@@ -3,13 +3,13 @@
 </p>
 
 <p align="center">
-  <a href="https://heavenly3.github.io/Aetheria/"><img alt="Play in your browser" src="https://img.shields.io/badge/%E2%96%B6%20Play%20in%20your%20browser-b8862e?style=for-the-badge"></a>
+  <a href="https://3vynia.github.io/Aetheria/"><img alt="Play in your browser" src="https://img.shields.io/badge/%E2%96%B6%20Play%20in%20your%20browser-b8862e?style=for-the-badge"></a>
   <a href="https://3vynia.itch.io/aetheria"><img alt="Play on itch.io" src="https://img.shields.io/badge/Play%20on%20itch.io-181726?style=for-the-badge&logo=itchdotio&logoColor=e2b65a"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Heavenly3/Aetheria/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Heavenly3/Aetheria/actions/workflows/ci.yml/badge.svg"></a>
-  <a href="https://github.com/Heavenly3/Aetheria/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/Heavenly3/Aetheria?include_prereleases&label=release&color=b8862e"></a>
+  <a href="https://github.com/3Vynia/Aetheria/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/3Vynia/Aetheria/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/3Vynia/Aetheria/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/3Vynia/Aetheria?include_prereleases&label=release&color=b8862e"></a>
   <img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883">
   <img alt="Languages" src="https://img.shields.io/badge/languages-English%20%C2%B7%20Espa%C3%B1ol-6f5cd2">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
@@ -279,7 +279,7 @@ Every push runs lint, the translation check, the tests and a build. A tag such a
 
 ## Feedback
 
-Found a bug or have an idea? Use the **Feedback** section in Settings, leave a comment on [itch.io](https://3vynia.itch.io/aetheria) or [open an issue](https://github.com/Heavenly3/Aetheria/issues/new). The in-game report adds the version, your device and your hero, so it is easy to follow up.
+Found a bug or have an idea? Use the **Feedback** section in Settings, leave a comment on [itch.io](https://3vynia.itch.io/aetheria) or [open an issue](https://github.com/3Vynia/Aetheria/issues/new). The in-game report adds the version, your device and your hero, so it is easy to follow up.
 
 ## Adding a language
 

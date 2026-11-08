@@ -8,7 +8,7 @@
 import { storage } from './saveGuard.js'
 
 export const ITCH_URL = 'https://3vynia.itch.io/aetheria'
-export const ISSUES_URL = 'https://github.com/Heavenly3/Aetheria/issues/new'
+export const ISSUES_URL = 'https://github.com/3Vynia/Aetheria/issues/new'
 const KEEP = 5
 // Browsers add these for reasons outside the game (extensions, other origins, layout warnings)
 const NOISE = [/^Script error\.?$/i, /ResizeObserver loop/i]
