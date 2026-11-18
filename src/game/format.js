@@ -50,4 +50,5 @@ export function fmtClock(sec) {
 export const pct = (v, digits = 0) => (v * 100).toFixed(digits) + '%'
 
 export const fmtDate = ts => formatter('d', loc => new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short', year: 'numeric' })).format(ts)
+export const fmtDateTime = ts => formatter('dt', loc => new Intl.DateTimeFormat(loc, { dateStyle: 'medium', timeStyle: 'short' })).format(ts)
 export const fmtHour = ts => formatter('h', loc => new Intl.DateTimeFormat(loc, { hour: '2-digit', minute: '2-digit' })).format(ts)

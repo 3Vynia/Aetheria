@@ -11,7 +11,7 @@ import { exitToTitle } from '../game/loop.js'
 import { ROLES, DIFFICULTIES } from '../game/data/character.js'
 import { encodeCode, decodeAny, makeLink, downloadFile, pickFile } from '../game/transfer.js'
 import { listBackups, readBackup } from '../game/backup.js'
-import { fmtTime } from '../game/format.js'
+import { fmtTime, fmtDateTime } from '../game/format.js'
 import GameIcon from './GameIcon.vue'
 
 // Everything about the save: the hero's name, automatic backups, copies outside the browser and the slot itself
@@ -33,7 +33,7 @@ function rename() {
 const backups = ref([])
 const refreshBackups = async () => { backups.value = await listBackups(G.slot) }
 onMounted(refreshBackups)
-const when = ts => new Date(ts).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+const when = fmtDateTime
 async function backupNow() { await G.backupNow(); await refreshBackups(); G.toast('locked-chest', 'backup.made', {}, 'success') }
 // The game being replaced stays among the backups (read the one to restore first: restoring the
 // "before" copy swaps it with the current game, which is how an import or a restore is undone)

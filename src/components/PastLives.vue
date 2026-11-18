@@ -4,7 +4,7 @@ import { G, state } from '../game/engine.js'
 import { SKILLS } from '../game/data/skills.js'
 import { ITEMS } from '../game/data/items.js'
 import { TRIAL_MAP } from '../game/data/trials.js'
-import { fmt, fmtTime } from '../game/format.js'
+import { fmt, fmtTime, fmtDate } from '../game/format.js'
 import { throttled } from '../ui/throttled.js'
 import GameIcon from './GameIcon.vue'
 import ItemTile from './ItemTile.vue'
@@ -17,7 +17,7 @@ const lives = computed(() => [...(state.ascension.lives || [])].reverse())
 const shown = computed(() => (showAll.value ? lives.value : lives.value.slice(0, SHOWN)))
 // Lives lived before the record began (a save that had already ascended)
 const unrecorded = computed(() => Math.max(0, state.ascension.count - lives.value.length))
-const when = ts => new Date(ts).toLocaleDateString(undefined, { dateStyle: 'medium' })
+const when = fmtDate
 // How much quicker this life reached its end than the one before it
 function faster(life, i) {
   const prev = lives.value[i + 1]

@@ -6,6 +6,7 @@ import { MYTHIC_TIERS, MYTHIC_DROPS } from '../game/data/mythics.js'
 import { MYTHIC_IDS } from '../game/mythics.js'
 import { mythicWhere, oneIn } from '../ui/itemSources.js'
 import { modText } from '../i18n/mods.js'
+import { fmtDate } from '../game/format.js'
 import ItemTile from './ItemTile.vue'
 import GameIcon from './GameIcon.vue'
 import ShareCard from './ShareCard.vue'
@@ -16,7 +17,7 @@ const TIERS = Object.keys(MYTHIC_TIERS)
 const groups = computed(() => TIERS.map(tier => ({ tier, color: MYTHIC_TIERS[tier].color, ids: MYTHIC_IDS.filter(id => ITEMS[id].myth === tier) })))
 const drops = id => MYTHIC_DROPS.filter(d => d.item === id)
 const sharing = ref(null)
-const when = ts => new Date(ts).toLocaleDateString(undefined, { dateStyle: 'medium' })
+const when = fmtDate
 </script>
 
 <template>
