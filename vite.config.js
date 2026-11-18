@@ -29,6 +29,8 @@ export default defineConfig(({ mode }) => ({
       output: {
         codeSplitting: {
           groups: [
+            // The icons rarely change: their own chunk stays cached across game updates
+            { name: 'icons', test: /src[\\/]game[\\/]icons\.json/, priority: 1 },
             { name: 'game', test: /src[\\/](game|i18n[\\/](index|bind|mods|names))/ },
           ],
         },
