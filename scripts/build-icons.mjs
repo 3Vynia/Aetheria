@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { optimize } from 'svgo'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const collection = JSON.parse(readFileSync(join(root, 'node_modules/@iconify-json/game-icons/icons.json'), 'utf8'))
@@ -40,7 +41,32 @@ if (missing.size) {
   console.error('Unknown icons:', [...missing].join(', '))
   process.exit(1)
 }
+// 3) Each icon becomes one path with coordinates rounded to a tenth of a unit, which nobody can see at the
+// sizes the game draws them. Curves are not turned into arcs: rounded radii make rings visibly thicker
+const SVGO = {
+  multipass: true,
+  floatPrecision: 1,
+  plugins: [
+    { name: 'preset-default', params: { overrides: { convertPathData: { makeArcs: false } } } },
+    { name: 'removeAttrs', params: { attrs: 'fill' } },
+  ],
+}
+function pathOf(name, body, w, h) {
+  const svg = optimize(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${body}</svg>`, SVGO).data
+  const d = svg.match(/^<svg[^>]*><path d="([^"]*)"\/><\/svg>$/)?.[1]
+  if (!d) {
+    console.error(`Icon ${name} did not reduce to a single path`)
+    process.exit(1)
+  }
+  return d
+}
+
+// { name: [path data, width, height] }
 const out = {}
-for (const n of [...used].sort()) if (all[n]) out[n] = [all[n].body, all[n].width || W, all[n].height || H]
+for (const n of [...used].sort()) {
+  if (!all[n]) continue
+  const w = all[n].width || W, h = all[n].height || H
+  out[n] = [pathOf(n, all[n].body, w, h), w, h]
+}
 writeFileSync(join(root, 'src/game/icons.json'), JSON.stringify(out))
 console.log(`${Object.keys(out).length} icons written to src/game/icons.json`)

@@ -80,7 +80,7 @@ function icon(ctx, name, x, y, size, color) {
   ctx.translate(x, y)
   ctx.scale(size / data[1], size / data[2])
   ctx.fillStyle = color
-  for (const [, d] of data[0].matchAll(/ d="([^"]+)"/g)) ctx.fill(new Path2D(d))
+  ctx.fill(new Path2D(data[0]))
   ctx.restore()
 }
 

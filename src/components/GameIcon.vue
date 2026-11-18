@@ -10,7 +10,7 @@ const data = computed(() => icons[props.name] || ['', 512, 512])
 </script>
 
 <template>
-  <svg class="gi" :width="size" :height="size" :viewBox="`0 0 ${data[1]} ${data[2]}`" fill="currentColor" aria-hidden="true" v-html="data[0]" />
+  <svg class="gi" :width="size" :height="size" :viewBox="`0 0 ${data[1]} ${data[2]}`" fill="currentColor" aria-hidden="true"><path :d="data[0]" /></svg>
 </template>
 
 <style scoped>
