@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => ({
       output: {
         codeSplitting: {
           groups: [
-            { name: 'game', test: /src[\\/](game|i18n[\\/](index|bind|mods|names|locales[\\/]en))/ },
+            { name: 'game', test: /src[\\/](game|i18n[\\/](index|bind|mods|names))/ },
           ],
         },
       },

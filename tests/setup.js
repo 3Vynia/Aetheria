@@ -1,5 +1,6 @@
 import { expect } from 'vitest'
 import { FEATURES } from '../src/game/features.js'
+import { setLocale } from '../src/i18n/index.js'
 
 // The engine saves to localStorage; give it an in-memory one. Every test starts with it empty:
 // it is cleared the first time a new test touches it (a hook here can fail to register when the
@@ -21,3 +22,6 @@ globalThis.localStorage = new MemoryStorage()
 
 // Real weather changes with the clock; tests that need it switch it back on
 FEATURES.weatherEffects = false
+
+// Languages load on demand; the tests read English text
+await setLocale('en')

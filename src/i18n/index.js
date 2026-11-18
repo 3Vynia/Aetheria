@@ -1,8 +1,7 @@
 import { createI18n } from 'vue-i18n'
-import en from './locales/en.js'
 
 export const LOCALES = {
-  en: { name: 'English', intl: 'en-US' },
+  en: { name: 'English', intl: 'en-US', load: () => import('./locales/en.js') },
   es: { name: 'Español', intl: 'es-ES', load: () => import('./locales/es.js') },
 }
 const STORAGE_KEY = 'aetheria-locale'
@@ -19,10 +18,11 @@ export function detectLocale() {
 export const i18n = createI18n({
   legacy: false,
   globalInjection: true,
-  // English is always bundled (it is the fallback); other languages load on demand, see setLocale
+  // Every language loads on demand (see setLocale), so a player downloads only the one they play in.
+  // The i18n check keeps all of them complete, so nothing needs a fallback from another language
   locale: 'en',
   fallbackLocale: 'en',
-  messages: { en },
+  messages: {},
   warnHtmlMessage: false,
   missingWarn: false,
   fallbackWarn: false,
