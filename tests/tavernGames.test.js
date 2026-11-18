@@ -22,7 +22,8 @@ describe('blackjack', () => {
     table()
     expect(G.cardsStart(5)).toBe(null)
     const r = G.cardsStart(100)
-    expect(state.gold).toBe(9900)
+    // A natural blackjack on the deal is settled at once
+    expect(state.gold).toBe(r.result ? 10000 + r.result.net : 9900)
     expect(r.you).toHaveLength(2)
     expect(G.cardsStart(100)).toBe(null) // one hand at a time
     if (!r.result) G.cardsStand()
