@@ -24,8 +24,24 @@ export async function encodeCode(save) {
   return CODE_PREFIX + toB64Url(await pipe(json, new CompressionStream('deflate-raw')))
 }
 
+const isObject = v => !!v && typeof v === 'object' && !Array.isArray(v)
+const isCount = v => Number.isFinite(v) && v >= 0
+
+// The shape every save has had since the first version. Anything else (another game's file, a save
+// edited by hand into something broken) is refused before it can replace a game; finer damage, like a
+// single bad number, is repaired when the save loads
+export function isSave(s) {
+  return isObject(s)
+    && typeof s.name === 'string' && s.name.trim() !== ''
+    && isObject(s.skills) && Object.keys(s.skills).length > 0
+    && Object.values(s.skills).every(k => isObject(k) && isCount(k.xp))
+    && (s.gold == null || isCount(s.gold))
+    && ['version', 'lastTick', 'created'].every(k => s[k] == null || Number.isFinite(s[k]))
+    && ['hero', 'inventory', 'equipment', 'stats', 'settings'].every(k => s[k] == null || isObject(s[k]))
+}
+
 function validate(s) {
-  if (!s || typeof s !== 'object' || !s.skills || !s.name) throw new Error('Invalid save')
+  if (!isSave(s)) throw new Error('Invalid save')
   return s
 }
 

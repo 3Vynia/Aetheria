@@ -35,6 +35,15 @@ const refreshBackups = async () => { backups.value = await listBackups(G.slot) }
 onMounted(refreshBackups)
 const when = ts => new Date(ts).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 async function backupNow() { await G.backupNow(); await refreshBackups(); G.toast('locked-chest', 'backup.made', {}, 'success') }
+// The game being replaced stays among the backups (read the one to restore first: restoring the
+// "before" copy swaps it with the current game, which is how an import or a restore is undone)
+async function replaceWith(save) {
+  G.save()
+  await G.keepBefore(G.slot)
+  G.loadSave(save)
+  name.value = state.name
+  await refreshBackups()
+}
 function restore(b) {
   confirm.require({
     header: t('backup.restoreTitle'),
@@ -45,8 +54,7 @@ function restore(b) {
     accept: async () => {
       const save = await readBackup(G.slot, b.tier)
       if (!save) { G.toast('cross-mark', 'backup.failed', {}, 'warn'); return }
-      G.loadSave(save)
-      name.value = state.name
+      await replaceWith(save)
       G.toast('locked-chest', 'backup.restored', {}, 'success')
     },
   })
@@ -82,7 +90,7 @@ function askReplace(save) {
     icon: 'pi pi-exclamation-triangle',
     acceptLabel: t('settings.replaceConfirm'), rejectLabel: t('common.cancel'),
     acceptProps: { severity: 'danger' }, rejectProps: { severity: 'secondary', outlined: true },
-    accept: () => { G.loadSave(save); name.value = state.name; saveText.value = ''; G.toast('scroll-unfurled', 'settings.imported', {}, 'success') },
+    accept: async () => { await replaceWith(save); saveText.value = ''; G.toast('scroll-unfurled', 'settings.imported', {}, 'success') },
   })
 }
 async function importCode() {

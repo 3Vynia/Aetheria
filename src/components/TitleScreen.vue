@@ -75,7 +75,8 @@ async function importFile() {
   catch { G.toast('cross-mark', 'settings.invalidSave', {}, 'warn') }
 }
 function placeImport(i) {
-  const write = () => {
+  const write = async () => {
+    await G.keepBefore(i)
     if (!G.writeSlot(i, pending.value.save)) { G.toast('cross-mark', 'title.importFailed', {}, 'warn'); return }
     G.toast('scroll-unfurled', 'title.imported', { name: pending.value.info.name, n: i + 1 }, 'success')
     pending.value = null

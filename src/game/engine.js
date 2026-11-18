@@ -35,7 +35,7 @@ import { unlocks, unlocksState } from './unlocks.js'
 import { echoes } from './echoes.js'
 import { records, recordsState } from './records.js'
 import { mythics, mythicsState } from './mythics.js'
-import { writeBackup } from './backup.js'
+import { writeBackup, writeBefore } from './backup.js'
 import { FRAIL_HP } from './data/trials.js'
 import { ECHOES } from './data/echoes.js'
 import { THREAT_EFFECT } from './data/realm.js'
@@ -319,6 +319,15 @@ export const G = {
     if (this.slot === null) return Promise.resolve(null)
     const raw = toRaw(state)
     return writeBackup(this.slot, JSON.stringify(raw), this.summarize(raw))
+  },
+  // Before an import, a restore or a new hero replaces slot i, its game is kept as the "before" backup so
+  // the player can undo it. Reads the slot as stored: in game, save first. Resolves when written
+  keepBefore(i) {
+    const raw = store.get(SLOT_KEY(i))
+    if (!raw) return Promise.resolve(null)
+    let info
+    try { info = this.summarize(JSON.parse(raw)) } catch { return Promise.resolve(null) }
+    return writeBefore(i, raw, info)
   },
   // Downloading or sharing the save counts as a backup the player keeps
   markExported() { this.s.settings.lastExport = Date.now() },

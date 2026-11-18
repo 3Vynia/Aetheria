@@ -97,6 +97,8 @@ export async function continueGame(slot) {
 
 export function startNewGame(slot, profile) {
   channel?.postMessage({ type: 'claim', slot, tab: TAB })
+  // A hero started over another keeps that one among the slot's backups
+  G.keepBefore(slot)
   G.newGame(slot, profile)
   session.inGame = true
   session.welcome = true
