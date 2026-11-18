@@ -31,7 +31,8 @@ const report = (title, list) => {
   list.forEach(l => console.log('  ' + l))
 }
 
-// 1) Keys used by the code
+// 1) Keys used by the code (languages load on demand, so English is loaded here before the data is read)
+i18n.global.setLocaleMessage('en', (await load('src/i18n/locales/en.js')).default)
 i18n.global.locale.value = 'en'
 const used = new Map()
 i18n.global.setMissingHandler((_, key) => { if (!used.has(key)) used.set(key, 'game data') })
