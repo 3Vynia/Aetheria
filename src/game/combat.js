@@ -74,7 +74,7 @@ export const combat = {
       maxHit = Math.floor(this.currentSpell().max * (1 + b.mDmg))
     }
     let accMult = 1 + (this.blessed('vigor') ? 0.1 : 0) + this.mod(type + 'Acc')
-    let dmgMult = (1 + (this.blessed('vigor') ? 0.1 : 0) + this.room('trophy') * 0.04 + this.mod(type + 'Dmg')) * st.dmg
+    let dmgMult = (1 + (this.blessed('vigor') ? 0.1 : 0) + this.room('trophy') * 0.04 + this.mod(type + 'Dmg') + this.homeEffect(m, 'dmg')) * st.dmg
     const helm = this.taskHelmBonus()
     if (helm && this.onTask(m)) { accMult += helm; dmgMult += helm }
     const hunt = this.huntBonus(m)
@@ -271,7 +271,7 @@ export const combat = {
     if (act.kind === 'area') this.easeThreat(m.id, elite)
     const gold = this.addGold(rand(m.gold[0], m.gold[1]) * (elite ? ELITE_LOOT.gold : 1) * (1 + region * REGION_GOLD), true)
     const loot = []
-    const lootMult = (1 + this.mod('loot') + region * REGION_LOOT) * (elite ? ELITE_LOOT.drops : 1)
+    const lootMult = (1 + this.mod('loot') + region * REGION_LOOT + this.homeEffect(m, 'loot')) * (elite ? ELITE_LOOT.drops : 1)
     if (elite) {
       const dust = rand(...ELITE_LOOT.stardust)
       this.addItem('stardust', dust)

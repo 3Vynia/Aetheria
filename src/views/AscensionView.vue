@@ -7,6 +7,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { G, state } from '../game/engine.js'
 import { BRANCHES, UPGRADES, UPGRADE_MAP, ASCEND_MIN_TOTAL } from '../game/data/ascension.js'
 import { TRIALS, TRIAL_MAP, TRIAL_SHARDS } from '../game/data/trials.js'
+import { RACES, LEGACY_XP } from '../game/data/races.js'
 import { fmt, fmtDec } from '../game/format.js'
 import { modText } from '../i18n/mods.js'
 import { play } from '../game/sound.js'
@@ -23,6 +24,9 @@ const preview = computed(() => G.shardsForAscension())
 const branches = computed(() => Object.entries(BRANCHES).map(([id, b]) => ({ id, ...b, name: b.name, list: UPGRADES.filter(u => u.branch === id) })))
 // The trial chosen for the next life (none by default)
 const nextTrial = ref(null)
+// The race to be born as in the next life (the same by default)
+const nextRace = ref(G.raceId())
+const livedAs = id => asc.value.races?.[id] || 0
 const rewardText = tr => Object.entries(tr.reward).map(([k, v]) => modText(k, v)).join(' · ')
 const current = computed(() => (asc.value.trial ? TRIAL_MAP[asc.value.trial] : null))
 function abandon() {
@@ -45,11 +49,12 @@ function resetTree() {
 function ascend() {
   confirm.require({
     header: t('ascension.confirmTitle'),
-    message: t('ascension.confirmMessage', { n: preview.value }) + (nextTrial.value ? ' ' + t('trials.confirmNext', { name: t(`trials.list.${nextTrial.value}.name`) }) : ''),
+    message: t('ascension.confirmMessage', { n: preview.value }) + (nextTrial.value ? ' ' + t('trials.confirmNext', { name: t(`trials.list.${nextTrial.value}.name`) }) : '')
+      + (nextRace.value !== G.raceId() ? ' ' + t('ascension.confirmRace', { race: RACES[nextRace.value].name }) : ''),
     icon: 'pi pi-exclamation-triangle',
     acceptLabel: t('ascension.ascendNow'), rejectLabel: t('common.cancel'),
     acceptProps: { severity: 'danger' }, rejectProps: { severity: 'secondary', outlined: true },
-    accept: () => { const n = G.ascend(nextTrial.value); nextTrial.value = null; play('rare'); G.toast('ankh', 'ascension.done', { n, count: state.ascension.count }, 'rare'); router.push('/') },
+    accept: () => { const n = G.ascend(nextTrial.value, nextRace.value); nextTrial.value = null; nextRace.value = G.raceId(); play('rare'); G.toast('ankh', 'ascension.done', { n, count: state.ascension.count }, 'rare'); router.push('/') },
   })
 }
 </script>
@@ -89,6 +94,24 @@ function ascend() {
         <div class="small"><b class="ok-text">{{ $t('ascension.keepLabel') }}</b> <span class="muted">{{ $t('ascension.keep') }}</span></div>
         <div class="small" style="margin-top:8px"><b class="bad-text">{{ $t('ascension.loseLabel') }}</b> <span class="muted">{{ $t('ascension.lose') }}</span></div>
       </div>
+    </div>
+
+    <!-- The race of the next life; every race a life is completed with leaves a legacy -->
+    <div class="row wrap" style="margin-top:26px;gap:10px">
+      <div class="section-title grow" style="margin:0">{{ $t('ascension.raceTitle') }}</div>
+      <span class="tag arcane">{{ $t('ascension.legacy', { n: Math.round(G.raceLegacy() * 100), max: Object.keys(RACES).length * Math.round(LEGACY_XP * 100) }) }}</span>
+    </div>
+    <p class="small muted" style="margin-top:8px">{{ $t('ascension.raceIntro', { n: Math.round(LEGACY_XP * 100) }) }}</p>
+    <div class="grid-cards">
+      <button v-for="(ra, id) in RACES" :key="id" class="card trial" :class="{ on: nextRace === id }" :style="{ '--c': ra.color }" :aria-pressed="nextRace === id" @click="nextRace = id">
+        <div class="row">
+          <ItemTile :icon="ra.icon" :tint="ra.color" size="sm" :tip="false" />
+          <b class="grow">{{ ra.name }}</b>
+          <span v-if="id === G.raceId()" class="tag">{{ $t('ascension.raceNow') }}</span>
+          <span v-else-if="livedAs(id)" class="tag ok"><i class="pi pi-check" /> {{ $t('ascension.raceLived', { n: livedAs(id) }) }}</span>
+        </div>
+        <div class="small muted" style="margin-top:6px">{{ $t(`races.${id}.trait`) }}: {{ $t(`races.${id}.traitText`) }}</div>
+      </button>
     </div>
 
     <!-- Trials: a rule for the next life, and a lasting bonus for living it through -->

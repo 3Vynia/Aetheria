@@ -51,6 +51,8 @@ const regions = computed(() => (void state.bestiary.kills, void state.quests, AR
           <b>{{ r.a.name }}</b>
           <span class="small muted block">{{ $t('world.level', { n: r.a.recLvl }) }} · {{ r.open ? $t('world.progress', { n: r.p.met, total: r.p.total }) : $t('world.locked', { quest: questName(r.a.reqQuest) }) }}</span>
         </span>
+        <span v-if="G.race().home === r.a.id" class="tag ok"><GameIcon :name="G.race().icon" :size="12" /> {{ $t('races.homeTag') }}</span>
+        <span v-else-if="G.race().rival === r.a.id" class="tag bad"><GameIcon :name="G.race().icon" :size="12" /> {{ $t('races.rivalTag') }}</span>
         <span v-if="here === r.a.id" class="tag gold">{{ $t('world.here') }}</span>
         <span v-for="m in r.marks" :key="m.k" class="mark" :class="m.k" :aria-label="m.text"><GameIcon :name="MARK_ICONS[m.k]" :size="12" /></span>
       </router-link>

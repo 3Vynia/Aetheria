@@ -38,7 +38,7 @@ describe('stances', () => {
 
   it('trade damage, speed and defence', () => {
     armed()
-    const m = MONSTERS.cow
+    const m = MONSTERS.wolf
     const of = id => G.withStance(id, () => ({ ...G.playerStats(m), speed: G.attackSpeed(), crit: G.critChance() }))
     const accurate = of('attack'), berserk = of('berserk')
     expect(berserk.maxHit).toBeGreaterThan(accurate.maxHit)

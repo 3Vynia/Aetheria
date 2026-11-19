@@ -47,7 +47,7 @@ const touch = (v, depth = 0) => {
     else touch(x, depth + 1)
   }
 }
-for (const f of ['skills', 'items', 'actions', 'combat', 'progression', 'character', 'tavern', 'extras']) {
+for (const f of ['skills', 'items', 'actions', 'combat', 'progression', 'character', 'tavern', 'extras', 'races']) {
   Object.values(await load(`src/game/data/${f}.js`)).forEach(v => touch(v))
 }
 const { towerMonster } = await load('src/game/data/combat.js')

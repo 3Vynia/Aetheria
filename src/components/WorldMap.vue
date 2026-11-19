@@ -28,6 +28,9 @@ const regions = computed(() => (void state.bestiary.kills, void state.quests, AR
   }
 })))
 const withExtras = computed(() => regions.value.filter(r => r.open && (r.dungeon || r.bosses.length)))
+// The hero's homeland and rival land, marked on the map
+const land = id => (G.race().home === id ? 'home' : G.race().rival === id ? 'rival' : null)
+const landText = id => (land(id) === 'home' ? t('races.home', { dmg: 10, loot: 10 }) : t('races.rival', { dmg: -5 }))
 const landmarks = computed(() => LANDMARKS.filter(l => G.screenOpen(l.to)))
 const label = r => [r.a.name, t('world.level', { n: r.a.recLvl }), r.open ? t('world.progress', { n: r.p.met, total: r.p.total }) : t('world.locked', { quest: questName(r.a.reqQuest) }),
   here.value === r.a.id ? t('world.here') : null, ...r.marks.map(m => m.text)].filter(Boolean).join('. ')
@@ -216,7 +219,7 @@ onUnmounted(() => {
         </span>
         <span class="plate">
           <b class="name">{{ r.a.name }}</b>
-          <span class="lvl">{{ $t('world.level', { n: r.a.recLvl }) }}</span>
+          <span class="lvl">{{ $t('world.level', { n: r.a.recLvl }) }}<span v-if="land(r.a.id)" class="land" :class="land(r.a.id)" v-tooltip.top="landText(r.a.id)"> · <GameIcon :name="G.race().icon" :size="11" /></span></span>
         </span>
         <span v-if="here === r.a.id" class="hero-pin" aria-hidden="true"><ItemTile :icon="state.avatar" :tint="state.tint" size="xs" :tip="false" /></span>
         <span v-if="r.marks.length" class="marks" aria-hidden="true">
@@ -287,6 +290,8 @@ ellipse.dim { opacity: 0.3; }
 .pips i { width: 6px; height: 6px; border-radius: 50%; background: var(--tint-3); }
 .pips i.on { background: var(--gold); }
 .plate { display: flex; flex-direction: column; align-items: center; padding: 4px 10px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(8px); line-height: 1.25; }
+.land.home { color: var(--tag-ok); }
+.land.rival { color: var(--tag-bad); }
 .node:hover .plate { border-color: var(--line-hi); }
 .name { font-size: 14px; font-weight: 800; }
 .lvl { font-size: 12px; color: var(--muted); }

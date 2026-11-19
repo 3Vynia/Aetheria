@@ -34,7 +34,7 @@ export const omens = {
   maybeEvent() {
     if (this.s.event) return
     const offering = !!this.s.omens.offering
-    if (Math.random() >= (offering ? OFFERING_CHANCE_PER_MIN : OMEN_CHANCE_PER_MIN * this.omenFairMult())) return
+    if (Math.random() >= (offering ? OFFERING_CHANCE_PER_MIN : OMEN_CHANCE_PER_MIN * this.omenFairMult() * this.raceOmenMult())) return
     this.s.omens.offering = false
     this.beginSign(rollOmen(Math.random, offering).id)
   },

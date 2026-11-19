@@ -11,6 +11,8 @@ import Button from 'primevue/button'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { ROLES, DIFFICULTIES, AVATARS, TINTS, ATTRIBUTES, TALENTS, ORIGINS, ROLE_RATINGS, RATING_AXES, STARTER_ROLE, roleCombat } from '../game/data/character.js'
 import { SKILLS } from '../game/data/skills.js'
+import { RACES, DEFAULT_RACE } from '../game/data/races.js'
+import { AREAS } from '../game/data/combat.js'
 import { rollName } from '../game/data/journal.js'
 import { modText } from '../i18n/mods.js'
 import GameIcon from './GameIcon.vue'
@@ -21,7 +23,7 @@ const emit = defineEmits(['cancel', 'create'])
 const { t } = useI18n()
 
 /* ---------- the steps ---------- */
-const STEPS = ['role', 'look', 'difficulty', 'origin', 'begin']
+const STEPS = ['role', 'race', 'look', 'difficulty', 'origin', 'begin']
 // Each step is a tab of the list: the tab says whether it is the one shown, its wrapper stays plain
 const stepPt = v => ({ root: { 'aria-current': undefined }, header: { 'aria-selected': String(step.value === v) } })
 
@@ -33,6 +35,7 @@ const tint = ref(ROLES[STARTER_ROLE].color)
 const name = ref('')
 const difficulty = ref('normal')
 const origin = ref('wanderer')
+const race = ref(DEFAULT_RACE)
 // How the game starts: with the guided tutorial, and with the menu found screen by screen
 const tutorial = ref(true)
 const gradual = ref(true)
@@ -41,6 +44,7 @@ const step = ref('1')
 const r = computed(() => ROLES[role.value])
 const d = computed(() => DIFFICULTIES[difficulty.value])
 const o = computed(() => ORIGINS[origin.value])
+const ra = computed(() => RACES[race.value])
 const validName = computed(() => name.value.trim().length >= 2)
 const randomName = () => { name.value = rollName(Math.random, Math.random() < 0.5 ? 'he' : 'she') }
 // The class suggests its portrait and colour until the player picks their own
@@ -51,13 +55,28 @@ function pickRole(k) {
   avatar.value = portraitOf(k)
   tint.value = ROLES[k].color
 }
+// A race suggests its own portrait when it has one, until the player picks their own
+function pickRace(k) {
+  race.value = k
+  if (!touched.value && AVATARS.includes(RACES[k].icon)) avatar.value = RACES[k].icon
+}
 function create() {
-  emit('create', { name: name.value.trim().slice(0, 20), avatar: avatar.value, tint: tint.value, role: role.value, difficulty: difficulty.value, origin: origin.value, tutorial: tutorial.value, gradual: gradual.value })
+  emit('create', { name: name.value.trim().slice(0, 20), avatar: avatar.value, tint: tint.value, role: role.value, difficulty: difficulty.value, origin: origin.value, race: race.value, tutorial: tutorial.value, gradual: gradual.value })
 }
 
 /* ---------- what each choice means ---------- */
 const MAX_ATTR = 8
 const talentsOf = k => TALENTS.filter(x => x.role === k)
+const raceTalents = k => TALENTS.filter(x => x.race === k)
+const areaName = id => AREAS.find(a => a.id === id)?.name || ''
+// A race's numbers in words: what it does better, and what it does worse
+const hpLine = v => t(v > 0 ? 'races.hpUp' : 'races.hpDown', { n: Math.round(Math.abs(v) * 100) })
+const raceLines = (k, good) => [
+  ...Object.entries(RACES[k].bonus).filter(([key, v]) => (v > 0) === good && key !== RACES[k].traitKey).map(([key, v]) => modText(key, v)),
+  ...(RACES[k].hpPct && (RACES[k].hpPct > 0) === good ? [hpLine(RACES[k].hpPct)] : []),
+]
+const raceGood = k => raceLines(k, true)
+const raceBad = k => raceLines(k, false)
 const TOOLS = ['bronze_pickaxe', 'bronze_axe', 'rod']
 const kit = computed(() => {
   const items = {}
@@ -114,6 +133,7 @@ onUnmounted(() => mq?.removeEventListener?.('change', onMq))
             <div class="pv-name">{{ name.trim() || $t('creation.unnamed') }}</div>
             <div class="row wrap pv-tags">
               <span class="tag" :style="{ color: r.color }"><GameIcon :name="r.icon" :size="13" /> {{ r.name }}</span>
+              <span class="tag" :style="{ color: ra.color }"><GameIcon :name="ra.icon" :size="13" /> {{ ra.name }}</span>
               <span class="tag"><GameIcon :name="o.icon" :size="13" /> {{ o.name }}</span>
               <span class="tag hue" :style="{ '--hue': d.color }">{{ d.name }}</span>
             </div>
@@ -131,7 +151,7 @@ onUnmounted(() => mq?.removeEventListener?.('change', onMq))
           <ul class="perks"><li v-for="p in r.perks" :key="p">{{ p }}</li></ul>
           <div class="section-title" style="margin:16px 0 8px">{{ $t('creation.talents') }}</div>
           <div class="row wrap" style="gap:6px">
-            <span v-for="tal in talentsOf(role)" :key="tal.id" class="tag" v-tooltip.top="$t('talents.perRank', { effect: modText(tal.mod, tal.per) })"><GameIcon :name="tal.icon" :size="12" /> {{ tal.name }}</span>
+            <span v-for="tal in [...talentsOf(role), ...raceTalents(race)]" :key="tal.id" class="tag" v-tooltip.top="$t('talents.perRank', { effect: modText(tal.mod, tal.per) })"><GameIcon :name="tal.icon" :size="12" /> {{ tal.name }}</span>
           </div>
           <div class="section-title" style="margin:16px 0 8px">{{ $t('creation.startsWith') }}</div>
           <div class="row wrap" style="gap:6px">
@@ -172,12 +192,38 @@ onUnmounted(() => mq?.removeEventListener?.('change', onMq))
             <div class="cc-nav"><span /><Button :label="$t('common.next')" icon="pi pi-arrow-right" iconPos="right" @click="activateCallback('2')" /></div>
           </StepPanel>
 
-          <!-- 2 · Appearance and name -->
+          <!-- 2 · Race -->
           <StepPanel v-slot="{ activateCallback }" value="2">
+            <p class="small muted" style="margin-top:0">{{ $t('creation.raceIntro') }}</p>
+            <div class="cards">
+              <button v-for="(ra, k) in RACES" :key="k" class="choice" :class="{ on: race === k }" :style="{ '--c': ra.color }" :aria-pressed="race === k" @click="pickRace(k)">
+                <div class="row" style="gap:12px;align-items:flex-start">
+                  <ItemTile :icon="ra.icon" :tint="ra.color" size="md" :tip="false" />
+                  <div class="grow" style="min-width:0">
+                    <b>{{ ra.name }}</b>
+                    <div class="small muted">{{ ra.desc }}</div>
+                  </div>
+                </div>
+                <ul class="facts small">
+                  <li v-for="line in raceGood(k)" :key="line">{{ line }}</li>
+                  <li v-for="line in raceBad(k)" :key="line" class="warn">{{ line }}</li>
+                  <li><b>{{ $t(`races.${k}.trait`) }}.</b> {{ $t(`races.${k}.traitText`) }}</li>
+                  <li class="muted"><GameIcon name="position-marker" :size="12" /> {{ $t('races.homeTitle') }}: {{ areaName(ra.home) }}<template v-if="ra.rival"> · {{ $t('races.rivalTitle') }}: {{ areaName(ra.rival) }}</template></li>
+                </ul>
+              </button>
+            </div>
+            <div class="cc-nav">
+              <Button :label="$t('common.back')" icon="pi pi-arrow-left" severity="secondary" text @click="activateCallback('1')" />
+              <Button :label="$t('common.next')" icon="pi pi-arrow-right" iconPos="right" @click="activateCallback('3')" />
+            </div>
+          </StepPanel>
+
+          <!-- 2 · Appearance and name -->
+          <StepPanel v-slot="{ activateCallback }" value="3">
             <div class="stack">
               <label for="cc-name" class="small muted">{{ $t('creation.name') }}</label>
               <div class="row">
-                <InputText id="cc-name" v-model="name" maxlength="20" :placeholder="$t('creation.namePlaceholder')" class="grow" @keyup.enter="validName && activateCallback('3')" />
+                <InputText id="cc-name" v-model="name" maxlength="20" :placeholder="$t('creation.namePlaceholder')" class="grow" @keyup.enter="validName && activateCallback('4')" />
                 <Button icon="pi pi-sync" severity="secondary" outlined :aria-label="$t('creation.randomName')" v-tooltip.top="$t('creation.randomName')" @click="randomName" />
               </div>
               <p class="small faint" style="margin:6px 0 0">{{ $t('creation.lookHint') }}</p>
@@ -193,13 +239,13 @@ onUnmounted(() => mq?.removeEventListener?.('change', onMq))
               </div>
             </div>
             <div class="cc-nav">
-              <Button :label="$t('common.back')" icon="pi pi-arrow-left" severity="secondary" text @click="activateCallback('1')" />
-              <Button :label="$t('common.next')" icon="pi pi-arrow-right" iconPos="right" :disabled="!validName" @click="activateCallback('3')" />
+              <Button :label="$t('common.back')" icon="pi pi-arrow-left" severity="secondary" text @click="activateCallback('2')" />
+              <Button :label="$t('common.next')" icon="pi pi-arrow-right" iconPos="right" :disabled="!validName" @click="activateCallback('4')" />
             </div>
           </StepPanel>
 
           <!-- 3 · Difficulty -->
-          <StepPanel v-slot="{ activateCallback }" value="3">
+          <StepPanel v-slot="{ activateCallback }" value="4">
             <div class="cards">
               <button v-for="(df, k) in DIFFICULTIES" :key="k" class="choice" :class="{ on: difficulty === k }" :style="{ '--c': df.color }" :aria-pressed="difficulty === k" @click="difficulty = k">
                 <div class="row" style="gap:12px;align-items:flex-start">
@@ -216,13 +262,13 @@ onUnmounted(() => mq?.removeEventListener?.('change', onMq))
             </div>
             <p class="small muted">{{ $t('creation.note', { n: slotIndex + 1 }) }}</p>
             <div class="cc-nav">
-              <Button :label="$t('common.back')" icon="pi pi-arrow-left" severity="secondary" text @click="activateCallback('2')" />
-              <Button :label="$t('common.next')" icon="pi pi-arrow-right" iconPos="right" @click="activateCallback('4')" />
+              <Button :label="$t('common.back')" icon="pi pi-arrow-left" severity="secondary" text @click="activateCallback('3')" />
+              <Button :label="$t('common.next')" icon="pi pi-arrow-right" iconPos="right" @click="activateCallback('5')" />
             </div>
           </StepPanel>
 
           <!-- 4 · Origin -->
-          <StepPanel v-slot="{ activateCallback }" value="4">
+          <StepPanel v-slot="{ activateCallback }" value="5">
             <p class="small muted" style="margin-top:0">{{ $t('creation.originIntro') }}</p>
             <div class="cards">
               <button v-for="(or, k) in ORIGINS" :key="k" class="choice" :class="{ on: origin === k }" :style="{ '--c': or.color }" :aria-pressed="origin === k" @click="origin = k">
@@ -246,13 +292,13 @@ onUnmounted(() => mq?.removeEventListener?.('change', onMq))
             </div>
             <blockquote class="memory">“{{ $t(`origins.${origin}.memory`) }}”</blockquote>
             <div class="cc-nav">
-              <Button :label="$t('common.back')" icon="pi pi-arrow-left" severity="secondary" text @click="activateCallback('3')" />
-              <Button :label="$t('common.next')" icon="pi pi-arrow-right" iconPos="right" @click="activateCallback('5')" />
+              <Button :label="$t('common.back')" icon="pi pi-arrow-left" severity="secondary" text @click="activateCallback('4')" />
+              <Button :label="$t('common.next')" icon="pi pi-arrow-right" iconPos="right" @click="activateCallback('6')" />
             </div>
           </StepPanel>
 
           <!-- 5 · Begin -->
-          <StepPanel v-slot="{ activateCallback }" value="5">
+          <StepPanel v-slot="{ activateCallback }" value="6">
             <div class="summary">
               <ItemTile :icon="avatar" :tint="tint" size="lg" :tip="false" />
               <div class="grow">
@@ -277,7 +323,7 @@ onUnmounted(() => mq?.removeEventListener?.('change', onMq))
               <p class="small faint" style="margin:0">{{ $t('creation.startLater') }}</p>
             </div>
             <div class="cc-nav">
-              <Button :label="$t('common.back')" icon="pi pi-arrow-left" severity="secondary" text @click="activateCallback('4')" />
+              <Button :label="$t('common.back')" icon="pi pi-arrow-left" severity="secondary" text @click="activateCallback('5')" />
               <Button :label="$t('creation.begin')" icon="pi pi-play" size="large" @click="create" />
             </div>
           </StepPanel>

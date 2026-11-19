@@ -10,7 +10,8 @@ const { t } = useI18n()
 const role = computed(() => ROLES[state.role])
 const groups = computed(() => [
   { title: t('talents.roleTitle', { role: role.value.name }), list: TALENTS.filter(x => x.role === state.role), color: role.value.color },
-  { title: t('talents.generalTitle'), list: TALENTS.filter(x => !x.role), color: '#e2b65a' },
+  { title: t('talents.raceTitle', { race: G.race().name }), list: TALENTS.filter(x => x.race === G.raceId()), color: G.race().color },
+  { title: t('talents.generalTitle'), list: TALENTS.filter(x => !x.role && !x.race), color: '#e2b65a' },
 ])
 function learn(tal) { if (G.learnTalent(tal.id)) G.toast(tal.icon, 'talents.learned', { name: tal.name, rank: G.talentRank(tal.id), max: tal.max }, 'success') }
 </script>

@@ -35,6 +35,8 @@ import { inventory } from './inventory.js'
 import { skilling } from './skilling.js'
 import { combat } from './combat.js'
 import { progress } from './progress.js'
+import { races } from './races.js'
+import { RACES, DEFAULT_RACE, UNMARKED_TALENTS, SAP_REGEN } from './data/races.js'
 import { writeBackup, writeBefore } from './backup.js'
 import { slayer } from './slayer.js'
 import { company, companyState } from './company.js'
@@ -95,6 +97,8 @@ export function newState(profile = {}) {
     difficulty: profile.difficulty || 'normal',
     // Where the hero comes from (data/character.js ORIGINS)
     origin: ORIGINS[profile.origin] ? profile.origin : 'wanderer',
+    // The people the hero was born among (data/races.js)
+    race: RACES[profile.race] ? profile.race : DEFAULT_RACE,
     gold: 50,
     skills,
     hero: { xp: 0, attrs: Object.fromEntries(Object.keys(ATTRIBUTES).map(k => [k, 0])), talents: {} },
@@ -372,6 +376,10 @@ export const G = {
     // Events from before omens existed are dropped
     if (st.event && !(OMEN_MAP[st.event.id] && st.event.phase)) st.event = null
     if (!ROLES[st.role]) st.role = 'warrior'
+    // Saves from before races were born human
+    if (!RACES[st.race]) st.race = DEFAULT_RACE
+    // ...and so were the lives they had already completed
+    if (st.ascension.count > 0 && !Object.keys(st.ascension.races || {}).length) st.ascension.races = { [DEFAULT_RACE]: st.ascension.count }
     if (!st.unlocks) this.openAllScreens()
     // Quiet pop-ups became a choice of three
     if (st.settings.quietToasts) { st.settings.toasts = 'important'; st.settings.quietToasts = false }
@@ -466,10 +474,10 @@ export const G = {
   talentRank(id) { return this.s.hero.talents[id] || 0 },
   talentPoints() {
     const spent = Object.values(this.s.hero.talents).reduce((a, b) => a + b, 0)
-    return Math.floor(this.heroLevel() / TALENT_POINT_EVERY) - spent
+    return Math.floor(this.heroLevel() / TALENT_POINT_EVERY) + (this.raceTrait('unmarked') ? UNMARKED_TALENTS : 0) - spent
   },
   canLearn(tal) {
-    return this.talentPoints() > 0 && this.talentRank(tal.id) < tal.max && this.heroLevel() >= tal.lvl && (!tal.role || tal.role === this.s.role)
+    return this.talentPoints() > 0 && this.talentRank(tal.id) < tal.max && this.heroLevel() >= tal.lvl && (!tal.role || tal.role === this.s.role) && (!tal.race || tal.race === this.raceId())
   },
   learnTalent(id) {
     const tal = TALENTS.find(x => x.id === id)
@@ -494,6 +502,7 @@ export const G = {
     const out = []
     const push = (src, v) => { if (v) out.push({ src, v }) }
     push('role', ROLES[this.s.role]?.bonus[key] || 0)
+    push('race', this.raceMods(key))
     for (const a in ATTRIBUTES) { const per = ATTRIBUTES[a].mods[key]; if (per) push('attr.' + a, per * this.attr(a)) }
     const tal = this.s.hero.talents
     push('talents', TALENTS.reduce((v, tt) => v + (tt.mod === key && tal[tt.id] ? tt.per * tal[tt.id] : 0), 0))
@@ -524,7 +533,7 @@ export const G = {
     return v
   },
   modNow(key) {
-    let v = (ROLES[this.s.role]?.bonus[key] || 0) + this.extraMods(key) + this.petMods(key) + this.ascensionMods(key) + this.setMods(key) + this.bestiaryMods(key) + this.festivalMods(key) + this.omenMods(key) + this.weatherMods(key) + this.streakMods(key) + this.guildMods(key) + this.codexMods(key) + this.crownMods(key) + this.techniqueMods(key) + this.echoMods(key) + this.trialMods(key) + this.mythicMods(key) + this.companyMods(key)
+    let v = (ROLES[this.s.role]?.bonus[key] || 0) + this.raceMods(key) + this.extraMods(key) + this.petMods(key) + this.ascensionMods(key) + this.setMods(key) + this.bestiaryMods(key) + this.festivalMods(key) + this.omenMods(key) + this.weatherMods(key) + this.streakMods(key) + this.guildMods(key) + this.codexMods(key) + this.crownMods(key) + this.techniqueMods(key) + this.echoMods(key) + this.trialMods(key) + this.mythicMods(key) + this.companyMods(key)
     for (const [a, per] of ATTR_BY_MOD[key] || []) v += per * this.attr(a)
     const tal = this.s.hero.talents
     for (const tt of TALENTS_BY_MOD[key] || []) if (tal[tt.id]) v += tt.per * tal[tt.id]
@@ -619,7 +628,7 @@ export const G = {
     return m
   },
   doubleChance(skill, id) {
-    return this.mod('double') + this.mod('double.' + skillCat(skill)) + this.masteryLevel(skill, id) * MASTERY.doublePer
+    return this.mod('double') + this.mod('double.' + skillCat(skill)) + this.mod('double.' + skill) + this.masteryLevel(skill, id) * MASTERY.doublePer
   },
   preserveChance(skill, id) {
     if (skillCat(skill) !== 'artisan') return 0
@@ -662,7 +671,7 @@ export const G = {
       }
     }
     const fighting = st.activity && st.activity.type === 'combat'
-    const every = fighting ? HP_REGEN_COMBAT : HP_REGEN
+    const every = fighting ? HP_REGEN_COMBAT : HP_REGEN / (this.raceTrait('sap') ? SAP_REGEN : 1)
     if (st.hp > 0 && st.hp < this.maxHp()) {
       st.hpRegen += dt
       while (st.hpRegen >= every && st.hp < this.maxHp()) { st.hpRegen -= every; st.hp++ }
@@ -724,6 +733,6 @@ export const G = {
   },
 }
 
-Object.assign(G, inventory, skilling, combat, progress, systems, meta, ascension, collection, omens, companions, weekly, relicForge, journal, fighting, company, tavernGames, guilds, affairs, codex, slayer, church, bar, farm, thief, festivals, crown, routines, techniques, realm, unlocks, echoes, records, mythics)
+Object.assign(G, races, inventory, skilling, combat, progress, systems, meta, ascension, collection, omens, companions, weekly, relicForge, journal, fighting, company, tavernGames, guilds, affairs, codex, slayer, church, bar, farm, thief, festivals, crown, routines, techniques, realm, unlocks, echoes, records, mythics)
 
 export { SKILLS, ITEMS }

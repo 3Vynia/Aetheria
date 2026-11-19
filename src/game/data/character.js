@@ -163,6 +163,28 @@ export const TALENTS = [
   { id: 'healer',     icon: 'healing-shield',      mod: 'heal',             per: 0.1,  max: 5, lvl: 8,  role: 'paladin' },
   { id: 'devout',     icon: 'prayer',              mod: 'blessing',         per: 0.15, max: 3, lvl: 18, role: 'paladin' },
   { id: 'bulwark',    icon: 'bordered-shield',     mod: 'block',            per: 0.03, max: 5, lvl: 12, role: 'paladin' },
+  // Racial talents: three for each race (data/races.js), at hero levels 10, 20 and 30
+  { id: 'adaptable', icon: 'person', mod: 'xp', per: 0.02, max: 5, lvl: 10, race: 'human' },
+  { id: 'silver_tongue', icon: 'two-coins', mod: 'gold', per: 0.04, max: 5, lvl: 20, race: 'human' },
+  { id: 'resolve', icon: 'checked-shield', mod: 'reduction', per: 0.01, max: 5, lvl: 30, race: 'human' },
+  { id: 'stonebreaker', icon: 'war-pick', mod: 'speed.mining', per: 0.03, max: 5, lvl: 10, race: 'dwarf' },
+  { id: 'anvil_born', icon: 'anvil-impact', mod: 'double.smithing', per: 0.02, max: 5, lvl: 20, race: 'dwarf' },
+  { id: 'stoneskin', icon: 'stone-block', mod: 'defense', per: 0.03, max: 5, lvl: 30, race: 'dwarf' },
+  { id: 'woodsong', icon: 'pine-tree', mod: 'speed.woodcutting', per: 0.03, max: 5, lvl: 10, race: 'elf' },
+  { id: 'keen_sight', icon: 'archery-target', mod: 'rangedAcc', per: 0.03, max: 5, lvl: 20, race: 'elf' },
+  { id: 'old_soul', icon: 'open-book', mod: 'mastery', per: 0.05, max: 5, lvl: 30, race: 'elf' },
+  { id: 'green_thumb', icon: 'sprout', mod: 'farmYield', per: 1, max: 3, lvl: 10, race: 'bogkin' },
+  { id: 'mirebrew', icon: 'round-potion', mod: 'speed.herblore', per: 0.03, max: 5, lvl: 20, race: 'bogkin' },
+  { id: 'mire_blood', icon: 'healing-shield', mod: 'heal', per: 0.05, max: 5, lvl: 30, race: 'bogkin' },
+  { id: 'cold_patience', icon: 'hourglass', mod: 'offline', per: 1, max: 3, lvl: 10, race: 'frostborn' },
+  { id: 'ice_hide', icon: 'shield', mod: 'reduction', per: 0.01, max: 5, lvl: 20, race: 'frostborn' },
+  { id: 'winter_angler', icon: 'fishing-pole', mod: 'speed.fishing', per: 0.03, max: 5, lvl: 30, race: 'frostborn' },
+  { id: 'kindled', icon: 'campfire', mod: 'speed.cooking', per: 0.03, max: 5, lvl: 10, race: 'drakeborn' },
+  { id: 'dragonfire', icon: 'dragon-breath', mod: 'meleeDmg', per: 0.03, max: 5, lvl: 20, race: 'drakeborn' },
+  { id: 'hoard', icon: 'open-treasure-chest', mod: 'gold', per: 0.04, max: 5, lvl: 30, race: 'drakeborn' },
+  { id: 'stargazer', icon: 'crystal-ball', mod: 'speed.runecrafting', per: 0.03, max: 5, lvl: 10, race: 'starborn' },
+  { id: 'aether_flow', icon: 'magic-swirl', mod: 'magicAcc', per: 0.03, max: 5, lvl: 20, race: 'starborn' },
+  { id: 'comet_born', icon: 'star-swirl', mod: 'magicDmg', per: 0.03, max: 5, lvl: 30, race: 'starborn' },
 ]
 TALENTS.forEach(tal => {
   named(tal, `talents.${tal.id}`)

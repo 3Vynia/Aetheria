@@ -21,7 +21,7 @@ export const skilling = {
   actionTime(skill, a) { return a.time / (this.speedFactor(skill) + this.masteryLevel(skill, a.id) * MASTERY.speedPer) },
   hasTool(a) { return !a.tool || this.toolTier(a.tool.type) >= a.tool.tier },
   canDo(skill, a) { return this.level(skill) >= a.lvl && this.hasItems(a.in) && this.hasTool(a) && this.festivalOpen(a) },
-  burnChance(skill, a) { return Math.max(0, 0.45 - (this.level(skill) - a.lvl) * 0.025) * (1 - this.room('kitchen') * 0.3) * (1 - this.momentumBonus(skill)) },
+  burnChance(skill, a) { return this.raceTrait('flame') ? 0 : Math.max(0, 0.45 - (this.level(skill) - a.lvl) * 0.025) * (1 - this.room('kitchen') * 0.3) * (1 - this.momentumBonus(skill)) },
   failChance(skill, a) { return Math.min(0.55, Math.max(0.03, 0.55 - (this.level(skill) - a.lvl) * 0.012 - this.mod('thieving') - Math.min(0.12, this.level('agility') * 0.0012) - this.toolTier('lockpick') * 0.015 + (skill === 'thieving' ? this.heatFail() : 0))) },
   runeMult(skill, a) { return 1 + Math.floor((this.level(skill) - a.lvl) / 12) },
 

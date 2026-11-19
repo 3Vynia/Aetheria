@@ -3,6 +3,7 @@
    and spend them on permanent upgrades.
    Mixed into G (engine.js); `this` is the engine.
    ========================================================= */
+import { RACES } from './data/races.js'
 import { SKILLS, XP_TABLE } from './data/skills.js'
 import { BOSSES } from './data/combat.js'
 import { UPGRADES, UPGRADE_MAP, ASCEND_MIN_TOTAL } from './data/ascension.js'
@@ -20,7 +21,8 @@ export const LIVES_KEPT = 100
 export const ascensionState = () => ({
   // trial: the rule this life is lived under · trials: how many times each was completed
   // lives: a summary of every life finished · lifeAt: when this life began (time and play time)
-  ascension: { shards: 0, total: 0, count: 0, upgrades: {}, trial: null, trials: {}, lives: [], lifeAt: null },
+  // races: how many lives were completed as each race (their legacy)
+  ascension: { shards: 0, total: 0, count: 0, upgrades: {}, trial: null, trials: {}, lives: [], lifeAt: null, races: {} },
 })
 
 export const ascension = {
@@ -90,8 +92,8 @@ export const ascension = {
     // Living a whole life under a trial pays more
     return this.trial() ? Math.floor(base * TRIAL_SHARDS) : base
   },
-  // next: the trial to live the new life under, or none
-  ascend(next = null) {
+  // next: the trial to live the new life under, or none · race: the race to be born as (the same by default)
+  ascend(next = null, race = null) {
     if (!this.canAscend()) return 0
     const gained = this.shardsForAscension()
     const completed = this.trial()
@@ -101,12 +103,14 @@ export const ascension = {
     const kept = {}
     for (const k of KEPT) kept[k] = JSON.parse(JSON.stringify(this.s[k] ?? null))
     const myths = this.mythicsHeld()
-    const fresh = this.freshState({ name: kept.name, role: kept.role, avatar: kept.avatar, tint: kept.tint, difficulty: kept.difficulty })
+    const lived = this.raceId()
+    const fresh = this.freshState({ name: kept.name, role: kept.role, avatar: kept.avatar, tint: kept.tint, difficulty: kept.difficulty, race: RACES[race] ? race : lived })
     for (const k of Object.keys(fresh)) this.s[k] = k in kept && kept[k] !== null ? kept[k] : fresh[k]
     const asc = this.s.ascension
     asc.shards += gained
     asc.total += gained
     asc.count++
+    asc.races = { ...(asc.races || {}), [lived]: (asc.races?.[lived] || 0) + 1 }
     asc.trials ||= {}
     if (completed) {
       asc.trials[completed] = (asc.trials[completed] || 0) + 1

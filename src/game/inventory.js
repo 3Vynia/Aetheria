@@ -152,7 +152,7 @@ export const inventory = {
 
   /* ================= health, food and potions ================= */
   maxHp() {
-    const hp = this.level('hitpoints') + Math.floor(this.mod('maxHp'))
+    const hp = Math.max(1, Math.round((this.level('hitpoints') + Math.floor(this.mod('maxHp'))) * this.raceHpMult()))
     // A frail life has half the health
     return this.underTrial('frail') ? Math.max(1, Math.floor(hp * FRAIL_HP)) : hp
   },

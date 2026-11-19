@@ -19,6 +19,7 @@ import { farm } from '../src/game/farm.js'
 import { thief } from '../src/game/thief.js'
 import { festivals } from '../src/game/festivals.js'
 import { inventory } from '../src/game/inventory.js'
+import { races } from '../src/game/races.js'
 import { skilling } from '../src/game/skilling.js'
 import { combat } from '../src/game/combat.js'
 import { progress } from '../src/game/progress.js'
@@ -37,7 +38,7 @@ import { mythics } from '../src/game/mythics.js'
 // Every system is mixed into one engine object: two methods with the same name would silently replace each other
 describe('engine mixins', () => {
   it('never share a method name', () => {
-    const mixins = { systems, meta, ascension, collection, omens, companions, weekly, relicForge, journal, fighting, guilds, codex, slayer, church, bar, farm, thief, festivals, inventory, skilling, combat, progress, company, tavernGames, affairs, crown, routines, techniques, realm, unlocks, echoes, records, mythics }
+    const mixins = { systems, meta, ascension, collection, omens, companions, weekly, relicForge, journal, fighting, guilds, codex, slayer, church, bar, farm, thief, festivals, races, inventory, skilling, combat, progress, company, tavernGames, affairs, crown, routines, techniques, realm, unlocks, echoes, records, mythics }
     // The engine's own methods, read from its source
     const src = readFileSync(new URL('../src/game/engine.js', import.meta.url), 'utf8')
     const body = src.slice(src.indexOf('export const G = {'))

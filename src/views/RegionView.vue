@@ -63,6 +63,8 @@ const party = computed(() => state.company.party.map(id => G.companyMember(id)).
         <p class="banner-desc">{{ area.desc }}</p>
         <div class="row wrap" style="gap:6px">
           <span class="tag">{{ $t('combat.recommended', { n: area.recLvl }) }}</span>
+          <span v-if="G.race().home === area.id" class="tag ok" v-tooltip.top="$t('races.home', { dmg: 10, loot: 10 })"><GameIcon :name="G.race().icon" :size="12" /> {{ $t('races.homeTag') }}</span>
+          <span v-else-if="G.race().rival === area.id" class="tag bad" v-tooltip.top="$t('races.rival', { dmg: -5 })"><GameIcon :name="G.race().icon" :size="12" /> {{ $t('races.rivalTag') }}</span>
           <template v-if="open">
             <RegionThreat :area="area.id" />
             <span class="tag" :class="{ ok: progress.met === progress.total }"><GameIcon name="open-book" :size="12" /> {{ $t('world.progress', { n: progress.met, total: progress.total }) }}</span>
