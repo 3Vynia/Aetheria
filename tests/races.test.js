@@ -216,3 +216,25 @@ describe('races in the story', () => {
     expect(G.memoryUnlocked(MEMORIES.find(m => m.id === 'life1'))).toBe(true)
   })
 })
+
+describe('races, reviewed', () => {
+  it('let the newest story beat speak before the word about the hero\'s people', async () => {
+    const { rumorsFor, talksFor } = await import('../src/game/data/journal.js')
+    hero('dwarf')
+    expect(rumorsFor(G).at(-1).id).not.toMatch(/^born_/)
+    for (const who of ['astrologer', 'smith', 'morwen']) expect(talksFor(G, who).at(-1).id, who).not.toMatch(/^race_/)
+  })
+
+  it('never give the hero a gender in Spanish, and count lives properly', async () => {
+    const { default: es } = await import('../src/i18n/locales/es.js')
+    const { i18n } = await import('../src/i18n/index.js')
+    const { TALENTS } = await import('../src/game/data/character.js')
+    const raceTalents = TALENTS.filter(t => t.race).map(t => es.talents[t.id])
+    const texts = [...Object.values(es.races).flatMap(r => (typeof r === 'object' ? Object.values(r) : [r])), es.ascension.confirmRace, ...raceTalents,
+      ...Object.values(es.journal.talk.morwen)]
+    for (const s of texts) expect(s, s).not.toMatch(/\b(Nacido|nacido|Tocado|tocado|Pescador|Observador|pequeña rana|como \{race\})\b/)
+    expect(i18n.global.t('ascension.raceLivedOne')).toBe('One life lived')
+    expect(i18n.global.t('ascension.raceLived', { n: 3 })).toBe('3 lives lived')
+    expect(i18n.global.t('ascension.confirmRace', { race: 'Elf' })).not.toMatch(/\ba Elf\b/)
+  })
+})

@@ -4070,9 +4070,9 @@ export default {
   },
 
   ascension: {
-    raceTitle: 'Race of the next life', raceNow: 'This life', raceLived: '{n} lives lived',
+    raceTitle: 'Race of the next life', raceNow: 'This life', raceLivedOne: 'One life lived', raceLived: '{n} lives lived',
     raceIntro: 'You may be born among another people. Every race you complete a life with adds {n}% experience to every life after it.',
-    legacy: 'Legacy: +{n}% XP of {max}%', confirmRace: 'You will be born a {race}.',
+    legacy: 'Legacy: +{n}% XP of {max}%', confirmRace: 'Your next life will be of the {race} race.',
     title: 'Ascension', desc: 'Start your hero over from the very beginning in exchange for Aether shards. Shards buy permanent upgrades that make every new life faster.',
     shards: '{n} Aether shards', shardsWord: 'Aether shards', count: 'Ascensions: {n}', total: 'Shards earned: {n}',
     ascendTitle: 'Ascend', formula: 'Shards grow with total level, hero level, quest points and every boss defeated in this life.',

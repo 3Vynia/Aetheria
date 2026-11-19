@@ -108,7 +108,7 @@ function ascend() {
           <ItemTile :icon="ra.icon" :tint="ra.color" size="sm" :tip="false" />
           <b class="grow">{{ ra.name }}</b>
           <span v-if="id === G.raceId()" class="tag">{{ $t('ascension.raceNow') }}</span>
-          <span v-else-if="livedAs(id)" class="tag ok"><i class="pi pi-check" /> {{ $t('ascension.raceLived', { n: livedAs(id) }) }}</span>
+          <span v-else-if="livedAs(id)" class="tag ok"><i class="pi pi-check" /> {{ livedAs(id) === 1 ? $t('ascension.raceLivedOne') : $t('ascension.raceLived', { n: livedAs(id) }) }}</span>
         </div>
         <div class="small muted" style="margin-top:6px">{{ $t(`races.${id}.trait`) }}: {{ $t(`races.${id}.traitText`) }}</div>
       </button>

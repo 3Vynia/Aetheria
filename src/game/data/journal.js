@@ -191,8 +191,8 @@ export const RUMORS = [
   { id: 'faceless', when: has('crown_tale') },
   { id: 'remembers', when: g => (g.s.ascension?.count || 0) > 0 },
 ]
-// The keeper knows where the hero comes from
-RACE_IDS.forEach(race => RUMORS.push({ id: `born_${race}`, when: g => g.raceId() === race }))
+// The keeper knows where the hero comes from; it comes up when there is nothing newer to tell
+RUMORS.unshift(...RACE_IDS.map(race => ({ id: `born_${race}`, when: g => g.raceId() === race })))
 export const rumorsFor = g => RUMORS.filter(r => { try { return r.when(g) } catch { return false } })
 
 /* What the people of the journal say when the hero talks to them, in `journal.talk.<person>.<id>`.
@@ -214,6 +214,6 @@ export const TALKS = {
   warden: [{ id: 'gate', when: always }, { id: 'children', when: always }],
   firstKing: [{ id: 'stars', when: always }, { id: 'curse', when: has('the_crown_whole') }],
 }
-// The astrologer, the smith and Morwen each have a word for the hero's people
-for (const who of ['astrologer', 'smith', 'morwen']) RACE_IDS.forEach(race => TALKS[who].push({ id: `race_${race}`, when: g => g.raceId() === race }))
+// The astrologer, the smith and Morwen each have a word for the hero's people, after anything newer
+for (const who of ['astrologer', 'smith', 'morwen']) TALKS[who].unshift(...RACE_IDS.map(race => ({ id: `race_${race}`, when: g => g.raceId() === race })))
 export const talksFor = (g, who) => (TALKS[who] || []).filter(l => { try { return l.when(g) } catch { return false } })
