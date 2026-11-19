@@ -16,6 +16,7 @@ import { SET_MAP } from '../game/data/sets.js'
 import { WEEKLY_MAP } from '../game/data/weekly.js'
 import { CHAPTER_MAP } from '../game/data/journal.js'
 import { SHARD_MAP, ENDING_MAP } from '../game/data/crown.js'
+import { TROPHY_MAP } from '../game/data/home.js'
 import { G } from '../game/engine.js'
 
 const byId = list => id => list.find(x => x.id === id)?.name ?? id
@@ -28,6 +29,7 @@ registerNames('quest', byId(QUESTS))
 registerNames('ach', byId(ACHIEVEMENTS))
 registerNames('room', byId(ROOMS))
 registerNames('blessing', byId(BLESSINGS))
+registerNames('trophy', id => TROPHY_MAP[id]?.name ?? id)
 registerNames('dungeon', byId(DUNGEONS))
 registerNames('trial', id => t(`trials.list.${id}.name`))
 registerNames('area', byId(AREAS))

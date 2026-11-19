@@ -383,6 +383,7 @@ export default {
     bestiaryGroup: 'Grupo del compendio completado: {group}.', drop: '¡{monster} suelta {item}!', towerFloor: 'Nuevo récord en la Torre: piso {floor}.', dungeonFirst: 'Primera vez que completas {dungeon}.',
     bossFirst: 'Primera victoria contra {monster}.', death: 'Derrotado por {monster}.', deathGold: 'Derrotado por {monster}. Pierdes {gold} de oro.',
     slayerTask: 'Encargo de caza completado: {monster}.', quest: 'Misión completada: {quest}.', achievement: 'Logro: {ach}.',
+    trophy: '{trophy} ya cuelga en {room}.',
     room: '{room} mejorada a nivel {level}.', prestige: '{skill} alcanza el prestigio {n}.', tavernLevel: 'Tu taberna ahora es {tavern}.',
     hired: 'Contratas a {name} ({spec}, {rarity}).', fired: '{name} deja tu personal.', workerLevel: '{name} alcanza el nivel {level} de {skill}.',
     expeditionOk: 'Vuelve la expedición de {exp} ({name}) con {gold} de oro.', expeditionFail: 'Fracasa la expedición de {exp} ({name}): {gold} de oro.',
@@ -782,8 +783,18 @@ export default {
   },
 
   home: {
-    intro: 'Tu hogar crece contigo. Cada habitación necesita oro y materiales que tú mismo recolectas y fabricas, y da bonos permanentes.',
-    level: 'Nivel {n} / {max}', notBuilt: 'Aún sin construir', next: 'Siguiente: {effect}', upgrade: 'Mejorar', build: 'Construir', upgraded: '<b>{room}</b> mejorada a nivel {n}',
+    title: 'Tu hogar',
+    intro: 'Tu hogar crece contigo. Construye y mejora sus habitaciones con oro y materiales que tú mismo consigues, y cuelga los trofeos de los jefes que has vencido.',
+    level: 'Nivel {n} / {max}', notBuilt: 'Aún sin construir', upgrade: 'Mejorar', build: 'Construir', upgraded: '<b>{room}</b> mejorada a nivel {n}',
+    houseLevel: 'Casa nivel {n} / {max}', roomsBuilt: '{n} / {max} habitaciones', trophiesHung: '{n} / {max} trofeos',
+    wallBonus: 'Bonos de los trofeos', wallEmpty: 'Vence a los jefes las veces suficientes y sus trofeos podrán colgarse aquí, cada uno con su propio bono.',
+    planTitle: 'Plano de la casa', canUpgrade: 'Puedes construirla ya', now: 'Ahora', nextShort: 'Siguiente',
+    roomTrophies: 'Trofeos de esta habitación', noTrophies: 'En esta habitación no se cuelga ningún trofeo.', hang: 'Colgar',
+    hung: '<b>{trophy}</b> ya cuelga en {room}', trophyHung: 'Colgado', trophyKills: '{boss}: {n} / {max}',
+    trophyRoom: 'Construye antes {room}', trophyCost: 'Faltan materiales', trophyReady: 'Listo para colgar',
+    wallTitle: 'Pared de trofeos', wallText: 'Cada jefe deja un trofeo cuando lo has vencido las veces suficientes. Paga para montarlo y te dará su bono para siempre.',
+    group: { realm: 'Jefes del reino', dungeon: 'Señores de las mazmorras' }, trophyLocked: 'Aún en pie',
+    trophyOf: '{boss} · {room}', kills: 'Veces que ha caído {boss}',
   },
 
   rooms: {
@@ -798,6 +809,22 @@ export default {
     chapel: { name: 'Capilla', desc: 'Bendiciones un {v}% más largas' },
     bedroom: { name: 'Dormitorio', desc: 'Progreso sin conexión: {v} h' },
   },
+  trophies: {
+    goblin_crown: { name: 'Corona del Rey Goblin', desc: 'Abollada, torcida y aun así vale más que todos los goblins que la llevaron.' },
+    troll_hammer: { name: 'Martillo del Señor Troll', desc: 'Hacen falta dos hombres para descolgarlo y quitarle el polvo.' },
+    kraken_tentacle: { name: 'Tentáculo de kraken en salmuera', desc: 'La cocinera jura que mejora cualquier caldo con solo enseñárselo.' },
+    necro_staff: { name: 'Bastón del Nigromante Eterno', desc: 'Su calavera susurra lecciones por la noche. Algunas hasta son útiles.' },
+    dragon_head: { name: 'Cabeza del Dragón Ancestral', desc: 'Sus ojos parecen seguir a las visitas por la sala.' },
+    void_wings: { name: 'Alas del Emperador del Vacío', desc: 'Bajo su sombra, las velas tardan más en consumirse.' },
+    sun_mask: { name: 'Máscara del Soberano del Éter', desc: 'Brilla con suavidad, y bajo ella se duerme largo y hondo.' },
+    warren_totem: { name: 'Tótem del cacique goblin', desc: 'Tallado en una viga del túnel, todavía huele a setas.' },
+    bone_throne: { name: 'Reposabrazos del rey esqueleto', desc: 'Lo único que queda de un trono de huesos. Sirve de buen banco de trabajo.' },
+    naga_scales: { name: 'Escamas de la gran naga', desc: 'Colgadas sobre los semilleros, espantan a las plagas.' },
+    frost_mirror: { name: 'Espejo de la reina del invierno', desc: 'Nunca se empaña y enseña dónde golpear.' },
+    wyrm_shield: { name: 'Peto de la sierpe de bronce', desc: 'Una escama del tamaño de una puerta, montada como escudo.' },
+    rift_eye: { name: 'Ojo del guardián de la grieta', desc: 'Encuentra lo que otros dejan atrás.' },
+  },
+
 
   church: {
     orderTitle: "Orden del Alba",
@@ -1604,6 +1631,8 @@ export default {
         title: "Mejoras de cazador",
         body: "Mejoras permanentes que se compran con puntos de cazador. Cada una se compra una vez y funciona en todos los encargos desde entonces.",
       },
+      home: { title: 'Plano de la casa', body: 'Elige una habitación para ver qué da y cuánto cuesta el siguiente nivel. Un punto dorado marca las que puedes construir ya; los marquitos son los trofeos que cabe colgar en cada una.' },
+      trophies: { title: 'Trofeos', body: 'Vence a un jefe las veces suficientes, construye la habitación donde se cuelga su trofeo y paga su precio. Los trofeos colgados se quedan para siempre, también al ascender.' },
       order: { title: "Orden del Alba", body: "Cada día hay una ofrenda nueva. Entrégala para ganar favor y XP de Oración. Los niveles de favor alargan las bendiciones, abren un hueco de bendición en el nivel 3 y las abaratan en el nivel 5." },
       graceful: { title: "Conjunto ligero", body: "Cuatro piezas ligeras que se compran con marcas de gracia de las pistas de Agilidad. Juntas aceleran la recolección, aumentan la XP de Agilidad, hacen más seguro el robo y aceleran todas las acciones." },
       towerAffixes: { title: "Los pisos de esta semana", body: "Desde el piso 6, cada bloque de cinco pisos tiene un cambio que varía cada semana, igual para todos. Los pisos con cambio dan un cuarto más de fichas." },

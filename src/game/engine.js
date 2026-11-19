@@ -42,6 +42,7 @@ import { slayer } from './slayer.js'
 import { company, companyState } from './company.js'
 import { tavernGames } from './tavernGames.js'
 import { church, churchState } from './church.js'
+import { home, homeState } from './home.js'
 import { bar } from './bar.js'
 import { farm } from './farm.js'
 import { thief, thiefState } from './thief.js'
@@ -150,6 +151,7 @@ export function newState(profile = {}) {
     ...recordsState(),
     ...mythicsState(),
     ...churchState(),
+    ...homeState(),
     ...thiefState(),
     ...festivalsState(),
   }
@@ -533,7 +535,7 @@ export const G = {
     return v
   },
   modNow(key) {
-    let v = (ROLES[this.s.role]?.bonus[key] || 0) + this.raceMods(key) + this.extraMods(key) + this.petMods(key) + this.ascensionMods(key) + this.setMods(key) + this.bestiaryMods(key) + this.festivalMods(key) + this.omenMods(key) + this.weatherMods(key) + this.streakMods(key) + this.guildMods(key) + this.codexMods(key) + this.crownMods(key) + this.techniqueMods(key) + this.echoMods(key) + this.trialMods(key) + this.mythicMods(key) + this.companyMods(key)
+    let v = (ROLES[this.s.role]?.bonus[key] || 0) + this.raceMods(key) + this.extraMods(key) + this.petMods(key) + this.ascensionMods(key) + this.setMods(key) + this.bestiaryMods(key) + this.festivalMods(key) + this.omenMods(key) + this.weatherMods(key) + this.streakMods(key) + this.guildMods(key) + this.codexMods(key) + this.crownMods(key) + this.techniqueMods(key) + this.echoMods(key) + this.trialMods(key) + this.mythicMods(key) + this.companyMods(key) + this.homeMods(key)
     for (const [a, per] of ATTR_BY_MOD[key] || []) v += per * this.attr(a)
     const tal = this.s.hero.talents
     for (const tt of TALENTS_BY_MOD[key] || []) if (tal[tt.id]) v += tt.per * tal[tt.id]
@@ -733,6 +735,6 @@ export const G = {
   },
 }
 
-Object.assign(G, races, inventory, skilling, combat, progress, systems, meta, ascension, collection, omens, companions, weekly, relicForge, journal, fighting, company, tavernGames, guilds, affairs, codex, slayer, church, bar, farm, thief, festivals, crown, routines, techniques, realm, unlocks, echoes, records, mythics)
+Object.assign(G, races, inventory, skilling, combat, progress, systems, meta, ascension, collection, omens, companions, weekly, relicForge, journal, fighting, company, tavernGames, guilds, affairs, codex, slayer, church, home, bar, farm, thief, festivals, crown, routines, techniques, realm, unlocks, echoes, records, mythics)
 
 export { SKILLS, ITEMS }

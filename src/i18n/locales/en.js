@@ -383,6 +383,7 @@ export default {
     bestiaryGroup: 'Compendium group completed: {group}.', drop: '{monster} dropped {item}!', towerFloor: 'New Tower record: floor {floor}.', dungeonFirst: 'First clear of {dungeon}.',
     bossFirst: 'First victory over {monster}.', death: 'Defeated by {monster}.', deathGold: 'Defeated by {monster}. Lost {gold} gold.',
     slayerTask: 'Slayer task complete: {monster}.', quest: 'Quest complete: {quest}.', achievement: 'Achievement: {ach}.',
+    trophy: '{trophy} now hangs in the {room}.',
     room: '{room} upgraded to level {level}.', prestige: '{skill} reached prestige {n}.', tavernLevel: 'Your tavern is now {tavern}.',
     hired: 'Hired {name}, a {rarity} {spec}.', fired: '{name} has left your staff.', workerLevel: '{name} reached level {level} in {skill}.',
     expeditionOk: 'The expedition to {exp} ({name}) returned with {gold} gold.', expeditionFail: 'The expedition to {exp} ({name}) failed: {gold} gold.',
@@ -782,8 +783,18 @@ export default {
   },
 
   home: {
-    intro: 'Your home grows with you. Every room needs gold and materials you gather and craft yourself, and gives permanent bonuses.',
-    level: 'Level {n} / {max}', notBuilt: 'Not built yet', next: 'Next: {effect}', upgrade: 'Upgrade', build: 'Build', upgraded: '<b>{room}</b> upgraded to level {n}',
+    title: 'Your home',
+    intro: 'Your home grows with you. Build and upgrade its rooms with gold and materials you gather yourself, and hang the trophies of the bosses you have beaten.',
+    level: 'Level {n} / {max}', notBuilt: 'Not built yet', upgrade: 'Upgrade', build: 'Build', upgraded: '<b>{room}</b> upgraded to level {n}',
+    houseLevel: 'House level {n} / {max}', roomsBuilt: '{n} / {max} rooms built', trophiesHung: '{n} / {max} trophies',
+    wallBonus: 'Trophy bonuses', wallEmpty: 'Beat bosses often enough and their trophies can hang here, each with a bonus of its own.',
+    planTitle: 'Floor plan', canUpgrade: 'You can build this now', now: 'Now', nextShort: 'Next level',
+    roomTrophies: 'Trophies in this room', noTrophies: 'No trophy hangs in this room.', hang: 'Hang',
+    hung: '<b>{trophy}</b> now hangs in the {room}', trophyHung: 'Hanging', trophyKills: '{boss}: {n} / {max}',
+    trophyRoom: 'Build the {room} first', trophyCost: 'Not enough materials', trophyReady: 'Ready to hang',
+    wallTitle: 'Trophy wall', wallText: 'Each boss leaves a trophy once you have beaten it enough times. Pay to have it mounted and it gives its bonus for good.',
+    group: { realm: 'Bosses of the realm', dungeon: 'Lords of the dungeons' }, trophyLocked: 'Still standing',
+    trophyOf: '{boss} · {room}', kills: 'Times {boss} has fallen',
   },
 
   rooms: {
@@ -798,6 +809,22 @@ export default {
     chapel: { name: 'Chapel', desc: 'Blessings last {v}% longer' },
     bedroom: { name: 'Bedroom', desc: 'Offline progress: {v} h' },
   },
+  trophies: {
+    goblin_crown: { name: "Goblin King's crown", desc: 'Dented, crooked and still worth more than the goblins who wore it.' },
+    troll_hammer: { name: "Troll Lord's hammer", desc: 'Two men are needed to lift it off the wall to dust it.' },
+    kraken_tentacle: { name: 'Pickled kraken tentacle', desc: 'The cook swears it improves every broth it is shown to.' },
+    necro_staff: { name: "The Eternal Necromancer's staff", desc: 'Its skull whispers lessons at night. Some of them are even useful.' },
+    dragon_head: { name: 'Head of the Ancient Dragon', desc: 'Its eyes seem to follow guests around the room.' },
+    void_wings: { name: 'Wings of the Void Emperor', desc: 'Candles burn longer under their shadow.' },
+    sun_mask: { name: 'Mask of the Aether Sovereign', desc: 'It glows softly, and sleep beneath it is long and deep.' },
+    warren_totem: { name: "Goblin Chieftain's totem", desc: 'Carved from a tunnel beam, it smells faintly of mushrooms.' },
+    bone_throne: { name: "Skeleton King's armrest", desc: 'All that is left of a throne of bones. It makes a fine workbench.' },
+    naga_scales: { name: 'Great Naga scales', desc: 'Hung over the seed beds, they keep the pests away.' },
+    frost_mirror: { name: "Winter Queen's mirror", desc: 'It never fogs, and it shows where to strike.' },
+    wyrm_shield: { name: "Bronze Wyrm's breastplate", desc: 'A scale the size of a door, mounted as a shield.' },
+    rift_eye: { name: 'Eye of the Rift Warden', desc: 'It finds what others leave behind.' },
+  },
+
 
   church: {
     orderTitle: "Order of the Dawn",
@@ -1604,6 +1631,8 @@ export default {
         title: "Slayer perks",
         body: "Permanent upgrades bought with slayer points. Each one is bought once and works on every task from then on.",
       },
+      home: { title: 'Floor plan', body: 'Pick a room to see what it gives and what the next level costs. A gold dot marks the rooms you can build right now; the small frames are the trophies each room can hold.' },
+      trophies: { title: 'Trophies', body: 'Beat a boss enough times, build the room the trophy hangs in and pay its price. Hung trophies stay for good, even after you ascend.' },
       order: { title: "Order of the Dawn", body: "A new offering every day. Offer it for favour and Prayer XP. Favour levels make blessings last longer, open a blessing slot at level 3 and make blessings cheaper at level 5." },
       graceful: { title: "Graceful outfit", body: "Four light pieces bought with marks of grace from the agility courses. Worn together they speed up gathering, boost Agility XP, make thieving safer and speed up every action." },
       towerAffixes: { title: "This week's floors", body: "From floor 6 on, every block of five floors has a twist that changes each week, the same for everyone. Floors with a twist pay a quarter more tokens." },
