@@ -30,6 +30,8 @@ import ArmGame from '../components/ArmGame.vue'
 import BeerGame from '../components/BeerGame.vue'
 import MorrisGame from '../components/MorrisGame.vue'
 import RunesGame from '../components/RunesGame.vue'
+import ShoesGame from '../components/ShoesGame.vue'
+import BardsGame from '../components/BardsGame.vue'
 import KeeperTalk from '../components/KeeperTalk.vue'
 import ExpeditionsPanel from '../components/ExpeditionsPanel.vue'
 
@@ -39,12 +41,18 @@ const confirm = useConfirm()
 const route = useRoute()
 const TABS = ['staff', 'expeditions', 'orders', 'bar', 'games']
 const tab = ref(TABS.includes(route.query.tab) ? route.query.tab : 'staff')
-// The game tables, and the one open
+// The game tables, by kind, and the one open
 const TABLES = [
-  { id: 'cards', icon: 'crown' }, { id: 'dice', icon: 'perspective-dice-six-faces-random' }, { id: 'darts', icon: 'archery-target' },
-  { id: 'taba', icon: 'crossed-bones' }, { id: 'arm', icon: 'biceps' }, { id: 'beer', icon: 'beer-horn' },
-  { id: 'morris', icon: 'stone-block' }, { id: 'runes', icon: 'rune-stone' },
+  { id: 'cards', icon: 'crown', kind: 'chance' }, { id: 'dice', icon: 'perspective-dice-six-faces-random', kind: 'chance' },
+  { id: 'taba', icon: 'crossed-bones', kind: 'chance' }, { id: 'runes', icon: 'rune-stone', kind: 'chance' },
+  { id: 'darts', icon: 'archery-target', kind: 'skill' }, { id: 'shoes', icon: 'horseshoe', kind: 'skill' },
+  { id: 'arm', icon: 'biceps', kind: 'skill' }, { id: 'beer', icon: 'beer-horn', kind: 'skill' },
+  { id: 'morris', icon: 'stone-block', kind: 'wits' }, { id: 'bards', icon: 'lyre', kind: 'wits' },
 ]
+const KINDS = ['chance', 'skill', 'wits']
+// How each table has gone for the hero so far
+const tableNet = id => (void state.tavern.games, id === 'dice' ? state.tavern.dice?.net || 0 : id === 'cards' || id === 'darts' ? G.tavernGames()[id].net || 0 : state.tavern.games?.[id]?.net || 0)
+const tablePlayed = id => (id === 'dice' ? state.tavern.dice?.played || 0 : state.tavern.games?.[id]?.played || 0)
 const TABLE_STORE = 'aetheria-tavern-table'
 const table = ref((() => { try { const v = localStorage.getItem(TABLE_STORE); return TABLES.some(g => g.id === v) ? v : 'cards' } catch { return 'cards' } })())
 watch(table, v => { try { localStorage.setItem(TABLE_STORE, v) } catch { /* storage unavailable */ } })
@@ -369,10 +377,20 @@ const readyOrders = computed(() => t.value.orders.filter(o => !o.done && G.qty(o
         <TabPanel value="games">
           <!-- The tables: one game at a time, the last one chosen remembered on this device -->
           <div class="tables" role="tablist" :aria-label="$t('tavern.tabs.games')">
-            <button v-for="g in TABLES" :key="g.id" type="button" role="tab" class="table-btn" :class="{ on: table === g.id }" :aria-selected="table === g.id" @click="table = g.id">
-              <GameIcon :name="g.icon" :size="20" />
-              <span>{{ $t(`tavern.tables.${g.id}`) }}</span>
-            </button>
+            <div v-for="k in KINDS" :key="k" class="table-group">
+              <span class="group-name">{{ $t('tavern.tableKinds.' + k) }}</span>
+              <div class="group-row">
+                <button v-for="g in TABLES.filter(x => x.kind === k)" :key="g.id" type="button" role="tab" class="table-btn" :class="{ on: table === g.id }"
+                  :aria-selected="table === g.id" @click="table = g.id">
+                  <span class="table-icon"><GameIcon :name="g.icon" :size="22" /></span>
+                  <span class="table-text">
+                    <b>{{ $t(`tavern.tables.${g.id}`) }}</b>
+                    <small>{{ $t(`tavern.tableTags.${g.id}`) }}</small>
+                  </span>
+                  <span v-if="tablePlayed(g.id)" class="table-net tnum" :class="tableNet(g.id) > 0 ? 'up' : tableNet(g.id) < 0 ? 'down' : ''">{{ (tableNet(g.id) > 0 ? '+' : '') + fmt(tableNet(g.id)) }}</span>
+                </button>
+              </div>
+            </div>
           </div>
           <div class="game-stage" role="tabpanel">
             <CardsGame v-if="table === 'cards'" />
@@ -382,6 +400,8 @@ const readyOrders = computed(() => t.value.orders.filter(o => !o.done && G.qty(o
             <ArmGame v-else-if="table === 'arm'" />
             <BeerGame v-else-if="table === 'beer'" />
             <MorrisGame v-else-if="table === 'morris'" />
+            <ShoesGame v-else-if="table === 'shoes'" />
+            <BardsGame v-else-if="table === 'bards'" />
             <RunesGame v-else />
           </div>
         </TabPanel>
@@ -410,17 +430,35 @@ const readyOrders = computed(() => t.value.orders.filter(o => !o.done && G.qty(o
 :root[data-theme="light"] .sum.stuck b, :root[data-theme="light"] .sum.injured b { color: var(--danger); }
 :root[data-theme="light"] .sum.away b { color: #2f7a70; }
 .growth { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 8px 10px; border-radius: 10px; background: var(--tint-1); border: 1px solid var(--line); }
-.tables { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; margin-bottom: 16px; }
-.table-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 12px; border: 1px solid var(--line);
-  background: var(--panel); color: var(--muted); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: border-color 0.15s, color 0.15s, transform 0.15s; }
-.table-btn:hover { border-color: var(--line-hi); color: var(--ink); }
-.table-btn.on { border-color: var(--gold); color: var(--ink); box-shadow: 0 0 18px -10px var(--gold); }
-.table-btn.on .gi { color: var(--gold); }
+.tables { display: grid; grid-template-columns: 4fr 4fr 2fr; gap: 14px; margin-bottom: 16px; }
+.table-group { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.group-name { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-hi); padding-inline-start: 2px; }
+.group-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); grid-auto-flow: column; gap: 6px; }
+.table-btn { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px 9px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--muted); font: inherit; cursor: pointer; text-align: center; min-width: 0;
+  transition: border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s; }
+.table-btn:hover { border-color: var(--line-hi); color: var(--ink); transform: translateY(-2px); }
+.table-btn.on { border-color: var(--gold); color: var(--ink); box-shadow: 0 0 18px -8px var(--gold);
+  background: radial-gradient(circle at 50% 0%, rgba(226, 182, 90, 0.16), transparent 70%), var(--panel); }
 .table-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-/* Phones: the tables become a strip that scrolls sideways */
-@media (max-width: 600px) {
-  .tables { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 104px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
-  .tables::-webkit-scrollbar { display: none; }
+.table-icon { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: var(--tint-2); border: 1px solid var(--line); color: var(--ink-2); }
+.table-btn.on .table-icon { color: var(--gold-hi); border-color: color-mix(in srgb, var(--gold) 50%, transparent); background: color-mix(in srgb, var(--gold) 14%, var(--panel-solid)); }
+.table-text { display: grid; gap: 1px; min-width: 0; }
+.table-text b { font-size: 13px; line-height: 1.2; }
+.table-text small { font-size: 11px; color: var(--faint); line-height: 1.25; }
+.table-net { position: absolute; top: 5px; right: 6px; font-size: 10.5px; font-weight: 700; color: var(--muted); }
+.table-net.up { color: var(--tag-ok); }
+.table-net.down { color: var(--tag-bad); }
+@media (max-width: 1280px) {
+  .tables { grid-template-columns: 1fr 1fr; }
+  .table-group:last-child { grid-column: 1 / -1; }
 }
+/* Phones: each group becomes a strip that scrolls sideways */
+@media (max-width: 600px) {
+  .tables { grid-template-columns: 1fr; gap: 10px; }
+  .group-row { grid-auto-columns: 112px; grid-template-columns: none; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .group-row::-webkit-scrollbar { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .table-btn { transition: none; } .table-btn:hover { transform: none; } }
 @media (max-width: 900px) { .up-card { width: 100%; order: 4; } }
 </style>

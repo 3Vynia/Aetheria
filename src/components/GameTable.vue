@@ -57,8 +57,19 @@ const net = computed(() => props.stats.net || 0)
 .game-title { margin: 0; font-family: var(--font-display); font-size: 20px; letter-spacing: 0.04em; }
 .game-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: stretch; }
 /* The felt: the table the game is played on */
-.felt { position: relative; min-height: 360px; padding: 22px; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; gap: 16px;
-  background: radial-gradient(ellipse at 50% 35%, color-mix(in srgb, #2f6b4a 26%, var(--well)), var(--well) 75%); border: 1px solid var(--line); box-shadow: inset 0 0 40px -10px rgba(0, 0, 0, 0.55); }
+/* The felt: green cloth under a lamp, inside a wooden rim */
+.felt { position: relative; min-height: 380px; padding: 26px; border-radius: 18px; display: flex; flex-direction: column; justify-content: center; gap: 16px;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 30%, rgba(255, 214, 140, 0.13), transparent 70%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.018) 0 2px, transparent 2px 5px),
+    radial-gradient(ellipse at 50% 40%, #2c5e42, #1b3a2a 70%, #132a1f);
+  border: 10px solid #4a2f1a;
+  box-shadow: inset 0 0 0 1px rgba(226, 182, 90, 0.35), inset 0 0 46px -6px rgba(0, 0, 0, 0.7), 0 0 0 1px #2a1a0e, 0 10px 24px -12px rgba(0, 0, 0, 0.7); }
+.felt::before { content: ''; position: absolute; inset: 8px; border-radius: 10px; border: 1px dashed rgba(226, 182, 90, 0.18); pointer-events: none; }
+:root[data-theme="light"] .felt { background:
+    radial-gradient(ellipse 70% 55% at 50% 30%, rgba(255, 236, 190, 0.35), transparent 70%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 5px),
+    radial-gradient(ellipse at 50% 40%, #d3e6d6, #bcd6c2 70%, #a9c9b1); border-color: #8a6038; }
 .side { display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 16px; background: var(--tint-1); border: 1px solid var(--line); }
 .figures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .figure { display: grid; gap: 2px; padding: 8px 10px; border-radius: 10px; background: var(--panel-solid); border: 1px solid var(--line); }
@@ -78,6 +89,6 @@ const net = computed(() => props.stats.net || 0)
 }
 @media (max-width: 1000px) {
   .game-grid { grid-template-columns: 1fr; }
-  .felt { min-height: 0; padding: 16px; }
+  .felt { min-height: 0; padding: 18px 14px; border-width: 7px; }
 }
 </style>

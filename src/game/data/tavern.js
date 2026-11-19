@@ -183,18 +183,23 @@ export const TABA_FACES = [
 // Arm wrestling: a ladder of regulars, each beaten one opening the next, stronger and paying more.
 // force: how far they push the arms per second (a share of the table); the hero pushes with every
 // press, harder with Strength, and presses quicker than ARM_PRESS seconds apart do not count.
-// The top of the ladder cannot be beaten without real Strength
+// Each rival comes in a different form every bout (ARM_FORM). Simulated at six presses a second, a
+// rival is beaten about half the time by a hero with `str` Strength and nearly always 15 levels later.
+// share: the part of the tavern's betting limit they will wrestle for, so the easy rungs pay little
 export const ARM_RIVALS = [
-  { id: 'farmhand', icon: 'farmer', force: 0.17, mult: 1.5 },
-  { id: 'viking', icon: 'viking-head', force: 0.22, mult: 1.8 },
-  { id: 'dwarf', icon: 'dwarf-face', force: 0.28, mult: 2.2 },
-  { id: 'barbarian', icon: 'barbarian', force: 0.34, mult: 2.7 },
-  { id: 'ogre', icon: 'ogre', force: 0.4, mult: 3.3 },
-  { id: 'troll', icon: 'troll', force: 0.47, mult: 4 },
-  { id: 'champion', icon: 'dwarf-king', force: 0.55, mult: 5 },
+  { id: 'farmhand', icon: 'farmer', force: 0.17, mult: 1.8, str: 1, share: 0.04 },
+  { id: 'viking', icon: 'viking-head', force: 0.205, mult: 1.9, str: 15, share: 0.08 },
+  { id: 'dwarf', icon: 'dwarf-face', force: 0.24, mult: 2, str: 30, share: 0.15 },
+  { id: 'barbarian', icon: 'barbarian', force: 0.275, mult: 2.1, str: 45, share: 0.25 },
+  { id: 'ogre', icon: 'ogre', force: 0.31, mult: 2.2, str: 60, share: 0.4 },
+  { id: 'troll', icon: 'troll', force: 0.345, mult: 2.4, str: 75, share: 0.65 },
+  { id: 'champion', icon: 'dwarf-king', force: 0.38, mult: 2.6, str: 90, share: 1 },
 ]
 export const ARM_TIME = 15
-export const ARM_PRESS = 0.11
+export const ARM_PRESS = 0.15
+export const ARM_FORM = [0.8, 1.25]
+// Form bands to tell the hero how the rival came in today
+export const armFormKind = f => (f < 0.92 ? 'weak' : f > 1.12 ? 'strong' : 'usual')
 // How many results each table keeps to show
 export const RECENT_KEPT = 10
 // Drinking contest: each round the hero drinks when the tankard is steady; the rival may stagger,
@@ -211,3 +216,21 @@ export const MORRIS_PAYS = 2
 // Runecrafting slows the hands down
 export const RUNE_SWAPS = 7
 export const RUNE_PAYS = 2.6
+// Horseshoes: three shoes at a stake. Each throw is set in two steps, the strength of the toss and
+// then its line; how far both are from true decides where it lands (as a share of the pit's reach).
+// A ringer circles the stake, a leaner rests on it, a close one still scores
+export const SHOE_THROWS = 3
+export const SHOE_RINGS = [{ id: 'ringer', r: 0.07, pts: 3 }, { id: 'leaner', r: 0.15, pts: 2 }, { id: 'close', r: 0.3, pts: 1 }]
+// Three ringers pay four times; a steady hand averages about two points a shoe, which gives the bet back
+export const SHOE_PAYS = [{ min: 9, mult: 4 }, { min: 7, mult: 2 }, { min: 5, mult: 1 }]
+// Bards' duel: a rival minstrel sings a line and the hero answers with one of three. The crowd
+// scores each answer (a fitting rhyme, a lame one, or none) and the rival's own line
+export const BARD_VERSES = ['v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7', 'v8', 'v9', 'v10']
+export const BARD_ROUNDS = 3
+export const BARD_TIME = 12
+export const BARD_PAYS = 2
+// What the crowd gives an answer; a fitting one sometimes brings the house down
+export const BARD_SCORES = { good: 2, flat: 1, off: 0 }
+export const BARD_ROAR = 0.3
+// How the rival's lines go down: chances of 1, 2 and 3 points
+export const BARD_RIVAL = [0.25, 0.45, 0.3]

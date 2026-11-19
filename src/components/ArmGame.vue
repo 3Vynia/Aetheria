@@ -2,7 +2,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import Button from 'primevue/button'
 import { G, state } from '../game/engine.js'
-import { ARM_RIVALS, ARM_TIME, ARM_PRESS } from '../game/data/tavern.js'
+import { ARM_RIVALS, ARM_TIME, ARM_PRESS, armFormKind } from '../game/data/tavern.js'
 import { fmt } from '../game/format.js'
 import { play } from '../game/sound.js'
 import ItemTile from './ItemTile.vue'
@@ -22,6 +22,12 @@ const rival = ref(ARM_RIVALS[G.armTop()].id)
 watch(top, i => { if (!playing.value) rival.value = ARM_RIVALS[i].id })
 const foe = computed(() => ARM_RIVALS.find(r => r.id === (round.value?.rival || rival.value)))
 const foeIndex = computed(() => ARM_RIVALS.indexOf(foe.value))
+// What this rival will wrestle for, and how the hero measures up
+const limit = computed(() => (void state.gold, G.armMaxBet(foe.value.id)))
+watch(limit, l => { if (bet.value > l) bet.value = l }, { immediate: true })
+const strength = computed(() => G.level('strength'))
+const odds = computed(() => { const d = strength.value - foe.value.str; return d >= 15 ? 'easy' : d >= 0 ? 'even' : d >= -15 ? 'hard' : 'tough' })
+const form = computed(() => round.value?.form ? armFormKind(round.value.form) : null)
 
 // Where the arms stand: 0 is the rival's win, 1 the hero's; the seconds left; whether the rival surges
 const at = ref(0.5)
@@ -34,7 +40,7 @@ function frame(now) {
   last = now
   const surge = 1 + 0.6 * Math.max(0, Math.sin(now / 420) * Math.sin(now / 1030))
   surging.value = surge > 1.25
-  at.value = Math.max(0, at.value - foe.value.force * surge * dt)
+  at.value = Math.max(0, at.value - foe.value.force * (round.value?.form || 1) * surge * dt)
   left.value -= dt
   if (at.value <= 0 || left.value <= 0) return finish(at.value > 0.5)
   raf = requestAnimationFrame(frame)
@@ -78,6 +84,7 @@ onMounted(() => { if (playing.value) G.armEnd(false) })
         :aria-checked="foe.id === r.id" :disabled="playing || i > top" :aria-label="i > top ? $t('tavern.arm.lockedRung') : $t(`tavern.arm.rivals.${r.id}`)" @click="rival = r.id">
         <ItemTile :icon="i > top ? 'padlock' : r.icon" :tint="i > top ? '#2a2838' : '#6b4a2a'" size="sm" :tip="false" />
         <small class="tnum">×{{ r.mult }}</small>
+        <small class="tnum faint">{{ $t('tavern.arm.strShort', { n: r.str }) }}</small>
         <i v-if="game.beaten?.[r.id]" class="pi pi-check check" aria-hidden="true" />
       </button>
     </div>
@@ -101,6 +108,7 @@ onMounted(() => { if (playing.value) G.armEnd(false) })
         <ItemTile :icon="foe.icon" tint="#7a2a32" size="lg" :tip="false" />
         <b>{{ $t(`tavern.arm.rivals.${foe.id}`) }}</b>
         <small class="muted">{{ $t('tavern.arm.rung', { n: foeIndex + 1, of: ARM_RIVALS.length }) }}</small>
+        <span v-if="form" :key="'f' + game.played" class="tag pop" :class="{ bad: form === 'strong', ok: form === 'weak' }">{{ $t('tavern.arm.form.' + form) }}</span>
       </div>
     </div>
 
@@ -116,7 +124,12 @@ onMounted(() => { if (playing.value) G.armEnd(false) })
         <div class="small faint">{{ $t('tavern.arm.hint') }}</div>
       </template>
       <template v-else>
-        <BetInput v-model="bet" id="arm-bet" />
+        <div class="sizeup" :class="'o-' + odds">
+          <div class="row small"><span class="grow muted">{{ $t('tavern.arm.yourStr') }}</span><b class="tnum">{{ strength }}</b></div>
+          <div class="row small"><span class="grow muted">{{ $t('tavern.arm.theirStr') }}</span><b class="tnum">{{ foe.str }}</b></div>
+          <div class="odds small">{{ $t('tavern.arm.odds.' + odds) }}</div>
+        </div>
+        <BetInput v-model="bet" id="arm-bet" :limit="limit" />
         <Button :label="$t('tavern.arm.start', { rival: $t(`tavern.arm.rivals.${foe.id}`), x: foe.mult })" icon="pi pi-bolt" fluid @click="start" />
       </template>
     </template>
@@ -132,6 +145,11 @@ onMounted(() => { if (playing.value) G.armEnd(false) })
 .rung.locked { opacity: 0.55; cursor: default; }
 .rung:disabled:not(.locked) { cursor: default; }
 .rung:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.sizeup { display: grid; gap: 4px; padding: 10px 12px; border-radius: 10px; background: var(--panel-solid); border: 1px solid var(--line); }
+.odds { margin-top: 4px; font-weight: 700; }
+.o-easy .odds { color: var(--tag-ok); }
+.o-even .odds { color: var(--gold-hi); }
+.o-hard .odds, .o-tough .odds { color: var(--tag-bad); }
 .check { position: absolute; top: 4px; right: 5px; font-size: 10px; color: var(--ok); }
 .bout { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 8px 0; border-radius: 12px; }
 .bout:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }

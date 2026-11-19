@@ -6,8 +6,9 @@
    Mixed into G (engine.js); `this` is the engine.
    ========================================================= */
 import {
-  CARD_RANKS, CARD_SUITS, BLACKJACK, KEEPER_STANDS, NATURAL_PAYS, DART_RINGS, DART_THROWS, DART_PAYS, TABA_FACES, ARM_RIVALS,
+  CARD_RANKS, CARD_SUITS, BLACKJACK, KEEPER_STANDS, NATURAL_PAYS, DART_RINGS, DART_THROWS, DART_PAYS, TABA_FACES, ARM_RIVALS, ARM_FORM,
   RECENT_KEPT, BEER_ROUNDS, beerRivalFails, MORRIS_LINES, MORRIS_LINKS, MORRIS_MAX_MOVES, MORRIS_PAYS, RUNE_SWAPS, RUNE_PAYS,
+  SHOE_THROWS, SHOE_RINGS, SHOE_PAYS, BARD_VERSES, BARD_ROUNDS, BARD_SCORES, BARD_ROAR, BARD_RIVAL, BARD_PAYS,
 } from './data/tavern.js'
 
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a }
@@ -194,12 +195,19 @@ export const tavernGames = {
     const beaten = ARM_RIVALS.reduce((top, r, i) => (t.beaten?.[r.id] ? i + 1 : top), 0)
     return Math.min(ARM_RIVALS.length - 1, beaten)
   },
+  // The most a rival wrestles for: the weaker ones only for a share of the tavern's limit
+  armMaxBet(rival) {
+    const r = ARM_RIVALS.find(x => x.id === rival)
+    return r ? Math.max(10, Math.min(this.maxBet(), Math.floor(this.tavernInfo().maxBet * r.share))) : 0
+  },
   armStart(bet, rival) {
     const i = ARM_RIVALS.findIndex(r => r.id === rival)
-    return i >= 0 && i <= this.armTop() ? this.tableStart('arm', bet, { rival }) : null
+    if (i < 0 || i > this.armTop() || bet > this.armMaxBet(rival)) return null
+    const form = +(ARM_FORM[0] + Math.random() * (ARM_FORM[1] - ARM_FORM[0])).toFixed(3)
+    return this.tableStart('arm', bet, { rival, form })
   },
   // How far each press moves the arms towards the hero's side: more with Strength
-  armPush() { return 0.04 + 0.04 * Math.min(1, this.level('strength') / 99) },
+  armPush() { return 0.035 + 0.045 * Math.min(1, this.level('strength') / 99) },
   armEnd(won) {
     if (!this.tableOpen('arm')) return null
     const t = this.table('arm'), r = t.round, rival = ARM_RIVALS.find(x => x.id === r.rival)
@@ -270,5 +278,57 @@ export const tavernGames = {
     r.picked = i
     const won = i === this.runesEnd(r)
     return this.settleTable('runes', won ? 'win' : 'lose', won ? r.bet * RUNE_PAYS : 0)
+  },
+
+  /* ---------- horseshoes ---------- */
+  // How fast the two gauges sweep, in sweeps a second: calmer with Agility
+  shoesPace() { return 1 - 0.35 * Math.min(1, this.level('agility') / 99) },
+  shoesStart(bet) { return this.tableStart('shoes', bet, { throws: [] }) },
+  // power, line: how far off each step was, from -1 to 1 (0 is true). Returns where the shoe fell
+  shoesThrow(power, line) {
+    if (!this.tableOpen('shoes')) return null
+    const t = this.table('shoes'), r = t.round
+    if (r.throws.length >= SHOE_THROWS) return null
+    // A shoe never lands quite where it was meant to
+    const wobble = (Math.random() - 0.5) * 0.05
+    const x = line * 0.45 + wobble, y = power * 0.45 + (Math.random() - 0.5) * 0.05
+    const d = Math.hypot(x, y)
+    const ring = SHOE_RINGS.find(g => d <= g.r)
+    const shot = { x: +x.toFixed(3), y: +y.toFixed(3), kind: ring?.id || 'miss', pts: ring?.pts || 0 }
+    r.throws.push(shot)
+    if (r.throws.length >= SHOE_THROWS) {
+      const total = sum(r.throws.map(x => x.pts))
+      t.best = Math.max(t.best || 0, total)
+      const pay = SHOE_PAYS.find(p => total >= p.min)
+      this.settleTable('shoes', pay ? (pay.mult > 1 ? 'win' : 'even') : 'lose', r.bet * (pay?.mult || 0))
+      r.result.total = total
+    }
+    return shot
+  },
+
+  /* ---------- bards' duel ---------- */
+  bardsStart(bet) {
+    const verses = shuffle([...BARD_VERSES]).slice(0, BARD_ROUNDS)
+    // The three answers of every verse in their own order
+    const order = verses.map(() => shuffle(['good', 'flat', 'off']))
+    return this.tableStart('bards', bet, { verses, order, you: [], rival: [] })
+  },
+  // pick: which of the three answers (by position), or -1 when time ran out
+  bardsAnswer(pick) {
+    if (!this.tableOpen('bards')) return null
+    const r = this.table('bards').round
+    const i = r.you.length
+    const kind = r.order[i][pick] || 'off'
+    const roar = kind === 'good' && Math.random() < BARD_ROAR
+    r.you.push({ kind, pts: BARD_SCORES[kind] + (roar ? 1 : 0), roar })
+    let x = Math.random(), pts = 3
+    for (let k = 0; k < BARD_RIVAL.length; k++) { if (x < BARD_RIVAL[k]) { pts = k + 1; break } x -= BARD_RIVAL[k] }
+    r.rival.push(pts)
+    if (r.you.length >= BARD_ROUNDS) {
+      const you = sum(r.you.map(x => x.pts)), rival = sum(r.rival)
+      this.settleTable('bards', you > rival ? 'win' : you === rival ? 'tie' : 'lose', you > rival ? r.bet * BARD_PAYS : you === rival ? r.bet : 0)
+      Object.assign(r.result, { you, rival })
+    }
+    return r
   },
 }

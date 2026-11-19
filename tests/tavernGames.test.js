@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { G, state, newHero, setLevel } from './helpers.js'
-import { DART_THROWS, TABA_FACES, ARM_RIVALS, RUNE_PAYS } from '../src/game/data/tavern.js'
+import { DART_THROWS, TABA_FACES, ARM_RIVALS, ARM_FORM, RUNE_PAYS, SHOE_THROWS, SHOE_PAYS, BARD_ROUNDS, BARD_PAYS } from '../src/game/data/tavern.js'
 import { handValue } from '../src/game/tavernGames.js'
 
 function table() {
@@ -112,14 +112,21 @@ describe('the other tables', () => {
     expect(G.armStart(100, 'nobody')).toBe(null)
     expect(G.armTop()).toBe(0)
     expect(G.armStart(100, 'ogre')).toBe(null) // not reached yet
-    G.armStart(100, 'farmhand')
+    // The farmhand only wrestles for a small share of the tavern's limit
+    const small = G.armMaxBet('farmhand')
+    expect(small).toBeLessThan(G.armMaxBet('champion'))
+    expect(G.armStart(small + 1, 'farmhand')).toBe(null)
+    const r = G.armStart(small, 'farmhand')
+    expect(r.form).toBeGreaterThanOrEqual(ARM_FORM[0])
+    expect(r.form).toBeLessThanOrEqual(ARM_FORM[1])
     G.armEnd(true)
-    expect(state.gold).toBe(10000 + 100 * (ARM_RIVALS[0].mult - 1))
+    expect(state.gold).toBe(10000 + Math.floor(small * ARM_RIVALS[0].mult) - small)
     expect(G.armTop()).toBe(1)
-    expect(G.armStart(100, ARM_RIVALS[1].id)).toBeTruthy()
+    const bet = G.armMaxBet(ARM_RIVALS[1].id)
+    expect(G.armStart(bet, ARM_RIVALS[1].id)).toBeTruthy()
     G.armEnd(false)
     expect(G.armTop()).toBe(1) // a loss keeps the rungs already opened
-    expect(G.table('arm').recent[0]).toBe(-100)
+    expect(G.table('arm').recent[0]).toBe(-bet)
     const low = G.armPush()
     setLevel('strength', 90)
     expect(G.armPush()).toBeGreaterThan(low)
@@ -171,4 +178,47 @@ describe('the other tables', () => {
     expect(r.result.kind).toBe('win')
     expect(state.gold).toBe(10000 + 100 * (RUNE_PAYS - 1))
   })
+
+  it('pitches three horseshoes and pays by the points', () => {
+    table()
+    expect(G.shoesThrow(0, 0)).toBe(null)
+    G.shoesStart(100)
+    // True throws land on the stake
+    for (let i = 0; i < SHOE_THROWS; i++) expect(G.shoesThrow(0, 0).kind).toBe('ringer')
+    expect(G.shoesThrow(0, 0)).toBe(null)
+    const r = G.table('shoes').round
+    expect(r.result.total).toBe(9)
+    expect(state.gold).toBe(10000 + 100 * (SHOE_PAYS[0].mult - 1))
+    // Wild throws miss
+    G.tableClear('shoes')
+    G.shoesStart(100)
+    for (let i = 0; i < SHOE_THROWS; i++) expect(G.shoesThrow(1, -1).kind).toBe('miss')
+    expect(G.table('shoes').round.result.net).toBe(-100)
+    const fast = G.shoesPace()
+    setLevel('agility', 90)
+    expect(G.shoesPace()).toBeLessThan(fast)
+  })
+
+  it('scores a bards\' duel verse by verse and settles it after the last', () => {
+    table()
+    G.bardsStart(100)
+    const r = G.table('bards').round
+    expect(r.verses).toHaveLength(BARD_ROUNDS)
+    expect(new Set(r.verses).size).toBe(BARD_ROUNDS)
+    for (let i = 0; i < BARD_ROUNDS; i++) {
+      G.bardsAnswer(r.order[i].indexOf('good'))
+      expect(r.you[i].kind).toBe('good')
+      expect(r.you[i].pts).toBeGreaterThanOrEqual(2)
+      expect(r.rival[i]).toBeGreaterThanOrEqual(1)
+    }
+    const { you, rival, kind } = r.result
+    expect(kind).toBe(you > rival ? 'win' : you === rival ? 'tie' : 'lose')
+    expect(state.gold).toBe(10000 - 100 + (kind === 'win' ? 100 * BARD_PAYS : kind === 'tie' ? 100 : 0))
+    // Running out of time is a line that does not rhyme
+    G.tableClear('bards')
+    G.bardsStart(100)
+    G.bardsAnswer(-1)
+    expect(G.table('bards').round.you[0].kind).toBe('off')
+  })
 })
+

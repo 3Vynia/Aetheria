@@ -6,8 +6,9 @@ import { fmt } from '../game/format.js'
 
 // A bet for a tavern table: typed, or set with a tap (least, half, double, most)
 const bet = defineModel({ type: Number, default: 100 })
-const props = defineProps({ id: { type: String, required: true }, disabled: Boolean })
-const max = computed(() => (void state.gold, Math.max(10, G.maxBet())))
+// limit: a lower cap this table sets (a rival who only wrestles for so much)
+const props = defineProps({ id: { type: String, required: true }, disabled: Boolean, limit: { type: Number, default: 0 } })
+const max = computed(() => (void state.gold, Math.max(10, props.limit ? Math.min(props.limit, G.maxBet()) : G.maxBet())))
 const set = v => { bet.value = Math.max(10, Math.min(max.value, Math.floor(v))) }
 </script>
 
@@ -21,7 +22,7 @@ const set = v => { bet.value = Math.max(10, Math.min(max.value, Math.floor(v))) 
       <button type="button" :disabled="disabled" @click="set(bet * 2)">×2</button>
       <button type="button" :disabled="disabled" @click="set(max)">{{ $t('tavern.bet.max') }}</button>
     </div>
-    <div class="small faint tnum">{{ $t('tavern.bet.limit', { n: fmt(G.tavernInfo().maxBet) }) }}</div>
+    <div class="small faint tnum">{{ props.limit ? $t('tavern.bet.tableLimit', { n: fmt(props.limit) }) : $t('tavern.bet.limit', { n: fmt(G.tavernInfo().maxBet) }) }}</div>
   </div>
 </template>
 
