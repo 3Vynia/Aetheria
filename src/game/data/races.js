@@ -9,11 +9,12 @@ import { named } from '../../i18n/bind.js'
    traitKey: the bonus the trait is made of, told by the trait's own text rather than as a bonus */
 export const RACES = {
   // The meadows were the one land the Fracture did not touch
-  human: { icon: 'person', color: '#e2b65a', home: 'meadow', rival: null, bonus: { xp: 0.05 }, hpPct: 0, trait: 'unmarked' },
-  // The Iron shard: the forge under the caverns still beats
+  human: { icon: 'person', color: '#e2b65a', home: 'meadow', rival: null, bonus: { xp: 0.02 }, hpPct: 0, trait: 'unmarked' },
+  // The Iron shard: the forge under the caverns still beats. Their weakness is aim, not damage: at the
+  // first spells a few percent of damage would round away a whole point
   dwarf: {
     icon: 'dwarf-face', color: '#ff9a3c', home: 'caves', rival: 'celestial',
-    bonus: { 'speed.mining': 0.1, 'speed.smithing': 0.1, defense: 0.05, magicDmg: -0.1, 'double.smithing': 0.06 }, hpPct: 0, trait: 'forge', traitKey: 'double.smithing',
+    bonus: { 'speed.mining': 0.1, 'speed.smithing': 0.1, defense: 0.05, magicAcc: -0.1, 'double.smithing': 0.06 }, hpPct: 0, trait: 'forge', traitKey: 'double.smithing',
   },
   // The forest that remembers the king's road
   elf: {

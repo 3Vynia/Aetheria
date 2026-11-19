@@ -20,11 +20,12 @@ describe('races', () => {
   it('add their bonuses and their drawback to the modifiers', () => {
     hero('dwarf')
     expect(G.raceMods('speed.mining')).toBeCloseTo(0.1)
-    expect(G.raceMods('magicDmg')).toBeCloseTo(-0.1)
+    expect(G.raceMods('magicAcc')).toBeCloseTo(-0.1)
+    expect(G.raceMods('magicDmg')).toBe(0)
     expect(G.mod('speed.smithing')).toBeGreaterThanOrEqual(0.1)
     expect(G.modSources('defense').some(s => s.src === 'race')).toBe(true)
     hero('human')
-    expect(G.raceMods('xp')).toBeCloseTo(0.05)
+    expect(G.raceMods('xp')).toBeCloseTo(0.02)
     expect(G.raceMods('magicDmg')).toBe(0)
   })
 
