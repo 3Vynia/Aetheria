@@ -49,16 +49,17 @@ const validName = computed(() => name.value.trim().length >= 2)
 const randomName = () => { name.value = rollName(Math.random, Math.random() < 0.5 ? 'he' : 'she') }
 // The class suggests its portrait and colour until the player picks their own
 const touched = ref(false)
+// The race's portrait when it has one, the class's otherwise; offered until the player picks their own
+const suggested = () => (AVATARS.includes(RACES[race.value].icon) ? RACES[race.value].icon : portraitOf(role.value))
 function pickRole(k) {
   role.value = k
   if (touched.value) return
-  avatar.value = portraitOf(k)
+  avatar.value = suggested()
   tint.value = ROLES[k].color
 }
-// A race suggests its own portrait when it has one, until the player picks their own
 function pickRace(k) {
   race.value = k
-  if (!touched.value && AVATARS.includes(RACES[k].icon)) avatar.value = RACES[k].icon
+  if (!touched.value) avatar.value = suggested()
 }
 function create() {
   emit('create', { name: name.value.trim().slice(0, 20), avatar: avatar.value, tint: tint.value, role: role.value, difficulty: difficulty.value, origin: origin.value, race: race.value, tutorial: tutorial.value, gradual: gradual.value })

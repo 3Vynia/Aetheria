@@ -2,6 +2,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { G, state } from '../game/engine.js'
+import { HOME_DMG, HOME_LOOT, RIVAL_DMG } from '../game/data/races.js'
 import { AREAS } from '../game/data/combat.js'
 import { QUESTS } from '../game/data/progression.js'
 import { REGIONS, LANDMARKS, MAP_W, MAP_H, regionOfActivity, regionPath, regionDungeon, regionBosses } from '../game/data/world.js'
@@ -30,7 +31,8 @@ const regions = computed(() => (void state.bestiary.kills, void state.quests, AR
 const withExtras = computed(() => regions.value.filter(r => r.open && (r.dungeon || r.bosses.length)))
 // The hero's homeland and rival land, marked on the map
 const land = id => (G.race().home === id ? 'home' : G.race().rival === id ? 'rival' : null)
-const landText = id => (land(id) === 'home' ? t('races.home', { dmg: 10, loot: 10 }) : t('races.rival', { dmg: -5 }))
+const pc = v => Math.round(v * 100)
+const landText = id => (land(id) === 'home' ? t('races.home', { dmg: pc(HOME_DMG), loot: pc(HOME_LOOT) }) : t('races.rival', { dmg: pc(RIVAL_DMG) }))
 const landmarks = computed(() => LANDMARKS.filter(l => G.screenOpen(l.to)))
 const label = r => [r.a.name, t('world.level', { n: r.a.recLvl }), r.open ? t('world.progress', { n: r.p.met, total: r.p.total }) : t('world.locked', { quest: questName(r.a.reqQuest) }),
   here.value === r.a.id ? t('world.here') : null, ...r.marks.map(m => m.text)].filter(Boolean).join('. ')
