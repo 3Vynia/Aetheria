@@ -5,6 +5,7 @@ import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton'
 import { G, state } from '../game/engine.js'
 import { ACTS, CHAPTERS, CHARACTERS, MEMORIES, talksFor } from '../game/data/journal.js'
+import { RACES } from '../game/data/races.js'
 import { UNIQUE_MERCS, companionTalks } from '../game/data/company.js'
 import GameIcon from '../components/GameIcon.vue'
 import ItemTile from '../components/ItemTile.vue'
@@ -56,7 +57,7 @@ function talkCompanion(m) {
 
 // The first page ends with the one thing the hero remembers: where they come from
 const PARAGRAPH = String.fromCharCode(10).repeat(2)
-const chapterText = c => [t(`journal.chapters.${c.id}.text`, names.value), c.id === 'awakening' && t(`origins.${state.origin || 'wanderer'}.memory`)].filter(Boolean).join(PARAGRAPH)
+const chapterText = c => [t(`journal.chapters.${c.id}.text`, names.value), c.id === 'awakening' && t(`origins.${state.origin || 'wanderer'}.memory`), c.id === 'awakening' && t(`races.${G.raceId()}.memory`)].filter(Boolean).join(PARAGRAPH)
 
 // Any open page can be told again, or stopped
 const retell = id => { telling.value = telling.value === id ? null : id }
@@ -163,7 +164,7 @@ function readAll() {
       <p class="intro">{{ $t('journal.memoriesIntro') }}</p>
       <div v-for="m in MEMORIES" :key="m.id" class="page" :class="{ locked: !G.memoryUnlocked(m), open: open === m.id }">
         <button v-if="G.memoryUnlocked(m)" class="page-head" :aria-expanded="open === m.id" @click="toggle(m.id)">
-          <ItemTile icon="ankh" tint="#a98bff" size="sm" :tip="false" />
+          <ItemTile :icon="m.race ? RACES[m.race].icon : 'ankh'" :tint="m.race ? RACES[m.race].color : '#a98bff'" size="sm" :tip="false" />
           <span class="grow page-title">{{ $t(`journal.memories.${m.id}.title`) }}</span>
           <span v-if="isNew(m.id)" class="tag gold">{{ $t('journal.new') }}</span>
           <i class="pi muted" :class="open === m.id ? 'pi-angle-up' : 'pi-angle-down'" />
@@ -172,7 +173,7 @@ function readAll() {
           <ItemTile icon="padlock" tint="#2a2838" size="sm" :tip="false" />
           <span class="grow">
             <span class="page-title faint">{{ $t('journal.locked') }}</span>
-            <span class="small muted hint">{{ $t('journal.memoryLocked', { n: m.n }) }}</span>
+            <span class="small muted hint">{{ m.race ? $t('journal.memoryRaceLocked', { race: RACES[m.race].name }) : $t('journal.memoryLocked', { n: m.n }) }}</span>
           </span>
         </div>
         <div v-if="open === m.id" class="page-text">

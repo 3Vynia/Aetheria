@@ -1,4 +1,5 @@
 import { AREAS } from './combat.js'
+import { RACE_IDS } from './races.js'
 
 /*
   The hero's journal: the story told in short chapters that unlock as the hero explores, plus the
@@ -139,6 +140,8 @@ export const CHARACTERS = [
 
 // One memory of a past life comes back with each ascension
 export const MEMORIES = [1, 2, 3, 4, 5].map(n => ({ id: `life${n}`, n }))
+// ...and one of every race a life was completed with
+MEMORIES.push(...RACE_IDS.map(race => ({ id: `race_${race}`, race })))
 
 // What the tavern keeper talks about, depending on how far the story has gone. The most recent
 // fitting line is said first; asking again picks another fitting one
@@ -186,6 +189,8 @@ export const RUMORS = [
   { id: 'faceless', when: has('crown_tale') },
   { id: 'remembers', when: g => (g.s.ascension?.count || 0) > 0 },
 ]
+// The keeper knows where the hero comes from
+RACE_IDS.forEach(race => RUMORS.push({ id: `born_${race}`, when: g => g.raceId() === race }))
 export const rumorsFor = g => RUMORS.filter(r => { try { return r.when(g) } catch { return false } })
 
 /* What the people of the journal say when the hero talks to them, in `journal.talk.<person>.<id>`.
@@ -207,4 +212,6 @@ export const TALKS = {
   warden: [{ id: 'gate', when: always }, { id: 'children', when: always }],
   firstKing: [{ id: 'stars', when: always }, { id: 'curse', when: has('the_crown_whole') }],
 }
+// The astrologer, the smith and Morwen each have a word for the hero's people
+for (const who of ['astrologer', 'smith', 'morwen']) RACE_IDS.forEach(race => TALKS[who].push({ id: `race_${race}`, when: g => g.raceId() === race }))
 export const talksFor = (g, who) => (TALKS[who] || []).filter(l => { try { return l.when(g) } catch { return false } })

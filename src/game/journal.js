@@ -45,7 +45,8 @@ export const journal = {
     const region = STORY_REGION[c.hint]
     return { kind: 'story', to: GOAL_ROUTE[c.hint] || (region ? regionPath(region) : '/combat'), icon: c.icon, hint: c.hint, act: c.act, region }
   },
-  memoryUnlocked(m) { return (this.s.ascension?.count || 0) >= m.n },
+  // A memory of each life lived, and one of each race a life was completed with
+  memoryUnlocked(m) { return m.race ? (this.s.ascension?.races?.[m.race] || 0) > 0 : (this.s.ascension?.count || 0) >= m.n },
   // Everything new the hero has not opened yet: chapters, and memories of past lives
   journalUnread() {
     const j = this.s.journal

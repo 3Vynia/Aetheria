@@ -185,3 +185,34 @@ describe('races across lives', () => {
     expect(G.raceLegacy()).toBeCloseTo(0.07)
   })
 })
+
+describe('races in the story', () => {
+  it('give every race its own line on the first page, a word from the keeper and from three people', async () => {
+    const { rumorsFor, talksFor } = await import('../src/game/data/journal.js')
+    const { te } = await import('../src/i18n/index.js')
+    for (const id of RACE_IDS) {
+      hero(id)
+      expect(te(`races.${id}.memory`), id).toBe(true)
+      expect(rumorsFor(G).map(r => r.id), id).toContain(`born_${id}`)
+      for (const other of RACE_IDS.filter(o => o !== id)) expect(rumorsFor(G).map(r => r.id)).not.toContain(`born_${other}`)
+      for (const who of ['astrologer', 'smith', 'morwen']) {
+        const ids = talksFor(G, who).map(l => l.id)
+        expect(ids, `${who} ${id}`).toContain(`race_${id}`)
+        expect(te(`journal.talk.${who}.race_${id}`)).toBe(true)
+      }
+    }
+  })
+
+  it('bring back a memory of each race a life was completed with, beside the memories of every life', async () => {
+    const { MEMORIES } = await import('../src/game/data/journal.js')
+    const raceMemory = id => MEMORIES.find(m => m.race === id)
+    expect(MEMORIES.filter(m => m.n).map(m => m.id)).toEqual(['life1', 'life2', 'life3', 'life4', 'life5'])
+    hero('dwarf')
+    expect(G.memoryUnlocked(raceMemory('dwarf'))).toBe(false)
+    for (const s of Object.keys(state.skills)) setLevel(s, 60)
+    G.ascend(null, 'elf')
+    expect(G.memoryUnlocked(raceMemory('dwarf'))).toBe(true)
+    expect(G.memoryUnlocked(raceMemory('elf'))).toBe(false)
+    expect(G.memoryUnlocked(MEMORIES.find(m => m.id === 'life1'))).toBe(true)
+  })
+})
