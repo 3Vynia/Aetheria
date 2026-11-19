@@ -31,6 +31,9 @@ const traits = computed(() => G.monsterTraits(m.value))
 // Statuses on each side, with the seconds left
 const statuses = side => Object.entries(act.value?.fx?.[side] || {}).map(([id, s]) => ({ id, ...STATUSES[id], left: Math.ceil(s.t), n: s.n }))
 const statusTip = s => tip(t(`fighting.statuses.${s.id}.name`), t(`fighting.statuses.${s.id}.desc`), [{ text: `${s.left} s`, kind: 'muted' }])
+// Whether a side is stunned right now, and where a number pops on the portrait
+const stunned = side => !!act.value?.fx?.[side]?.stun
+const splatStyle = s => ({ '--dx': (s.dx || 0) + 'px', '--dy': (s.dy || 0) + 'px', ...(s.color ? { background: s.color } : {}) })
 const traitTip = id => tip(t(`fighting.traits.${id}.name`), t(`fighting.traits.${id}.desc`))
 // The ability bar of the current style, with cooldowns and whether there is energy for each
 const bar = computed(() => G.abilityBar().filter(id => ABILITY_MAP[id] && G.abilityUnlocked(ABILITY_MAP[id])).map(id => {
@@ -108,7 +111,12 @@ onMounted(() => {
     if (!target) return
     // What the number says: damage, a crit, a dodge, a block or a status ticking
     const text = d.dodged ? t('fighting.dodged') : d.evaded ? t('fighting.evaded') : d.crit ? `${d.dmg}!` : d.blocked ? `${d.dmg} · ${t('fighting.blocked')}` : String(d.dmg)
-    const s = { id: ++id, target, text, miss: !d.dmg && !d.fx, merc: d.who === 'merc', crit: d.crit, fx: d.fx, color: d.fx ? STATUSES[d.fx].color : null, soft: d.dodged || d.evaded || d.blocked }
+    const merc = d.who === 'merc'
+    // Where it pops on the portrait: the hero's own blows near the middle, a companion's to the right,
+    // a status ticking to the left, each a little apart so quick hits do not cover one another
+    const dx = d.fx ? -30 : merc ? 30 : Math.round(Math.random() * 28 - 14)
+    const dy = Math.round(Math.random() * 12 - 6)
+    const s = { id: ++id, target, text, miss: !d.dmg && !d.fx, merc, crit: d.crit, fx: d.fx, color: d.fx ? STATUSES[d.fx].color : null, soft: d.dodged || d.evaded || d.blocked, dx, dy }
     splats.value.push(s)
     setTimeout(() => (splats.value = splats.value.filter(x => x.id !== s.id)), 900)
     if (d.dmg > 0 && !d.fx) shake.value[target]++
@@ -128,7 +136,12 @@ onUnmounted(() => { off && off(); offAb && offAb(); offPhase && offPhase(); offK
 <template>
   <div v-if="act && m" class="arena" :class="{ 'is-elite': elite }" :style="elite ? { '--elite': elite.color } : null">
     <div class="fighter">
-      <div :key="'p' + shake.player" :class="{ shake: shake.player }"><ItemTile :icon="state.avatar" :tint="state.tint" size="xl" :tip="false" /></div>
+      <!-- The portrait carries everything that happens to the fighter: numbers, casts, a stun -->
+      <div class="portrait" :class="{ stunned: stunned('player') }">
+        <div :key="'p' + shake.player" :class="{ shake: shake.player }"><ItemTile :icon="state.avatar" :tint="state.tint" size="xl" :tip="false" /></div>
+        <div v-if="stunned('player')" class="stun-ring" aria-hidden="true"><GameIcon v-for="i in 3" :key="i" name="star-swirl" :size="18" /></div>
+        <div v-for="s in splats.filter(x => x.target === 'player')" :key="s.id" class="splat" :class="{ miss: s.miss, soft: s.soft, fx: s.fx, cast: s.cast }" :style="splatStyle(s)">{{ s.text }}</div>
+      </div>
       <div class="fighter-name">{{ state.name }}</div>
       <div class="bar thick hp-ok"><i :style="{ width: (Math.max(0, state.hp) / G.maxHp()) * 100 + '%' }" /></div>
       <div class="small muted tnum" style="margin-top:5px">{{ Math.max(0, state.hp) }} / {{ G.maxHp() }} {{ $t('common.hp') }}</div>
@@ -155,14 +168,17 @@ onUnmounted(() => { off && off(); offAb && offAb(); offPhase && offPhase(); offK
           <span class="small">{{ mercName(p) }}</span>
         </span>
       </div>
-      <div v-for="s in splats.filter(x => x.target === 'player')" :key="s.id" class="splat" :class="{ miss: s.miss, soft: s.soft, fx: s.fx, cast: s.cast }" :style="s.color ? { background: s.color } : null">{{ s.text }}</div>
     </div>
 
     <div class="vs">VS</div>
 
     <div class="fighter">
-      <div :key="'m' + shake.monster" :class="{ shake: shake.monster }" :style="{ opacity: alive ? 1 : 0.25, transition: 'opacity .3s' }">
-        <ItemTile :icon="m.icon" :tint="elite ? elite.color : m.boss ? '#c0392b' : '#8a2a32'" size="xl" :tip="false" />
+      <div class="portrait" :class="{ stunned: alive && stunned('monster') }">
+        <div :key="'m' + shake.monster" :class="{ shake: shake.monster }" :style="{ opacity: alive ? 1 : 0.25, transition: 'opacity .3s' }">
+          <ItemTile :icon="m.icon" :tint="elite ? elite.color : m.boss ? '#c0392b' : '#8a2a32'" size="xl" :tip="false" />
+        </div>
+        <div v-if="alive && stunned('monster')" class="stun-ring" aria-hidden="true"><GameIcon v-for="i in 3" :key="i" name="star-swirl" :size="18" /></div>
+        <div v-for="s in splats.filter(x => x.target === 'monster')" :key="s.id" class="splat" :class="{ miss: s.miss, merc: s.merc, crit: s.crit, soft: s.soft, fx: s.fx }" :style="splatStyle(s)">{{ s.text }}</div>
       </div>
       <div class="fighter-name">
         <span v-if="elite" class="elite-tag" v-tooltip.top="() => tip($t('fighting.elite'), $t('fighting.eliteHint', { gold: ELITE_LOOT.gold, drops: ELITE_LOOT.drops }))">{{ $t('fighting.elite') }}</span>
@@ -205,7 +221,6 @@ onUnmounted(() => { off && off(); offAb && offAb(); offPhase && offPhase(); offK
           <GameIcon :name="s.icon" :size="13" />{{ s.left }}<sup v-if="s.n > 1">×{{ s.n }}</sup>
         </span>
       </div>
-      <div v-for="s in splats.filter(x => x.target === 'monster')" :key="s.id" class="splat" :class="{ miss: s.miss, merc: s.merc, crit: s.crit, soft: s.soft, fx: s.fx }" :style="s.color ? { background: s.color } : null">{{ s.text }}</div>
     </div>
 
     <Transition name="say">
@@ -287,6 +302,25 @@ onUnmounted(() => { off && off(); offAb && offAb(); offPhase && offPhase(); offK
 .ab-slot.ready { opacity: 1; filter: drop-shadow(0 0 6px #a98bff); }
 .ab-cd { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 10px; font-size: 12px; color: #fff;
   background: conic-gradient(rgba(10, 8, 20, 0.75) var(--p), rgba(10, 8, 20, 0.25) 0); }
-.splat.cast { background: linear-gradient(135deg, #8b6dff, #5b3fbf); font-size: 13px; top: -14px; white-space: nowrap; animation-duration: 1.1s; }
-.splat.fx { font-size: 13px; min-width: 26px; padding: 2px 7px; top: 34px; color: #10121a; }
+.portrait { position: relative; width: 92px; margin: 0 auto; }
+.splat { margin-left: var(--dx, 0px); top: calc(18px + var(--dy, 0px)); }
+.splat.merc { left: 50%; font-size: 13.5px; min-width: 28px; padding: 2px 7px; top: calc(40px + var(--dy, 0px)); }
+.splat.cast { background: linear-gradient(135deg, #8b6dff, #5b3fbf); font-size: 13px; top: -16px; margin-left: 0; white-space: nowrap; animation-duration: 1.1s; }
+.splat.fx { font-size: 13px; min-width: 26px; padding: 2px 7px; top: 58px; color: #10121a; }
+/* Stunned: the portrait dims and stars circle over it */
+.portrait.stunned :deep(.tile) { filter: grayscale(0.55) brightness(0.7); transition: filter 0.2s; }
+.stun-ring { position: absolute; left: 50%; top: -14px; width: 76px; height: 26px; margin-left: -38px; pointer-events: none; z-index: 1; color: #f6dc9a;
+  filter: drop-shadow(0 0 4px rgba(246, 220, 154, 0.8)); }
+.stun-ring :deep(svg) { position: absolute; top: 4px; left: 29px; animation: orbit 1.2s linear infinite; }
+.stun-ring :deep(svg:nth-child(2)) { animation-delay: -0.4s; }
+.stun-ring :deep(svg:nth-child(3)) { animation-delay: -0.8s; }
+@keyframes orbit {
+  0% { transform: translate(-30px, 0) scale(0.85); opacity: 0.75; }
+  25% { transform: translate(0, 7px) scale(1.2); opacity: 1; }
+  50% { transform: translate(30px, 0) scale(0.85); opacity: 0.75; }
+  75% { transform: translate(0, -6px) scale(0.6); opacity: 0.4; }
+  100% { transform: translate(-30px, 0) scale(0.85); opacity: 0.75; }
+}
+:root[data-motion='reduce'] .stun-ring :deep(svg) { animation: none; }
+@media (prefers-reduced-motion: reduce) { .stun-ring :deep(svg) { animation: none; } }
 </style>
