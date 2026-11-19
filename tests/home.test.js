@@ -133,3 +133,43 @@ describe('rooms that work on their own', () => {
     vi.restoreAllMocks()
   })
 })
+
+describe('companions living at home', () => {
+  // A hero with a squire and an archer hired, and nobody in the party
+  function company() {
+    newHero()
+    state.gold = 1e9
+    G.hireMerc('squire')
+    G.hireMerc('archer')
+    state.company.party = []
+    return state.company.members
+  }
+
+  it('beds them by bedroom level, and never the ones with the hero', () => {
+    const [a, b] = company()
+    expect(G.homeGuests()).toHaveLength(0)
+    expect(G.companionPlace(a)).toBe('nobed')
+    state.rooms.bedroom = 1
+    expect(G.homeGuests()).toHaveLength(2)
+    state.company.party = [a.id]
+    expect(G.companionPlace(a)).toBe('party')
+    expect(G.companionPlace(b)).toBe('home')
+  })
+
+  it('gains trust, trains and heals while at home', () => {
+    const [a] = company()
+    Object.assign(state.rooms, { bedroom: 1, kitchen: 3, armory: 5 })
+    a.hurtUntil = Date.now() + 60e3
+    const lvl = a.lvl
+    G.updateHome(30 * 3600)
+    expect(a.trust).toBe(Math.floor(G.homeRates().trust * 30))
+    expect(a.lvl).toBeGreaterThan(lvl)
+    expect(G.mercHurt(a)).toBe(false)
+  })
+
+  it('does nothing for those without a bed', () => {
+    const [a] = company()
+    G.updateHome(10 * 3600)
+    expect(a.trust || 0).toBe(0)
+  })
+})

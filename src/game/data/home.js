@@ -56,3 +56,13 @@ export const PRODUCERS = [
   { room: 'vault', icon: 'locked-chest', kind: 'gold', perHour: (l, hero) => Math.round(40 * l * (1 + hero / 10)) },
 ]
 export const PRODUCER_MAP = Object.fromEntries(PRODUCERS.map(p => [p.room, p]))
+
+/* ---------- Companions at home ---------- */
+// Companions who are neither with the hero nor on a trip live in the house, two to a bedroom level
+export const BEDS_PER_LEVEL = 2
+// Trust earned an hour at home: a little on their own, more with the kitchen's meals
+export const homeTrust = kitchen => 0.2 + 0.1 * kitchen
+// Training in the armory: this share of a level an hour per armory level
+export const HOME_DRILL = 0.01
+// Wounds heal this much faster per bedroom level
+export const HOME_REST = 0.5

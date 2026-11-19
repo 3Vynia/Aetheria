@@ -2,7 +2,8 @@
    HOME — boss trophies hung in the house's rooms.
    Mixed into G (engine.js); `this` is the engine.
    ========================================================= */
-import { TROPHIES, TROPHY_MAP, PRODUCERS, PRODUCER_MAP, HOME_STORE_HOURS } from './data/home.js'
+import { TROPHIES, TROPHY_MAP, PRODUCERS, PRODUCER_MAP, HOME_STORE_HOURS, BEDS_PER_LEVEL, homeTrust, HOME_DRILL, HOME_REST } from './data/home.js'
+import { TRUST_MAX, MERC_MAX_LVL, mercXpNeed } from './data/company.js'
 import { CROPS, ITEMS } from './data/items.js'
 import { ACTIONS } from './data/actions.js'
 import { SKILLS, XP_TABLE, MAX_LEVEL } from './data/skills.js'
@@ -105,4 +106,48 @@ export const home = {
     return st
   },
   collectAllHome() { return PRODUCERS.map(p => this.collectHome(p.room)).filter(Boolean) },
+
+  /* ---------- companions living in the house ---------- */
+  homeBeds() { return this.room('bedroom') * BEDS_PER_LEVEL },
+  // Where each companion is: with the hero, on a trip, at home, or home without a bed
+  companionPlace(m) {
+    if (this.s.company.party.includes(m.id)) return 'party'
+    if (this.memberAway(m.id)) return 'away'
+    return this.homeGuests().includes(m) ? 'home' : 'nobed'
+  },
+  // The companions sleeping in the house, in the order they joined, as many as there are beds
+  homeGuests() {
+    const c = this.s.company
+    if (!c?.members.length) return []
+    return c.members.filter(m => !c.party.includes(m.id) && !this.memberAway(m.id)).slice(0, this.homeBeds())
+  },
+  // What an hour at home gives each guest
+  homeRates() {
+    return { trust: homeTrust(this.room('kitchen')), drill: HOME_DRILL * this.room('armory'), rest: 1 + HOME_REST * this.room('bedroom') }
+  },
+  updateHome(dt) {
+    const guests = this.homeGuests()
+    if (!guests.length) return
+    const r = this.homeRates(), h = dt / 3600
+    for (const m of guests) {
+      if ((m.trust || 0) < TRUST_MAX) {
+        m.homeTrust = (m.homeTrust || 0) + r.trust * h
+        if (m.homeTrust >= 1) {
+          const n = Math.floor(m.homeTrust)
+          m.homeTrust -= n
+          m.trust = Math.min(TRUST_MAX, (m.trust || 0) + n)
+        }
+      }
+      if (r.drill && m.lvl < MERC_MAX_LVL) {
+        m.homeXp = (m.homeXp || 0) + r.drill * mercXpNeed(m.lvl) * h
+        if (m.homeXp >= 1) {
+          const n = Math.floor(m.homeXp)
+          m.homeXp -= n
+          this.mercGainXp(m, n)
+        }
+      }
+      // Wounds close sooner in a good bed
+      if (this.mercHurt(m)) m.hurtUntil -= (r.rest - 1) * dt * 1000
+    }
+  },
 }

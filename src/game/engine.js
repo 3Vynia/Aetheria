@@ -658,6 +658,7 @@ export const G = {
     this.updateFarm(dt)
     this.updateSystems(dt)
     this.updateCompanion(dt)
+    this.updateHome(dt)
     this.ensureTasks()
 
     const act = st.activity

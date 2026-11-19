@@ -6,9 +6,11 @@ import { G, state } from '../game/engine.js'
 import { ROOMS } from '../game/data/progression.js'
 import { TROPHIES, trophiesIn, PRODUCERS, HOME_STORE_HOURS } from '../game/data/home.js'
 import { SKILLS } from '../game/data/skills.js'
+import { TRUST_MAX, LOYAL_AT, mercXpNeed, mercIcon, mercTint } from '../game/data/company.js'
+import { mercName } from '../ui/company.js'
 import { ITEMS } from '../game/data/items.js'
 import { BOSSES } from '../game/data/combat.js'
-import { fmt, fmtTime } from '../game/format.js'
+import { fmt, fmtTime, fmtClock } from '../game/format.js'
 import { modText } from '../i18n/mods.js'
 import { resolveParams } from '../i18n/index.js'
 import { play } from '../game/sound.js'
@@ -71,6 +73,16 @@ function collect(room) {
   play('quest')
   G.toast(ROOMS.find(r => r.id === room).icon, 'home.collected', { what: gained(st) }, 'success')
 }
+/* ---------- companions living in the house ---------- */
+const PLACE_ORDER = { home: 0, nobed: 1, away: 2, party: 3 }
+const guests = computed(() => (void now.value, [...state.company.members]
+  .map(m => ({ m, place: G.companionPlace(m) }))
+  .sort((a, b) => PLACE_ORDER[a.place] - PLACE_ORDER[b.place])))
+const sleeping = computed(() => guests.value.filter(g => g.place === 'home').length)
+const rates = computed(() => (void state.rooms, G.homeRates()))
+const pct = v => +(v * 100).toFixed(1)
+const hurtLeft = m => Math.max(0, ((m.hurtUntil || 0) - now.value) / 1000)
+
 function collectAll() {
   const got = G.collectAllHome()
   if (!got.length) return
@@ -232,6 +244,42 @@ function status(tr) {
       </div>
     </div>
 
+    <div class="panel pad guests">
+      <div class="row wrap guests-head">
+        <h3 class="panel-title grow"><GameIcon name="wood-cabin" /> {{ $t('home.guestsTitle') }} <HelpTip k="sections.homeGuests" /></h3>
+        <span class="tag gold">{{ $t('home.beds', { n: sleeping, max: G.homeBeds() }) }}</span>
+        <span class="tag" :class="{ ok: G.room('kitchen') }" v-tooltip.top="$t('home.rateTrustTip')"><GameIcon name="cooking-pot" :size="12" /> {{ $t('home.rateTrust', { n: rates.trust.toFixed(1) }) }}</span>
+        <span class="tag" :class="{ ok: rates.drill }" v-tooltip.top="$t('home.rateDrillTip')"><GameIcon name="swords-emblem" :size="12" /> {{ rates.drill ? $t('home.rateDrill', { n: pct(rates.drill) }) : $t('home.noDrill') }}</span>
+        <span class="tag" :class="{ ok: G.room('bedroom') }" v-tooltip.top="$t('home.rateRestTip')"><GameIcon name="wood-cabin" :size="12" /> {{ $t('home.rateRest', { n: rates.rest.toFixed(1) }) }}</span>
+      </div>
+      <p v-if="!guests.length" class="small muted guests-empty">{{ $t('home.noCompany') }}</p>
+      <p v-else-if="!G.homeBeds()" class="small muted guests-empty">{{ $t('home.noBeds', { room: roomName('bedroom') }) }}</p>
+      <div v-if="guests.length" class="guest-grid">
+        <div v-for="g in guests" :key="g.m.id" class="guest" :class="'at-' + g.place" :style="{ '--t': mercTint(g.m) }">
+          <div class="row">
+            <ItemTile :icon="mercIcon(g.m)" :tint="mercTint(g.m)" size="md" :tip="false" />
+            <div class="grow">
+              <div class="guest-name">{{ mercName(g.m) }}</div>
+              <div class="small muted">{{ $t(`company.roles.${g.m.role}.name`) }} · {{ $t('company.level', { n: g.m.lvl }) }}</div>
+            </div>
+          </div>
+          <div class="row small">
+            <span class="grow muted">{{ $t('home.trust') }}</span>
+            <b class="tnum" :class="{ 'gold-text': (g.m.trust || 0) >= LOYAL_AT }">{{ g.m.trust || 0 }} / {{ TRUST_MAX }}</b>
+          </div>
+          <div class="bar thin" :style="{ '--c': mercTint(g.m) }"><i :style="{ width: ((g.m.trust || 0) / TRUST_MAX) * 100 + '%' }" /></div>
+          <div v-if="g.place === 'home' && rates.drill" class="row small">
+            <span class="grow muted">{{ $t('home.training') }}</span>
+            <span class="tnum faint">{{ fmt(Math.floor(g.m.xp)) }} / {{ fmt(mercXpNeed(g.m.lvl)) }}</span>
+          </div>
+          <span class="tag place" :class="{ ok: g.place === 'home', bad: g.place === 'nobed', arcane: g.place === 'away' }">
+            <template v-if="g.place === 'home' && G.mercHurt(g.m)"><i class="pi pi-heart" /> {{ $t('home.healing', { t: fmtClock(hurtLeft(g.m)) }) }}</template>
+            <template v-else>{{ $t('home.place.' + g.place) }}</template>
+          </span>
+        </div>
+      </div>
+    </div>
+
     <div class="panel pad wall">
       <h3 class="panel-title"><GameIcon name="trophy-cup" /> {{ $t('home.wallTitle') }} <HelpTip k="sections.trophies" /></h3>
       <p class="small muted" style="margin-top:-6px">{{ $t('home.wallText') }}</p>
@@ -322,6 +370,19 @@ function status(tr) {
 
 .wall { margin-top: 16px; }
 .work { margin-top: 16px; }
+.guests { margin-top: 16px; }
+.guests-head { gap: 8px; margin-bottom: 14px; }
+.guests-head .panel-title { margin: 0; }
+.guests-empty { margin: 0; padding: 14px; border-radius: 10px; background: var(--well); text-align: center; }
+.guests-empty + .guest-grid { margin-top: 12px; }
+.guest-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.guest { flex: 1 1 220px; max-width: 300px; display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--well); }
+.guest.at-home { border-color: color-mix(in srgb, var(--t) 50%, transparent);
+  background: radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--t) 14%, transparent), transparent 60%), var(--well); }
+.guest.at-party, .guest.at-away { opacity: 0.75; }
+.guest-name { font-weight: 700; }
+.guest .place { align-self: flex-start; margin-top: auto; }
+.gold-text { color: var(--gold-hi); }
 .work-head .panel-title { margin: 0; }
 .work-head { margin-bottom: 14px; }
 .work-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
