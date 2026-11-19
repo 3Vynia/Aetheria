@@ -1426,8 +1426,8 @@ export default {
     sectionsLabel: "Secciones de ajustes",
     offlineSummary: "Resumen al volver",
     offlineSummaryHint: "Al volver, muestra lo que hizo tu héroe mientras no estabas.",
-    goalBar: "Barra de siguiente paso",
-    goalBarHint: "Una línea en lo alto de la pantalla con lo siguiente que merece la pena hacer.",
+    goalBar: "Contador de seguimiento",
+    goalBarHint: "Un número junto a tu héroe con lo que tienes en marcha; se pone verde cuando algo está listo para entregar.",
     toasts: "Mensajes emergentes",
     textSize: "Tamaño del texto",
     textSizeHint: "Hace todo el juego más grande o más pequeño.",
@@ -2435,7 +2435,7 @@ export default {
       dragons: "Cualquier dragón",
     },
   },
-  tracker: { needLevel: "Primero necesitas {skill} {lvl}: esto te lleva a subirla.", tough: "Las criaturas que lo sueltan aún son duras para ti.", title: "Seguimiento", label: "Objetivo", readyLabel: "Listo", intro: "Todo lo que tienes en marcha: misiones de la historia, el encargo del cazador, contratos del gremio, pedidos de la taberna y tareas diarias. Elige uno y vas directo a donde se hace.", handIn: "Hecho: entrégala", ready: "Listo", go: "Ir allí", missing: "Falta:", more: "y {n} más", all: "Todos los objetivos", empty: "No tienes nada en marcha. Empieza una misión o acepta una tarea y aparecerá aquí.", sources: { companion: "Acompañante", story: "Historia", slayer: "Encargo del cazador", guild: "Contrato del gremio", order: "Pedido de la taberna", daily: "Tarea diaria", weekly: "Tarea semanal" } },
+  tracker: { needLevel: "Primero necesitas {skill} {lvl}: esto te lleva a subirla.", tough: "Las criaturas que lo sueltan aún son duras para ti.", title: "Seguimiento", intro: "Todo lo que tienes en marcha: misiones de la historia, el encargo del cazador, contratos del gremio, pedidos de la taberna y tareas diarias. Elige uno y vas directo a donde se hace.", handIn: "Hecho: entrégala", ready: "Listo", go: "Ir allí", missing: "Falta:", more: "y {n} más", empty: "No tienes nada en marcha. Empieza una misión o acepta una tarea y aparecerá aquí.", sources: { companion: "Acompañante", story: "Historia", slayer: "Encargo del cazador", guild: "Contrato del gremio", order: "Pedido de la taberna", daily: "Tarea diaria", weekly: "Tarea semanal" } , button: "Seguimiento: {n} en marcha", readyCount: "Listos: {n}", seeAll: "Ver todo", needShort: "Antes: {skill} {lvl}", groups: { all: "Todo", story: "Historia", jobs: "Encargos", tavern: "Taberna", tasks: "Tareas" } },
   backup: {
     saveFailed: "No se pudo guardar la partida: el almacenamiento del navegador está lleno o bloqueado. Descarga una copia en Ajustes → Partida para no perder nada.",
     openFailed: "No se pudo abrir esa partida. Si tiene copias automáticas, puedes recuperar una desde su ranura.",
@@ -2512,11 +2512,9 @@ export default {
     toast: "¡{name} vencido para siempre! {n} de {total} ecos: una bonificación permanente de XP y oro.",
   },
   goal: {
-    label: "Siguiente paso",
-    quest: "Entrega la misión «{name}»: ya está lista",
     ending: "Elige cómo termina la historia, en la Corona",
-    hide: "Ocultar hasta el siguiente objetivo",
   },
+
   unlocks: {
     new: "Nuevo",
     more: "{n} más por descubrir",

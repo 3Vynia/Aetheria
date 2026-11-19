@@ -1426,8 +1426,8 @@ export default {
     sectionsLabel: "Settings sections",
     offlineSummary: "Welcome-back summary",
     offlineSummaryHint: "When you come back, show what your hero did while you were away.",
-    goalBar: "Next step bar",
-    goalBarHint: "A line at the top of the screen with the next thing worth doing.",
+    goalBar: "Tracking count",
+    goalBarHint: "A number beside your hero with what you have on the go; it turns green when something is ready to hand in.",
     toasts: "Pop-up messages",
     textSize: "Text size",
     textSizeHint: "Makes the whole game larger or smaller.",
@@ -2435,7 +2435,7 @@ export default {
       dragons: "Any dragon",
     },
   },
-  tracker: { needLevel: "Needs {skill} {lvl} first: this takes you to train it.", tough: "The creatures that drop it are still tough for you.", title: "Tracking", label: "Objective", readyLabel: "Ready", intro: "Everything you have on the go: story quests, the slayer task, guild contracts, tavern orders and daily tasks. Pick one and you go straight to where it is done.", handIn: "Done: hand it in", ready: "Ready", go: "Go there", missing: "Missing:", more: "and {n} more", all: "Every objective", empty: "Nothing on the go. Start a quest or take a task and it shows up here.", sources: { companion: "Companion", story: "Story", slayer: "Slayer task", guild: "Guild contract", order: "Tavern order", daily: "Daily task", weekly: "Weekly task" } },
+  tracker: { needLevel: "Needs {skill} {lvl} first: this takes you to train it.", tough: "The creatures that drop it are still tough for you.", title: "Tracking", intro: "Everything you have on the go: story quests, the slayer task, guild contracts, tavern orders and daily tasks. Pick one and you go straight to where it is done.", handIn: "Done: hand it in", ready: "Ready", go: "Go there", missing: "Missing:", more: "and {n} more", empty: "Nothing on the go. Start a quest or take a task and it shows up here.", sources: { companion: "Companion", story: "Story", slayer: "Slayer task", guild: "Guild contract", order: "Tavern order", daily: "Daily task", weekly: "Weekly task" } , button: "Tracking: {n} on the go", readyCount: "{n} ready", seeAll: "See all", needShort: "First: {skill} {lvl}", groups: { all: "All", story: "Story", jobs: "Jobs", tavern: "Tavern", tasks: "Tasks" } },
   backup: {
     saveFailed: "Could not save your game: this browser's storage is full or blocked. Download a copy in Settings → Save so nothing is lost.",
     openFailed: "That save could not be opened. If it has automatic backups, you can bring one back from its slot.",
@@ -2512,11 +2512,9 @@ export default {
     toast: "{name} beaten for good! {n} of {total} echoes: a lasting bonus to XP and gold.",
   },
   goal: {
-    label: "Next step",
-    quest: "Hand in the quest “{name}”: it is ready",
     ending: "Choose how the story ends, in the Crown",
-    hide: "Hide until the next goal",
   },
+
   unlocks: {
     new: "New",
     more: "{n} more to discover",

@@ -44,7 +44,7 @@ import { welcomeKind } from './game/data/questVoices.js'
 import TitleScreen from './components/TitleScreen.vue'
 import BottomNav from './components/BottomNav.vue'
 import TutorialCoach from './components/TutorialCoach.vue'
-import GoalBar from './components/GoalBar.vue'
+import TrackerBell from './components/TrackerBell.vue'
 import UpdateNotes from './components/UpdateNotes.vue'
 import { newsUnseen, markNewsSeen, unseenUpdates } from './ui/news.js'
 import { titled, cosmeticsForAch } from './game/data/cosmetics.js'
@@ -339,6 +339,7 @@ function startAdventure() {
             </router-link>
             <WalletChip />
           </div>
+          <TrackerBell />
           <button class="hero-chip" :aria-label="$t('heroMenu.label')" @click="menu.toggle($event)">
             <span class="hero-portrait">
               <ItemTile :icon="state.avatar" :tint="state.tint" size="sm" :tip="false" />
@@ -361,7 +362,6 @@ function startAdventure() {
 
         <section id="content" ref="content" class="view" tabindex="-1" :aria-label="title">
           <TutorialCoach />
-          <GoalBar />
           <router-view v-slot="{ Component }">
             <transition name="page" mode="out-in">
               <component :is="Component" :key="route.fullPath" />
