@@ -2,7 +2,8 @@
    JOURNAL — the story, unlocked chapter by chapter and kept forever.
    Mixed into G (engine.js); `this` is the engine.
    ========================================================= */
-import { CHAPTERS, CHAPTER_MAP, MEMORIES, NAMED, rollNames, rollName } from './data/journal.js'
+import { CHAPTERS, CHAPTER_MAP, MEMORIES, NAMED, KNOWN_NAMES, rollNames, rollName } from './data/journal.js'
+import { applyStoryNames } from '../i18n/index.js'
 import { QUESTS } from './data/progression.js'
 import { STORY_REGION, regionPath } from './data/world.js'
 
@@ -18,9 +19,10 @@ export const journal = {
   ensureJournal() {
     const j = this.s.journal
     if (!j.names) j.names = rollNames()
-    // Characters added after the save was made get a name of their own
+    // Characters added after the save was made get a name of their own, or the one the game already knew
     for (const [id, kind] of Object.entries(NAMED)) {
       if (j.names[id]) continue
+      if (KNOWN_NAMES[id]) { j.names[id] = KNOWN_NAMES[id]; continue }
       let n
       do n = rollName(Math.random, kind)
       while (Object.values(j.names).includes(n))
@@ -28,10 +30,12 @@ export const journal = {
     }
     j.chapters ||= {}
     j.read ||= {}
+    // Every text of the game names the king and the archmage as this game knows them
+    applyStoryNames(j.names)
     return j
   },
-  // Names used in the texts; the ones already in the game stay fixed
-  journalNames() { return { ...this.ensureJournal().names, edmund: 'Edmund', morwen: 'Morwen' } },
+  // Names used in the texts; Morwen's belongs to history and stays fixed
+  journalNames() { return { ...this.ensureJournal().names, morwen: 'Morwen' } },
   chapterUnlocked(id) { return !!this.s.journal.chapters[id] },
   // The one next thing worth doing, for the goal bar: a quest to hand in, the ending to choose,
   // or else the next page of the story

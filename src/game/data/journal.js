@@ -17,7 +17,9 @@ const SYL = {
   she: ['a', 'ia', 'is', 'wyn', 'elle', 'ara', 'ine', 'ys', 'eth', 'ira', 'ene', 'lyn', 'ora', 'issa', 'ae'],
 }
 // Who gets a rolled name, and which name endings suit them in the texts
-export const NAMED = { keeper: 'he', astrologer: 'she', smith: 'she', king: 'he', priest: 'he', captain: 'she', winter: 'she' }
+export const NAMED = { keeper: 'he', astrologer: 'she', smith: 'she', king: 'he', priest: 'he', captain: 'she', winter: 'she', edmund: 'he', selene: 'she' }
+// The king and the archmage had these names before they were rolled: older games keep them
+export const KNOWN_NAMES = { edmund: 'Edmund', selene: 'Selene' }
 
 export function rollName(rng, kind) {
   const pick = a => a[Math.floor(rng() * a.length)]

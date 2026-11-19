@@ -39,9 +39,38 @@ export function applyDocumentLocale() {
   document.documentElement.lang = loc
 }
 
+/*
+  The king and the archmage are named anew in every game. The texts are written with the names they
+  first had; each loaded language keeps its messages as written and is given a copy with the names of
+  the game being played (only remade when those names change)
+*/
+const STORY_NAMES = { edmund: 'Edmund', selene: 'Selene' }
+const written = {}
+const appliedNames = {}
+let storyNames = null
+const renameDeep = (v, re, map) => (typeof v === 'string' ? v.replace(re, w => map[w])
+  : Array.isArray(v) ? v.map(x => renameDeep(x, re, map))
+    : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, renameDeep(x, re, map)])) : v)
+function renameLocale(loc) {
+  const map = {}
+  for (const [id, first] of Object.entries(STORY_NAMES)) if (storyNames?.[id] && storyNames[id] !== first) map[first] = storyNames[id]
+  const key = JSON.stringify(map)
+  if (appliedNames[loc] === key) return
+  appliedNames[loc] = key
+  const words = Object.keys(map)
+  i18n.global.setLocaleMessage(loc, words.length ? renameDeep(written[loc], new RegExp(`\\b(${words.join('|')})\\b`, 'g'), map) : written[loc])
+}
+export function applyStoryNames(names) {
+  storyNames = names
+  for (const loc of Object.keys(written)) renameLocale(loc)
+}
+
 export async function setLocale(loc) {
   if (!LOCALES[loc]) return
-  if (!i18n.global.availableLocales.includes(loc)) i18n.global.setLocaleMessage(loc, (await LOCALES[loc].load()).default)
+  if (!written[loc]) {
+    written[loc] = (await LOCALES[loc].load()).default
+    renameLocale(loc)
+  }
   i18n.global.locale.value = loc
   try { localStorage.setItem(STORAGE_KEY, loc) } catch { /* storage unavailable */ }
   applyDocumentLocale()
