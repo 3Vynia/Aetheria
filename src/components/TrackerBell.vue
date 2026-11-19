@@ -127,10 +127,12 @@ function go(target) {
 .tb-filter:disabled { opacity: 0.4; cursor: default; }
 .tb-filter .tb-n { font-size: 11px; font-weight: 700; color: var(--faint); }
 .tb-filter.on .tb-n { color: var(--gold-hi); }
-.tb-board-body { overflow-y: auto; padding-top: 6px; margin-inline-end: -6px; padding-inline-end: 6px; }
+/* No padding at the top of the scroll: a sticky heading would stop below it and let rows show above */
+.tb-board-body { overflow-y: auto; margin-inline-end: -6px; padding-inline-end: 6px; }
 .tb-empty { padding: 14px 4px; }
 .tb-group + .tb-group { margin-top: 8px; }
-.tb-group-name { position: sticky; top: 0; z-index: 1; padding: 6px 2px 4px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold-hi); background: var(--panel-solid); }
+.tb-group-name { position: sticky; top: 0; z-index: 2; padding: 8px 2px 5px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold-hi);
+  background: var(--p-popover-background, var(--panel-solid)); box-shadow: 0 1px 0 var(--line), 0 6px 8px -6px rgba(0, 0, 0, 0.5); }
 .tb-row-goal { border-radius: 10px; }
 .tb-row-goal + .tb-row-goal { border-top: 1px solid var(--line); border-radius: 0; }
 .tb-main { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 6px; border: 0; border-radius: 10px; background: none; color: var(--ink); font: inherit; text-align: start; cursor: pointer; }
