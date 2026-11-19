@@ -794,6 +794,10 @@ export default {
     trophyRoom: 'Construye antes {room}', trophyCost: 'Faltan materiales', trophyReady: 'Listo para colgar',
     wallTitle: 'Pared de trofeos', wallText: 'Cada jefe deja un trofeo cuando lo has vencido las veces suficientes. Paga para montarlo y te dará su bono para siempre.',
     group: { realm: 'Jefes del reino', dungeon: 'Señores de las mazmorras' }, trophyLocked: 'Aún en pie',
+    workTitle: 'La casa trabajando', collectAll: 'Recoger todo', collect: 'Recoger', perHour: '{n} por hora',
+    makes: { garden: 'Cultiva tu mejor cosecha', kitchen: 'Cocina tu mejor plato', library: 'Apuntes para tu habilidad más floja', vault: 'Intereses de tus ahorros' },
+    xpFor: 'XP de {skill}', gainXp: '+{n} XP de {skill}', collected: 'Recogido: {what}', storeFull: 'Lleno: recógelo antes de que se desperdicie más',
+    fullIn: 'Se llena en {time}', cannotMake: 'Aún no hay nada que hacer: sube la habilidad con la que trabaja.', buildToMake: 'Construye {room} y empezará a trabajar.',
     trophyOf: '{boss} · {room}', kills: 'Veces que ha caído {boss}',
   },
 
@@ -1606,6 +1610,7 @@ export default {
       forge: { title: 'Forja', body: 'Encanta las ranuras de tu equipo para ganar estadísticas, o trabaja tus reliquias de prodigio: reforja su calidad, fusiona tres en una mejor o cambia su tipo.' },
       stats: { title: 'Estadísticas', body: 'Cómo te va: XP, oro y bajas por hora durante el último día, y contadores de todo lo que has hecho.' },
       tavern: { title: 'Taberna', body: 'Contrata personal que trabaja para ti en paralelo, incluso sin conexión, por un sueldo por hora. Envíalos de expedición, cumple pedidos por fichas y prueba suerte con bebidas, dados y el cofre misterioso.' },
+      homeWork: { title: 'La casa trabajando', body: 'Algunas habitaciones trabajan solas, también mientras no juegas. Cada una guarda hasta {n} horas de trabajo; pasado eso se detiene hasta que recojas. Más nivel de habitación, más producción.' },
       home: { title: 'Hogar', body: 'Construye y mejora salas con oro y materiales. Cada sala da un bonus permanente, como más XP, recolección más rápida o más horas de progreso sin conexión.' },
       church: { title: 'Iglesia', body: 'Reza para recibir bendiciones que te refuerzan durante un tiempo. Con más nivel de Plegaria puedes tener más bendiciones activas a la vez.' },
       shop: { title: 'Tienda', body: 'Compra provisiones en la pestaña Comprar y vende lo que no necesites en Vender. Los precios siguen el mercado del día: lo que tiene mucha demanda hoy se paga más.' },

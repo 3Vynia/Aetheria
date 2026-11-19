@@ -46,7 +46,7 @@ const sections = computed(() => [
     { to: '/tavern', icon: 'beer-horn', key: 'nav.tavern', badge: state.tavern.orders.filter(o => !o.done && G.qty(o.item) >= o.qty).length + G.patronsReady() || null,
       pulse: state.tavern.workers.some(w => w.status === 'working') || !!state.tavern.trips?.length },
     { to: '/guilds', icon: 'swords-emblem', key: 'nav.guilds', badge: G.guildsReady() || null },
-    { to: '/home', icon: 'family-house', key: 'nav.home' },
+    { to: '/home', icon: 'family-house', key: 'nav.home', badge: G.homeFull() || null },
     { to: '/forge', icon: 'anvil-impact', key: 'nav.forge' },
     { to: '/church', icon: 'church', key: 'nav.church' },
     { to: '/shop', icon: 'shop', key: 'nav.shop' },

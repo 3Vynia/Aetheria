@@ -794,6 +794,10 @@ export default {
     trophyRoom: 'Build the {room} first', trophyCost: 'Not enough materials', trophyReady: 'Ready to hang',
     wallTitle: 'Trophy wall', wallText: 'Each boss leaves a trophy once you have beaten it enough times. Pay to have it mounted and it gives its bonus for good.',
     group: { realm: 'Bosses of the realm', dungeon: 'Lords of the dungeons' }, trophyLocked: 'Still standing',
+    workTitle: 'The house at work', collectAll: 'Collect all', collect: 'Collect', perHour: '{n} an hour',
+    makes: { garden: 'Grows your best crop', kitchen: 'Cooks your best dish', library: 'Study notes for your weakest skill', vault: 'Interest on your savings' },
+    xpFor: '{skill} XP', gainXp: '+{n} {skill} XP', collected: 'Collected: {what}', storeFull: 'Full: collect it before more goes to waste',
+    fullIn: 'Full in {time}', cannotMake: 'Nothing to make yet: train the skill it works with.', buildToMake: 'Build the {room} and it starts working.',
     trophyOf: '{boss} · {room}', kills: 'Times {boss} has fallen',
   },
 
@@ -1606,6 +1610,7 @@ export default {
       forge: { title: 'Forge', body: 'Enchant your equipment slots for extra stats, or work your omen relics: reforge their quality, fuse three into a better one or reshape their kind.' },
       stats: { title: 'Statistics', body: 'How you have been doing: XP, gold and kills per hour over the last day, and counters for everything you have done.' },
       tavern: { title: 'Tavern', body: 'Hire staff who work for you in parallel, even offline, for an hourly wage. Send them on expeditions, fill orders for tokens, and try your luck with drinks, dice and the mystery chest.' },
+      homeWork: { title: 'The house at work', body: 'Some rooms work on their own, also while you are away. Each one stores up to {n} hours of work; past that it stops until you collect. More room levels make more.' },
       home: { title: 'Home', body: 'Build and upgrade rooms with gold and materials. Every room gives a permanent bonus, such as more XP, faster gathering or longer offline progress.' },
       church: { title: 'Church', body: 'Pray for blessings that boost you for a while. Higher Prayer lets you keep more blessings active at once.' },
       shop: { title: 'Shop', body: 'Buy supplies on the Buy tab and sell what you do not need on the Sell tab. Prices follow the daily market: items in high demand pay more today.' },

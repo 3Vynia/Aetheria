@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { G, state, newHero, setLevel } from './helpers.js'
-import { TROPHIES, TROPHY_MAP } from '../src/game/data/home.js'
+import { TROPHIES, TROPHY_MAP, PRODUCERS, HOME_STORE_HOURS } from '../src/game/data/home.js'
 import { ROOMS } from '../src/game/data/progression.js'
 import { BOSSES, DUNGEONS } from '../src/game/data/combat.js'
-import { ITEMS } from '../src/game/data/items.js'
+import { ITEMS, CROPS } from '../src/game/data/items.js'
 import { modText } from '../src/i18n/mods.js'
+import { vi } from 'vitest'
 
 const bosses = new Set([...BOSSES.map(b => b.id), ...DUNGEONS.map(d => d.boss.id)])
 const rooms = new Set(ROOMS.map(r => r.id))
@@ -70,5 +71,65 @@ describe('home trophies', () => {
     expect(G.ascend()).toBeGreaterThan(0)
     expect(G.hasTrophy(tr.id)).toBe(true)
     expect(G.mod('speed.gathering')).toBeGreaterThanOrEqual(tr.mods['speed.gathering'])
+  })
+})
+
+describe('rooms that work on their own', () => {
+  const HOUR = 3600e3
+  // Moves the clock forward by some hours
+  const later = h => vi.spyOn(Date, 'now').mockReturnValue(start + h * HOUR)
+  let start
+
+  it('only works once the room is built', () => {
+    newHero()
+    G.ensureHomeWork()
+    for (const p of PRODUCERS) expect(G.homeStored(p.room)).toBe(null)
+  })
+
+  it('piles up work over time, up to the store, and pays it out', () => {
+    newHero()
+    setLevel('farming', 20)
+    start = Date.now()
+    state.gold = 1e9
+    for (const id of ['garden', 'vault']) { state.rooms[id] = 2; G.ensureHomeWork() }
+    later(3)
+    const crop = G.homeStored('garden')
+    const best = CROPS.filter(c => c.lvl <= 20).sort((a, b) => b.value - a.value)[0]
+    expect(crop.item).toBe(best.id)
+    expect(crop.qty).toBe(3 * crop.perHour)
+    expect(crop.full).toBe(false)
+    const before = G.qty(best.id)
+    expect(G.collectHome('garden').qty).toBe(crop.qty)
+    expect(G.qty(best.id)).toBe(before + crop.qty)
+    expect(G.homeStored('garden').qty).toBe(0)
+    // The store caps at its limit
+    later(3 + HOME_STORE_HOURS * 3)
+    const gold = state.gold, vault = G.homeStored('vault')
+    expect(vault.full).toBe(true)
+    expect(vault.qty).toBe(Math.floor(vault.perHour * HOME_STORE_HOURS))
+    expect(G.collectAllHome()).toHaveLength(2)
+    expect(state.gold).toBe(gold + vault.qty)
+    vi.restoreAllMocks()
+  })
+
+  it('studies for the weakest skill and cooks the best dish known', () => {
+    newHero()
+    start = Date.now()
+    for (const s of Object.keys(state.skills)) setLevel(s, 30)
+    setLevel('agility', 10)
+    setLevel('cooking', 30)
+    state.rooms.library = 1
+    state.rooms.kitchen = 1
+    G.ensureHomeWork()
+    later(5)
+    const notes = G.homeStored('library')
+    expect(notes.skill).toBe('agility')
+    expect(notes.qty).toBeGreaterThan(0)
+    const xp = state.skills.agility.xp
+    G.collectHome('library')
+    expect(state.skills.agility.xp).toBe(xp + notes.qty)
+    const dish = G.homeStored('kitchen')
+    expect(ITEMS[dish.item].heal).toBeGreaterThan(0)
+    vi.restoreAllMocks()
   })
 })

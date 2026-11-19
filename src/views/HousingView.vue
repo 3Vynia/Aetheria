@@ -1,12 +1,14 @@
 <script setup>
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
 import { G, state } from '../game/engine.js'
 import { ROOMS } from '../game/data/progression.js'
-import { TROPHIES, trophiesIn } from '../game/data/home.js'
+import { TROPHIES, trophiesIn, PRODUCERS, HOME_STORE_HOURS } from '../game/data/home.js'
+import { SKILLS } from '../game/data/skills.js'
 import { ITEMS } from '../game/data/items.js'
 import { BOSSES } from '../game/data/combat.js'
-import { fmt } from '../game/format.js'
+import { fmt, fmtTime } from '../game/format.js'
 import { modText } from '../i18n/mods.js'
 import { resolveParams } from '../i18n/index.js'
 import { play } from '../game/sound.js'
@@ -14,6 +16,7 @@ import ItemTile from '../components/ItemTile.vue'
 import GameIcon from '../components/GameIcon.vue'
 import HelpTip from '../components/HelpTip.vue'
 
+const { t: $tr } = useI18n()
 // The house: a floor plan of its rooms, the chosen room beside it and the trophy wall below
 const STORE = 'aetheria-home-room'
 const picked = ref((() => { try { const v = localStorage.getItem(STORE); return ROOMS.some(r => r.id === v) ? v : ROOMS[0].id } catch { return ROOMS[0].id } })())
@@ -47,6 +50,33 @@ const modsOf = tr => Object.entries(tr.mods).map(([k, v]) => modText(k, v)).join
 const ready = computed(() => new Set(ROOMS.filter(r => G.canBuild(r)).map(r => r.id)))
 const hangable = computed(() => new Set(TROPHIES.filter(tr => !G.hasTrophy(tr.id) && !G.trophyBlocker(tr)).map(tr => tr.id)))
 const justHung = ref(null)
+
+/* ---------- what the rooms make on their own ---------- */
+const now = ref(Date.now())
+let clock
+onMounted(() => { G.ensureHomeWork(); clock = setInterval(() => { now.value = Date.now() }, 1000) })
+onUnmounted(() => clearInterval(clock))
+const work = computed(() => (void state.homeWork, PRODUCERS.map(p => ({ ...p, st: G.homeStored(p.room, now.value) }))))
+const anyReady = computed(() => work.value.some(w => w.st?.qty >= 1))
+const madeName = st => (st.item ? ITEMS[st.item].name : st.skill ? $tr('home.xpFor', { skill: SKILLS[st.skill].name }) : $tr('common.gold'))
+const fullIn = st => fmtTime((HOME_STORE_HOURS - st.hours) * 3600)
+function gained(st) {
+  if (st.item) return $tr('gain.item', { n: fmt(st.qty), item: ITEMS[st.item].name })
+  if (st.skill) return $tr('home.gainXp', { n: fmt(st.qty), skill: SKILLS[st.skill].name })
+  return $tr('gain.gold', { n: fmt(st.qty) })
+}
+function collect(room) {
+  const st = G.collectHome(room)
+  if (!st) return
+  play('quest')
+  G.toast(ROOMS.find(r => r.id === room).icon, 'home.collected', { what: gained(st) }, 'success')
+}
+function collectAll() {
+  const got = G.collectAllHome()
+  if (!got.length) return
+  play('quest')
+  G.toast('family-house', 'home.collected', { what: got.map(gained).join(' · ') }, 'success')
+}
 // The wall: the realm's bosses first, then the lords of the dungeons
 const realmBosses = new Set(BOSSES.map(b => b.id))
 const GROUPS = [
@@ -168,6 +198,40 @@ function status(tr) {
       </div>
     </div>
 
+    <div class="panel pad work">
+      <div class="row work-head">
+        <h3 class="panel-title grow"><GameIcon name="hourglass" /> {{ $t('home.workTitle') }} <HelpTip k="sections.homeWork" :params="{ n: HOME_STORE_HOURS }" /></h3>
+        <Button :label="$t('home.collectAll')" icon="pi pi-download" size="small" :disabled="!anyReady" @click="collectAll" />
+      </div>
+      <div class="work-grid">
+        <div v-for="w in work" :key="w.room" class="job" :class="{ off: !w.st, full: w.st?.full }">
+          <div class="row">
+            <ItemTile :icon="w.icon" :tint="w.st ? '#8a6a2a' : '#4a4a55'" size="md" :tip="false" />
+            <div class="grow">
+              <div class="job-name">{{ roomName(w.room) }}</div>
+              <div class="small muted">{{ $t('home.makes.' + w.room) }}</div>
+            </div>
+          </div>
+          <template v-if="w.st">
+            <div class="made">
+              <ItemTile v-if="w.st.item" :item="w.st.item" size="sm" />
+              <ItemTile v-else-if="w.st.skill" :icon="SKILLS[w.st.skill].icon" :tint="SKILLS[w.st.skill].color" size="sm" :tip="false" />
+              <ItemTile v-else icon="two-coins" tint="#c9a04a" size="sm" :tip="false" />
+              <div class="grow">
+                <div class="small"><b>{{ madeName(w.st) }}</b></div>
+                <div class="small faint">{{ $t('home.perHour', { n: fmt(w.st.perHour) }) }}</div>
+              </div>
+              <b class="tnum ready">{{ fmt(w.st.qty) }}</b>
+            </div>
+            <div class="bar" :style="{ '--c': w.st.full ? '#62c17e' : undefined }"><i :style="{ width: (w.st.hours / HOME_STORE_HOURS) * 100 + '%' }" /></div>
+            <div class="small" :class="w.st.full ? 'ok-text' : 'faint'">{{ w.st.full ? $t('home.storeFull') : $t('home.fullIn', { time: fullIn(w.st) }) }}</div>
+            <Button :label="$t('home.collect')" icon="pi pi-download" size="small" :severity="w.st.full ? undefined : 'secondary'" :disabled="w.st.qty < 1" @click="collect(w.room)" />
+          </template>
+          <div v-else class="small faint job-off">{{ G.room(w.room) ? $t('home.cannotMake') : $t('home.buildToMake', { room: roomName(w.room) }) }}</div>
+        </div>
+      </div>
+    </div>
+
     <div class="panel pad wall">
       <h3 class="panel-title"><GameIcon name="trophy-cup" /> {{ $t('home.wallTitle') }} <HelpTip k="sections.trophies" /></h3>
       <p class="small muted" style="margin-top:-6px">{{ $t('home.wallText') }}</p>
@@ -257,6 +321,19 @@ function status(tr) {
 .mini.hung { border-color: rgba(98, 193, 126, 0.3); background: rgba(98, 193, 126, 0.05); }
 
 .wall { margin-top: 16px; }
+.work { margin-top: 16px; }
+.work-head .panel-title { margin: 0; }
+.work-head { margin-bottom: 14px; }
+.work-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.job { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--well); }
+.job.full { border-color: rgba(98, 193, 126, 0.4); box-shadow: 0 0 14px rgba(98, 193, 126, 0.12); }
+.job.off { border-style: dashed; }
+.job.off :deep(.tile) { opacity: 0.55; filter: grayscale(0.6); }
+.job-name { font-weight: 700; }
+.job-off { margin-top: auto; padding: 10px; border-radius: 10px; background: var(--tint-2); text-align: center; }
+.made { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: var(--tint-2); }
+.ready { font-size: 20px; color: var(--gold-hi); }
+.job > .p-button { margin-top: auto; }
 .group-title { display: flex; align-items: center; gap: 12px; margin: 18px 0 12px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-hi); }
 .group-title i { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(226, 182, 90, 0.35), transparent); }
 .trophies { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
@@ -281,13 +358,17 @@ function status(tr) {
 .cost-i .gi { color: var(--gold); }
 .cost-i.miss { color: var(--danger); }
 
-@media (max-width: 1280px) { .plan { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 1280px) {
+  .plan { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .work-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 1100px) {
   .home-grid { grid-template-columns: 1fr; }
   .detail { position: static; }
 }
 @media (max-width: 900px) { .sum-card { width: 100%; order: 4; } }
 @media (max-width: 600px) {
+  .work-grid { grid-template-columns: 1fr; }
   .plan { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
   .room-tile { flex: 0 0 calc((100% - 16px) / 3); }
   .room-tile { padding: 10px 4px 8px; gap: 6px; min-width: 0; }

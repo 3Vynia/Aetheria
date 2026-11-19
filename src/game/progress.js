@@ -86,6 +86,7 @@ export const progress = {
     Object.entries(c.items).forEach(([k, q]) => q > 0 && this.removeItem(k, q))
     this.s.rooms[id] = this.room(id) + 1
     this.ensurePlots()
+    this.ensureHomeWork()
     this.log(r.icon, 'log.room', { room: '@room:' + r.id, level: this.room(id) })
     return true
   },

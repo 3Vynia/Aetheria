@@ -40,3 +40,19 @@ export const TROPHIES = [
 TROPHIES.forEach(tr => named(tr, `trophies.${tr.id}.name`, `trophies.${tr.id}.desc`))
 export const TROPHY_MAP = Object.fromEntries(TROPHIES.map(tr => [tr.id, tr]))
 export const trophiesIn = room => TROPHIES.filter(tr => tr.room === room)
+
+/* ---------- What some rooms make on their own ---------- */
+// Work piles up while you are away, up to this many hours, and waits to be collected
+export const HOME_STORE_HOURS = 12
+// perHour(level, engine): how much one hour of the room makes
+export const PRODUCERS = [
+  // The greenhouse grows the best crop you know how to plant
+  { room: 'garden', icon: 'plant-watering', kind: 'item', perHour: l => 2 * l },
+  // The royal kitchen cooks the best dish you know how to make
+  { room: 'kitchen', icon: 'cooking-pot', kind: 'item', perHour: l => 3 * l },
+  // The library writes study notes for your weakest skill: a share of its current level per hour
+  { room: 'library', icon: 'bookshelf', kind: 'xp', perHour: l => 0.01 * l },
+  // The vault earns interest, more as the hero grows
+  { room: 'vault', icon: 'locked-chest', kind: 'gold', perHour: (l, hero) => Math.round(40 * l * (1 + hero / 10)) },
+]
+export const PRODUCER_MAP = Object.fromEntries(PRODUCERS.map(p => [p.room, p]))
