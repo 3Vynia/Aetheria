@@ -270,4 +270,5 @@ export const SHOP = [
 SHOP.forEach(c => named(c, `shop.cats.${c.cat}`))
 
 /* ---------------- Prestige ---------------- */
-export const PRESTIGE = { xpPerLevel: 0.10, speedPerLevel: 0.05, globalXp: 0.01 }
+// max: prestiges a skill can take; past that its level stays at the top for good
+export const PRESTIGE = { xpPerLevel: 0.10, speedPerLevel: 0.05, globalXp: 0.01, max: 10 }

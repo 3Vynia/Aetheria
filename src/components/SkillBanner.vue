@@ -40,7 +40,7 @@ function askPrestige() {
     <div class="grow">
       <div class="row wrap">
         <h1 class="banner-title">{{ s.name }}</h1>
-        <span v-if="prestige" class="stars" v-tooltip.top="$t('prestige.badge', { n: prestige })"><GameIcon v-for="i in Math.min(prestige, 5)" :key="i" name="sparkles" :size="16" /><b v-if="prestige > 5">×{{ prestige }}</b></span>
+        <span v-if="prestige" class="stars" :class="{ maxed: G.prestigeMaxed(skill) }" v-tooltip.top="$t('prestige.badge', { n: prestige, max: PRESTIGE.max })"><GameIcon v-for="i in Math.min(prestige, 5)" :key="i" name="sparkles" :size="16" /><b v-if="prestige > 5">×{{ prestige }}</b></span>
       </div>
       <div class="banner-desc">{{ s.desc }}</div>
       <div class="bar thick" :style="{ '--c': s.color }"><i :style="{ width: G.levelProgress(skill) * 100 + '%' }" /></div>
@@ -57,7 +57,13 @@ function askPrestige() {
     </div>
     <div class="stack" style="align-items:flex-end;text-align:end">
       <div><div class="lvl-label">{{ $t('common.level') }}</div><div class="lvl-big">{{ lvl }}</div></div>
-      <Button v-if="G.canPrestige(skill)" :label="$t('prestige.button')" icon="pi pi-star" size="small" @click="askPrestige" />
+      <Button v-if="G.canPrestige(skill)" :label="$t('prestige.button')" icon="pi pi-star" size="small" v-tooltip.left="$t('prestige.left', { n: PRESTIGE.max - prestige })" @click="askPrestige" />
+      <span v-else-if="G.prestigeMaxed(skill)" class="tag gold max-tag" v-tooltip.left="$t('prestige.maxTip', { n: PRESTIGE.max })"><GameIcon name="sparkles" :size="13" /> {{ $t('prestige.max') }}</span>
     </div>
   </div>
 </template>
+
+<style scoped>
+.stars.maxed { color: var(--gold-hi); filter: drop-shadow(0 0 6px rgba(226, 182, 90, 0.6)); }
+.max-tag { box-shadow: 0 0 14px -4px var(--gold); }
+</style>

@@ -91,6 +91,7 @@ describe('rooms that work on their own', () => {
     setLevel('farming', 20)
     start = Date.now()
     state.gold = 1e9
+    later(0)
     for (const id of ['garden', 'vault']) { state.rooms[id] = 2; G.ensureHomeWork() }
     later(3)
     const crop = G.homeStored('garden')
@@ -120,6 +121,7 @@ describe('rooms that work on their own', () => {
     setLevel('cooking', 30)
     state.rooms.library = 1
     state.rooms.kitchen = 1
+    later(0)
     G.ensureHomeWork()
     later(5)
     const notes = G.homeStored('library')

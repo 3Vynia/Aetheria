@@ -336,7 +336,7 @@ export default {
   prestige: {
     title: 'Prestigio de {skill}', confirm: 'Hacer prestigio',
     message: 'Tu nivel vuelve a {lvl}. A cambio obtienes para siempre +{xp}% XP y +{speed}% velocidad en esta habilidad, y +{global}% XP en todas las demás.',
-    done: '<b>{skill}</b> ahora tiene prestigio {n}', badge: 'Prestigio {n}', button: 'Prestigio',
+    done: '<b>{skill}</b> ahora tiene prestigio {n}', badge: 'Prestigio {n} de {max}', button: 'Prestigio', max: 'Prestigio máximo', maxTip: 'Esta habilidad ya tiene sus {n} prestigios: su bono queda para siempre.', left: 'Quedan {n} prestigios en esta habilidad',
   },
 
   queue: { added: 'En cola: {n}× {action}', addAria: 'Añadir {name} a la cola', add: 'A la cola', howMany: '¿Cuántas veces?', count: '{n} en cola' },

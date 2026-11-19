@@ -336,7 +336,7 @@ export default {
   prestige: {
     title: 'Prestige {skill}', confirm: 'Prestige',
     message: 'Your level drops back to {lvl}. In return you get +{xp}% XP and +{speed}% speed in this skill for good, plus +{global}% XP in every skill.',
-    done: '<b>{skill}</b> is now prestige {n}', badge: 'Prestige {n}', button: 'Prestige',
+    done: '<b>{skill}</b> is now prestige {n}', badge: 'Prestige {n} of {max}', button: 'Prestige', max: 'Prestige maxed', maxTip: 'This skill has all {n} of its prestiges: its bonus stays for good.', left: '{n} prestiges left in this skill',
   },
 
   queue: { added: 'Queued: {n}× {action}', addAria: 'Add {name} to the queue', add: 'Queue', howMany: 'How many times?', count: '{n} in queue' },

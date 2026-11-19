@@ -3,7 +3,7 @@
    Mixed into G (engine.js); `this` is the engine.
    ========================================================= */
 import { XP_TABLE, MAX_LEVEL } from './data/skills.js'
-import { QUESTS, ACHIEVEMENTS, ROOMS, BLESSINGS, QUEST_STATS } from './data/progression.js'
+import { QUESTS, ACHIEVEMENTS, ROOMS, BLESSINGS, QUEST_STATS, PRESTIGE } from './data/progression.js'
 
 
 export const progress = {
@@ -103,7 +103,8 @@ export const progress = {
   },
 
   /* ================= prestige ================= */
-  canPrestige(skill) { return this.level(skill) >= MAX_LEVEL },
+  prestigeMaxed(skill) { return this.prestigeOf(skill) >= PRESTIGE.max },
+  canPrestige(skill) { return this.level(skill) >= MAX_LEVEL && !this.prestigeMaxed(skill) },
   doPrestige(skill) {
     if (!this.canPrestige(skill)) return false
     this.s.skills[skill].xp = skill === 'hitpoints' ? XP_TABLE[10] : 0
