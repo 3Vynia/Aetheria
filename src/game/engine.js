@@ -583,6 +583,29 @@ export const G = {
       + this.mod('speed') + this.mod('speed.' + cat) + this.mod('speed.' + skill)
       + (tool ? this.toolTier(tool) * TOOL_SPEED_PER_TIER : 0)
   },
+  // Where a skill's speed comes from, each part as the share it adds (for the speed tooltip)
+  speedSources(skill) {
+    const cat = skillCat(skill), tool = TOOL_FOR[skill]
+    const keys = ['speed', 'speed.' + cat, 'speed.' + skill]
+    const sum = fn => keys.reduce((v, k) => v + fn.call(this, k), 0)
+    const out = [
+      ['rooms', (cat === 'gathering' ? this.room('tools') * 0.06 : 0) + (cat === 'artisan' ? this.room('workshop') * 0.06 : 0)],
+      ['agility', this.level('agility') * 0.002],
+      ['prestige', this.prestigeOf(skill) * PRESTIGE.speedPerLevel],
+      ['blessings', (this.blessed('diligence') ? 0.1 : 0) + (this.blessed('grace') ? 0.1 : 0)],
+      ['tools', tool ? this.toolTier(tool) * TOOL_SPEED_PER_TIER : 0],
+    ]
+    const named = [
+      ['race', this.raceMods], ['drink', this.extraMods], ['pets', this.petMods], ['ascension', this.ascensionMods], ['sets', this.setMods],
+      ['bestiary', this.bestiaryMods], ['festival', this.festivalMods], ['omens', this.omenMods], ['weather', this.weatherMods], ['streak', this.streakMods],
+      ['guild', this.guildMods], ['codex', this.codexMods], ['crown', this.crownMods], ['technique', this.techniqueMods], ['echoes', this.echoMods],
+      ['trials', this.trialMods], ['mythic', this.mythicMods], ['company', this.companyMods], ['home', this.homeMods],
+    ].map(([id, fn]) => [id, sum(fn)])
+    // Whatever is left of the modifiers comes from the role, attributes and talents
+    const mods = keys.reduce((v, k) => v + this.mod(k), 0)
+    const hero = mods - named.reduce((v, [, x]) => v + x, 0)
+    return [...out, ...named, ['hero', hero]].filter(([, v]) => Math.abs(v) > 1e-9).map(([id, v]) => ({ id, v }))
+  },
   goldMult() { return (1 + this.room('vault') * 0.06 + (this.blessed('fortune') ? 0.15 : 0) + this.mod('gold')) * this.diff().gold },
   offlineCapHours() { return (8 + this.room('bedroom') * 2 + this.mod('offline')) * this.diff().offline },
   maxBlessings() { return 1 + Math.floor(this.level('prayer') / 30) + this.favourPerk('slot') },

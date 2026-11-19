@@ -333,6 +333,7 @@ export default {
     material: 'Material', showing: 'Showing {n} of {total}', clear: 'Clear filters', noMatch: 'Nothing matches the filters.',
   },
 
+  speedSrc: { rooms: 'Your house', agility: 'Agility', prestige: 'Prestige', blessings: 'Blessings', tools: 'Tool', race: 'Your people', drink: 'Drink and grace', pets: 'Pets', ascension: 'Rebirth', sets: 'Gear sets', bestiary: 'Bestiary', festival: 'Festival', omens: 'Omens', weather: 'The sky', streak: 'Streak', guild: 'Guild', codex: 'Codex', crown: 'Crown', technique: 'Technique', echoes: 'Echoes', trials: 'Trials', mythic: 'Mythic items', company: 'Companions', home: 'Trophies', hero: 'Role, attributes and talents' },
   prestige: {
     title: 'Prestige {skill}', confirm: 'Prestige',
     message: 'Your level drops back to {lvl}. In return you get +{xp}% XP and +{speed}% speed in this skill for good, plus +{global}% XP in every skill.',

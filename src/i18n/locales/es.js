@@ -333,6 +333,7 @@ export default {
     material: 'Material', showing: 'Mostrando {n} de {total}', clear: 'Limpiar filtros', noMatch: 'Nada coincide con los filtros.',
   },
 
+  speedSrc: { rooms: 'Tu casa', agility: 'Agilidad', prestige: 'Prestigio', blessings: 'Bendiciones', tools: 'Herramienta', race: 'Tu pueblo', drink: 'Bebida y gracia', pets: 'Mascotas', ascension: 'Renacimiento', sets: 'Conjuntos de equipo', bestiary: 'Bestiario', festival: 'Festival', omens: 'Prodigios', weather: 'El cielo', streak: 'Racha', guild: 'Gremio', codex: 'Compendio', crown: 'Corona', technique: 'Técnica', echoes: 'Ecos', trials: 'Pruebas', mythic: 'Objetos míticos', company: 'Compañeros', home: 'Trofeos', hero: 'Clase, atributos y talentos' },
   prestige: {
     title: 'Prestigio de {skill}', confirm: 'Hacer prestigio',
     message: 'Tu nivel vuelve a {lvl}. A cambio obtienes para siempre +{xp}% XP y +{speed}% velocidad en esta habilidad, y +{global}% XP en todas las demás.',

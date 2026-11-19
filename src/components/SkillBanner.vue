@@ -18,6 +18,8 @@ const s = computed(() => SKILLS[props.skill])
 const lvl = computed(() => G.level(props.skill))
 const prestige = computed(() => G.prestigeOf(props.skill))
 
+// The speed tag explains itself: every source and what it adds
+const speedTip = () => help('skill.speed', {}, G.speedSources(props.skill).map(x => ({ text: t('speedSrc.' + x.id) + ': ' + (x.v > 0 ? '+' : '') + pct(x.v, 1), kind: x.v < 0 ? 'bad' : '' })))
 function askPrestige() {
   confirm.require({
     header: t('prestige.title', { skill: s.value.name }),
@@ -51,7 +53,7 @@ function askPrestige() {
       </div>
       <div class="row wrap" style="margin-top:10px">
         <span class="tag gold" v-tooltip.top="() => help('skill.xp')">XP ×{{ G.xpMult(skill).toFixed(2) }}</span>
-        <span class="tag arcane" v-tooltip.top="() => help('skill.speed')">{{ $t('skill.speed') }} ×{{ G.speedFactor(skill).toFixed(2) }}</span>
+        <span class="tag arcane" v-tooltip.top="speedTip">{{ $t('skill.speed') }} ×{{ G.speedFactor(skill).toFixed(2) }}</span>
         <span v-if="skill === 'agility'" class="tag ok">{{ $t('skill.agilityBonus', { v: pct(lvl * 0.002, 1) }) }}</span>
       </div>
     </div>
