@@ -56,13 +56,11 @@ function go(target) {
       <GameIcon name="scroll-unfurled" :size="18" />
       <span v-if="counting && goals.length" class="tb-count tnum" :class="{ ok: ready }">{{ ready || goals.length }}</span>
     </button>
-    <Popover ref="pop" class="tracker-pop" @show="open = true; markSeen()" @hide="open = false">
+    <Popover ref="pop" class="tracker-pop" :pt="{ root: { class: 'tracker-pop-root' } }" @show="open = true; markSeen()" @hide="open = false">
       <div class="tb-board">
         <header class="tb-board-head">
           <b>{{ $t('tracker.title') }}</b>
           <span v-if="ready" class="tag ok"><i class="pi pi-check" /> {{ $t('tracker.readyCount', { n: ready }) }}</span>
-          <span class="grow" />
-          <router-link to="/quests" class="tb-all small" @click="pop.hide()">{{ $t('tracker.seeAll') }} <i class="pi pi-angle-right" /></router-link>
         </header>
         <div class="tb-filters" role="tablist">
           <button type="button" role="tab" class="tb-filter" :class="{ on: filter === 'all' }" :aria-selected="filter === 'all'" @click="filter = 'all'">
@@ -116,8 +114,6 @@ function go(target) {
 .tb-board { width: min(460px, calc(100vw - 28px)); display: flex; flex-direction: column; max-height: min(74vh, 620px); }
 .tb-board-head { display: flex; align-items: center; gap: 8px; padding: 2px 2px 10px; }
 .tb-board-head b { font-family: var(--font-display); font-size: 16px; letter-spacing: 0.04em; }
-.tb-all { color: var(--gold-hi); text-decoration: none; display: inline-flex; align-items: center; gap: 2px; }
-.tb-all:hover { text-decoration: underline; }
 .tb-filters { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
 .tb-filters::-webkit-scrollbar { display: none; }
 .tb-filter { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); background: none; color: var(--muted);
@@ -149,4 +145,10 @@ function go(target) {
 .tb-need-btn { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px 1px 2px; border-radius: 8px; border: 1px solid var(--line); background: none; color: var(--ink-2); cursor: pointer; font: inherit; }
 .tb-need-btn:hover { background: var(--tint-2); color: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .tb-bell.tb-fresh .tb-count { animation: none; } }
+</style>
+
+<style>
+/* The board drops straight below its button, without the pointer that cannot line up with it */
+.tracker-pop-root.p-popover { margin-top: 8px; }
+.tracker-pop-root.p-popover::before, .tracker-pop-root.p-popover::after { display: none; }
 </style>

@@ -13,7 +13,6 @@ import { fmt } from '../game/format.js'
 import ItemTile from '../components/ItemTile.vue'
 import GameIcon from '../components/GameIcon.vue'
 import DailyTasks from '../components/DailyTasks.vue'
-import TrackerBoard from '../components/TrackerBoard.vue'
 import HelpTip from '../components/HelpTip.vue'
 import SpokenText from '../components/SpokenText.vue'
 import VoiceNote from '../components/VoiceNote.vue'
@@ -66,10 +65,6 @@ const reqText = q => [
 
 <template>
   <div>
-    <!-- Everything on the go, each line leading to where it is done -->
-    <div class="section-title" style="margin-top:0">{{ $t('tracker.title') }}</div>
-    <p class="intro" style="margin-top:0">{{ $t('tracker.intro') }}</p>
-    <TrackerBoard style="margin-bottom:26px" />
     <DailyTasks />
     <div class="section-title" style="margin-top:0">{{ $t('quests.story') }} <HelpTip k="sections.story" /></div>
     <div class="row wrap" style="margin-bottom:18px">
