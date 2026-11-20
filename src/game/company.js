@@ -80,7 +80,7 @@ export const company = {
   // Who would come along now: in the party, not hurt and not away on an expedition
   partyReady() { return this.s.company.party.map(id => this.companyMember(id)).filter(m => m && !this.mercHurt(m) && !this.memberAway(m.id)) },
   partyWages() { return this.partyReady().reduce((s, m) => s + wageOf(m.lvl), 0) },
-  // At the start of a boss fight or a dungeon: the party comes along if the wages can be paid
+  // At the start of any fight but the endless ones in a region: the party comes along if the wages can be paid
   bringParty(act) {
     const ready = this.partyReady()
     if (!ready.length) return
@@ -136,11 +136,14 @@ export const company = {
       total += dmg
       breaking += dmg * (r.breaker || 1)
     }
-    const dealt = Math.min(total, act.mHp)
+    // Against the weekly boss their blows follow its rules and count towards the attempt
+    const weekly = act.kind === 'weekly'
+    const dealt = Math.min(weekly ? this.weeklyIncoming(act, total) : total, act.mHp)
     act.mHp -= dealt
     this.track(act, 'dealt', dealt)
     if (act.mech?.charge) act.mech.charge.dealt += breaking
     this.emit('hit', { who: 'merc', dmg: total })
+    if (weekly && this.weeklyDealt(act, dealt)) return 'end'
     return act.mHp <= 0 ? 'kill' : null
   },
   // Every creature that falls with them along teaches them something and earns a little trust

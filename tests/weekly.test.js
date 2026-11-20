@@ -143,3 +143,39 @@ describe('the weekly boss', () => {
     expect(WEEKLY_MAP[state.weekly.boss]).toBeTruthy()
   })
 })
+
+describe('the company against the weekly boss', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(MONDAY)
+    newHero()
+  })
+  afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks() })
+
+  it('comes along, and every blow it lands counts towards the attempt', () => {
+    fighter()
+    meet('colossus')
+    state.gold = 1e6
+    G.hireMerc('squire')
+    G.hireMerc('archer')
+    G.startCombat('weekly', 'weekly')
+    expect(state.activity.party).toEqual(['squire', 'archer'])
+    const hits = []
+    const off = G.on('hit', d => { if (d.who === 'merc') hits.push(d.dmg) })
+    run(60)
+    off()
+    expect(hits.some(n => n > 0)).toBe(true)
+    // What the attempt books is what the boss lost
+    expect(state.weekly.max - state.weekly.hp).toBe(state.weekly.dealt)
+    G.stop()
+  })
+
+  it('stays home from the endless fights of a region', () => {
+    fighter()
+    state.gold = 1e6
+    G.hireMerc('squire')
+    G.startCombat('area', 'chicken')
+    expect(state.activity.party).toEqual([])
+    G.stop()
+  })
+})

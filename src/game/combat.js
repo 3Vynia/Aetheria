@@ -158,8 +158,8 @@ export const combat = {
     if (this.s.hp <= 0) this.s.hp = 1
     const act = { type: 'combat', kind, target, floor, room: 0, mHp: 0, pTimer: 0, mTimer: 0, mercTimer: 0, respawn: 0, party: [], runKills: 0, clears: 0, elite: null, fx: null, energy: 0, cd: {}, hb: {}, phase: 0 }
     this.startTracking(act)
-    // The hired company comes along to bosses and dungeons
-    if (kind === 'boss' || kind === 'dungeon') this.bringParty(act)
+    // The company comes to every fight but the endless ones in a region, paid once when it starts
+    if (kind !== 'area') this.bringParty(act)
     this.spawn(act)
     if (kind === 'weekly') this.beginWeeklyAttempt(act)
     this.s.activity = act
@@ -215,7 +215,9 @@ export const combat = {
       this.checkPhase(act, m)
     }
 
-    if (this.companyTick(act, m, dt, ps) === 'kill') return this.killMonster(m)
+    const partyTurn = this.companyTick(act, m, dt, ps)
+    if (partyTurn === 'end') return
+    if (partyTurn === 'kill') return this.killMonster(m)
 
     if (!this.hasStatus(act, 'monster', 'stun') && !act.mech?.charge) act.mTimer += dt / (1 + this.slowOf(act, 'monster'))
     const mSpeed = m.speed * this.phaseOf(act).speed * (act.mb?.frenzy ? CREATURE_BUFFS.frenzy.speed : 1)

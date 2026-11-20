@@ -57,6 +57,8 @@ const mBuffs = computed(() => Object.entries(act.value?.mb || {}).map(([id, left
 const mechTip = id => tip(t(`fighting.mechs.${id}.name`), t(`fighting.mechs.${id}.desc`))
 const streak = computed(() => state.hunt?.streak || 0)
 const party = computed(() => G.partyOf(act.value))
+// In a region's endless fights the chosen company waits: shown dimmed so every arena reads the same
+const waiting = computed(() => (party.value.length ? [] : G.partyReady()))
 const live = computed(() => (void act.value?.live?.t, G.liveStats()))
 const NOTE_PARAMS = {
   ability: n => ({ ability: t(`abilities.list.${n.id}`) }),
@@ -167,6 +169,13 @@ onUnmounted(() => { off && off(); offAb && offAb(); offPhase && offPhase(); offK
           <ItemTile :icon="mercIcon(p)" :tint="mercTint(p)" size="sm" :tip="false" />
           <span class="small">{{ mercName(p) }}</span>
         </span>
+      </div>
+      <div v-else-if="waiting.length" class="party waiting" v-tooltip.top="$t('company.partyWaits')">
+        <span v-for="p in waiting" :key="p.id" class="party-member">
+          <ItemTile :icon="mercIcon(p)" :tint="mercTint(p)" size="sm" :tip="false" />
+          <span class="small">{{ mercName(p) }}</span>
+        </span>
+        <span class="small faint wait-note"><i class="pi pi-clock" /> {{ $t('company.partyWaitsShort') }}</span>
       </div>
     </div>
 
@@ -294,6 +303,8 @@ onUnmounted(() => { off && off(); offAb && offAb(); offPhase && offPhase(); offK
 .live b { color: var(--ink); }
 .live-title { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); cursor: help; }
 .party { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.party.waiting { opacity: 0.55; filter: grayscale(0.4); }
+.wait-note { flex-basis: 100%; }
 .party-member { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 3px; border-radius: 10px; background: var(--tint-1); border: 1px solid var(--line); }
 .notes { grid-column: 1 / -1; list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 12px; color: var(--ink-2); max-width: 520px; justify-self: center; width: 100%; }
 .notes li { display: flex; gap: 8px; }
