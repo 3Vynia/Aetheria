@@ -15,23 +15,24 @@
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
-**Aetheria** is a fantasy idle RPG that runs in the browser. Train 21 skills, fight your way across a map of the realm from the Dawn Meadows to the top of the sky with a company of companions at your side, join a guild and settle its affairs, raise pets, chase ultra rare finds and follow a story told in chapters, with voices for every character. Your hero keeps working while you are away.
+**Aetheria** is a fantasy idle RPG that runs in the browser. Pick one of seven peoples, train 21 skills, fight your way across a map of the realm from the Dawn Meadows to the top of the sky with a company of companions at your side, join a guild and settle its affairs, hang the trophies of the bosses you beat in a house that works for you, raise pets, chase ultra rare finds and follow a story told in chapters, with voices for every character. Your hero keeps working while you are away.
 
 No download, no account, no ads. It installs as an app on desktop and phones, keeps working offline, and your saves never leave your device unless you choose to share them.
 
 <p align="center">
-  <img src="docs/screenshots/combat.gif" alt="Fighting the Ancient Dragon" width="88%">
+  <img src="docs/screenshots/combat.gif" alt="Fighting the Ancient Dragon with the company" width="88%">
 </p>
 
 ## Highlights
 
 - **21 skills** for gathering, crafting and fighting, each with mastery, prestige and a twist of its own.
 - **Deep combat:** a map of the realm, thirteen stances, abilities with tactics rules, weapon statuses, creatures with moves of their own, elites, boss phases and mechanics, dungeons, an endless tower, slayer tasks and a weekly boss.
-- **A company at your side:** companions who fight with you, five of them met along the story with a quest and a voice of their own, and who set out on expeditions while you are busy.
-- **A tavern to run:** staff who work and grow, expedition crews, a bar, and eight table games from the King's Twenty-One to an arm-wrestling ladder.
+- **A company at your side:** companions who fight with you, five of them met along the story with a quest and a voice of their own, who set out on expeditions while you are busy and live in your house when they stay behind.
+- **A tavern to run:** staff who work and grow, expedition crews, a bar, and ten table games from the King's Twenty-One to an arm-wrestling ladder and a bards' duel in rhyme.
+- **A house that works:** a floor plan of ten rooms, a trophy for every boss you beat, rooms that grow, cook, study and earn while you are away, and beds for your companions.
 - **A story with voices:** six acts, three endings, a journal you can read aloud and characters you can talk to, every one with a voice of their own.
 - **Guilds with real puzzles:** affairs followed up out in the realm and settled by deduction, ciphers, light beams, astrolabes, scales and rites.
-- **Make the hero yours:** six classes, seven origins, four difficulties, attributes, talents, titles and portraits.
+- **Make the hero yours:** six classes, seven races with a homeland and talents of their own, seven origins, four difficulties, attributes, talents, titles and portraits.
 - **Rebirth:** start over for permanent upgrades, live a life under a trial and look back on every life you have lived.
 - **Miracles:** 25 ultra rare finds, with a card to share when one drops.
 - **A living world:** weather that follows the real seasons, rare omens, regions that grow restless, festivals and fairs.
@@ -42,20 +43,20 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/hero.png" alt="The hero screen with mythic gear"></td>
-    <td width="50%"><img src="docs/screenshots/combat.png" alt="The Ancient Dragon speaking in the arena"></td>
+    <td width="50%"><img src="docs/screenshots/hero.png" alt="The hero screen with mythic gear and every skill at the top"></td>
+    <td width="50%"><img src="docs/screenshots/combat.png" alt="The Ancient Dragon speaking in the arena, with the company at the hero's side"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/home.png" alt="The house: a floor plan of the rooms and the trophy bonuses"></td>
+    <td><img src="docs/screenshots/tavern.png" alt="A bards' duel at the tavern"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/creation.png" alt="Character creation: choosing a race"></td>
+    <td><img src="docs/screenshots/map.png" alt="The world map, zoomed in on the north of the realm"></td>
   </tr>
   <tr>
     <td><img src="docs/screenshots/guild.png" alt="A guild affair: turning mirrors to light the great lens"></td>
     <td><img src="docs/screenshots/journal.png" alt="Talking to the people of the journal"></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/creation.png" alt="Character creation: choosing a class"></td>
-    <td><img src="docs/screenshots/ascension.png" alt="Past lives on the Rebirth screen"></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/map.png" alt="The world map, zoomed in on the north of the realm"></td>
-    <td><img src="docs/screenshots/tavern.png" alt="Planning an expedition crew at the tavern"></td>
   </tr>
 </table>
 
@@ -70,13 +71,14 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 <details>
 <summary><b>Your hero</b></summary>
 
-- **Character creation** in five steps:
+- **Character creation** in six steps:
   - **Class:** Warrior, Ranger, Mage, Artisan, Rogue or Paladin, each with how it fights, a rating for combat, gathering, crafting and toughness, its own talents and its starting kit.
+  - **Race:** human, dwarf, elf, bogkin, frostborn, drakeborn or starborn, the peoples marked by the shards of the Crown. Each has its strengths and one weakness, a trait of its own, three racial talents, and a homeland and rival land where it fights better or worse.
   - **Appearance:** name, portrait and colour.
   - **Difficulty:** four of them, explained in plain words (pace, monster strength, gold, progress while away and what dying costs).
   - **Origin:** the one thing the hero remembers when they wake. Six origins give a small head start and a line of their own in the first page of the journal, and the wanderer brings only the mystery.
   - **Begin:** a summary, the guided tutorial and a menu that grows as you play, both optional.
-- **21 skills** across gathering, artisan, support and combat, with per-action mastery and prestige.
+- **21 skills** across gathering, artisan, support and combat, with per-action mastery and up to ten prestiges each. The speed of every skill lists where it comes from, source by source.
 - **Hero level (1–100)** fed by 25% of all skill XP. Every level grants attribute points (STR, DEX, INT, VIT, WIS, LCK) and every second level a talent point. The combat power panel shows where every number comes from.
 - **Tools:** tiered pickaxes, axes and fishing rods gate advanced resources; a sickle makes crops grow faster and yield more, and lockpicks make thieving faster and safer.
 - **Techniques:** every skill has a twist of its own. Mining strikes rich veins, woodcutting fells whole trees, smithing and fletching build momentum, cooking keeps a steady hand, herblore finds focus, firemaking feeds a hearth that keeps warming you, and runecrafting resonates with the weather and the night.
@@ -103,7 +105,7 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 - **Weekly boss:** a different boss every week, the same for every player, with a mechanic of its own, wounds that last all week and an exclusive trophy.
 - **A realm that reacts:** every region grows restless with time and calms down with every creature hunted there. Overrun regions are stronger and richer, and calming them pays a bounty.
 - **Tactics and loadouts:** retreat before falling, stop when the slayer task is done, guard during boss and creature charges, and five saved loadouts with their stance and ability bar. Ability rules answer a creature's move with a stun or a slow, defend below a chosen health and break an enemy's healing with the hardest hitter.
-- **The company:** companions hired for good, one of each trade. Up to two come along to every boss fight and dungeon for a wage, three with the War Banner of rebirth:
+- **The company:** companions hired for good, one of each trade. Up to two come along for a wage to every fight but the endless ones of a region (bosses, dungeons, the weekly boss, the tower, omens and festivals), three with the War Banner of rebirth:
   - **squires** draw blows and take part of charged strikes, **archers** cut off creatures' moves, **mages** break healings and **clerics** mend the hero and lift bleeding, poison and burns;
   - they level up with every kill, earn trust, fight better once loyal and stay through rebirth;
   - **five companions met along the way** join through the story and the guild, each better at their trade, with a bonus outside the fights, a quest of their own at full trust and a voice in the journal.
@@ -114,7 +116,7 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 <details>
 <summary><b>Story and voices</b></summary>
 
-- **Journal:** the story of Aetheria in chapters that unlock as you explore, beat bosses and witness omens. Six acts take it from the Dawn Road to the top of the sky, with three endings. Every game rolls a new cast of names.
+- **Journal:** the story of Aetheria in chapters that unlock as you explore, beat bosses and witness omens. Six acts take it from the Dawn Road to the top of the sky, with three endings. Every game rolls a new cast of names, and the story knows which people the hero was born to.
 - **Voices:** characters speak in short sung syllables made with WebAudio, with no audio files and no real words, so they sound the same in both languages. Each person has a timbre of their own, questions rise and statements fall, and the words appear in step with the voice.
   - A new journal page is told by a narrator, and any page can be read again or stopped.
   - **Talk** to everyone you have met: what they say grows with the story, including the old prophecy of the one who remembers.
@@ -143,12 +145,15 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 - **Tavern:** staff with specialities, rarities, traits and levels who work for a wage, daily orders, a mystery chest, a bar with patrons and special guests, and brews of your own.
   - **Staff growth:** workers grow seasoned at levels 25, 50 and 75, shedding a bad trait or learning a good one, and can be promoted to the next rarity.
   - **Expeditions:** crews of adventurers and companions sent out for one to twelve hours. Every trade helps on the road, events along the way can be turned away by the right trade, companions do better on ground they know, and a trip can repeat on its own.
-  - **Table games:** the King's Twenty-One against the keeper, dice, darts, knucklebone, a ladder of seven arm-wrestling rivals, a drinking contest, three men's morris and the rune shell game, all played for gold up to the tavern's limit.
+  - **Table games:** ten of them, grouped by chance, skill and wits: the King's Twenty-One against the keeper, dice, knucklebone and the rune shell game; darts, horseshoes, a ladder of seven arm-wrestling rivals and a drinking contest; three men's morris and a bards' duel answered in rhyme. All played for gold up to the tavern's limit.
 - **Thieving:** heat, jail, the fence and four heists that play out in stages.
 - **Farming:** plots that grow in real time, compost, seasons, pests, bountiful harvests, hybrids crossed from two parent crops, and a farmyard with a coop, a beehive, a scarecrow and a well.
 - **Fishing waters:** five waters with their own fish, bait, and a scene with the line, the bobber and the latest catches.
 - **Church:** blessings, a daily offering for favour, holy water and twelve combat prayers.
-- **Home:** rooms that speed up skills and craft.
+- **Home:** a floor plan of ten rooms that speed up skills, crafting and combat.
+  - **Trophies:** every boss and dungeon lord leaves one once beaten enough times, hung in a room for a bonus that stays through rebirth.
+  - **Rooms at work:** the greenhouse, kitchen, library and vault make crops, dishes, study notes and interest on their own, up to twelve hours at a time.
+  - **Companions at home:** those who stay behind sleep there, gaining trust, training in the armory and healing sooner.
 - **Routines:** up to twelve rules of the form "when this happens, do that", with eight ready-made rules to start from.
 
 </details>
@@ -157,7 +162,7 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 <summary><b>Collecting and rebirth</b></summary>
 
 - **Miracles:** 25 ultra rare finds that every skill action and every kill rolls for: epic tools and charms (about 1 in 50,000), legendary gear and the Hourglass of Ages (down to 1 in 250,000), and five mythic items at one in a million. Epic and legendary finds keep a streak that makes a long-overdue one up to three times likelier. Finds are locked, kept through rebirth and listed in the Compendium.
-- **Ascension:** start the whole hero over for Aether shards and spend them in a tree of permanent upgrades.
+- **Ascension:** start the whole hero over for Aether shards and spend them in a tree of permanent upgrades. The next life can be born as another race, and every race a life is completed with adds XP for good.
   - **Trials:** live the next life under a rule (Fasting, Arcane, Self-made or Frail) for extra shards and a lasting bonus.
   - **Past lives:** every life is written down when it ends and listed on the Rebirth screen.
 - **Pets:** 34 rare companions that hatch from eggs. Name, feed and pet them; they learn alongside you, grow their bond and bring gifts.
@@ -182,7 +187,7 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 <details>
 <summary><b>Comfort and accessibility</b></summary>
 
-- **Tracking board:** everything on the go in one place, and a line at the top of every screen that takes you where the next thing is done.
+- **Tracking board:** a button beside the hero counts everything on the go and turns green when something is ready. Its board sorts it into story, jobs, tavern and tasks, and every line takes you where it is done.
 - **Search** for any screen, skill, item, creature or quest (<kbd>Ctrl</kbd>+<kbd>K</kbd> or <kbd>/</kbd>), and **keyboard shortcuts** for the main screens (<kbd>?</kbd> lists them).
 - **Action queue** and **chained crafting:** when a recipe runs out, the game makes the missing materials first and goes back to it.
 - **Guided tutorial** and a **menu that grows** as screens become useful.
@@ -213,7 +218,7 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 | **Build** | [Vite](https://vite.dev/), with a single-file build that runs straight from disk |
 | **Languages** | [vue-i18n](https://vue-i18n.intlify.dev/): English and Spanish, every key checked in CI |
 | **Sound** | WebAudio only: music, ambience, alerts and voices are all synthesised |
-| **Quality** | [Vitest](https://vitest.dev/) (over 440 tests, including real saves from every earlier version) and [ESLint](https://eslint.org/) |
+| **Quality** | [Vitest](https://vitest.dev/) (over 570 tests, including real saves from every earlier version) and [ESLint](https://eslint.org/) |
 | **Hosting** | GitHub Pages as an installable, offline-ready app, and itch.io |
 
 There is no backend: the whole game runs in the browser and saves to `localStorage` and IndexedDB.
@@ -237,7 +242,7 @@ npm run dev            # dev server at http://localhost:5173
 | `npm run balance` | XP/hour, gold/hour and combat estimates for every level |
 | `npm run icons` | Rebuild `src/game/icons.json` and check every icon name |
 
-Every push runs lint, the translation check, the tests and a build. A tag such as `v1.0.0-beta.12` publishes a release with both builds and its notes from `docs/releases/`.
+Every push runs lint, the translation check, the tests and a build. A tag such as `v1.0.0-beta.14` publishes a release with both builds and its notes from `docs/releases/`.
 
 ## Project layout
 
@@ -256,7 +261,9 @@ Every push runs lint, the translation check, the tests and a build. A tag such a
 <details>
 <summary>The engine, module by module</summary>
 
-- `engine.js`: reactive state and core logic (XP, actions, combat, quests, prestige, offline simulation).
+- `engine.js`: reactive state, saving, levels, modifiers and the main update, with offline simulation.
+- `inventory.js`, `skilling.js`, `combat.js`, `progress.js`: items and gear; skill actions with fishing and farming; fights and the tower; quests, achievements, the church and prestige.
+- `races.js`, `home.js`: the hero's people, and the house's trophies, rooms at work and companions at home.
 - `loop.js`: game loop, offline progress, autosave and one tab per game.
 - `systems.js`: tavern, staff and their growth, expedition crews, orders, queue, loadouts, prayers, market, events and history.
 - `company.js`: the company of companions, their part in fights, trust and quests.
