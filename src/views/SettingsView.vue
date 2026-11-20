@@ -54,6 +54,10 @@ async function toggleNotify(v) {
 function restartTutorial() { startTutorial(); G.toast('treasure-map', 'settings.tutorialRestarted', {}, 'success') }
 function skipIt() { skipTutorial(); G.toast('treasure-map', 'settings.tutorialSkipped', {}, 'success') }
 function openAll() { G.openAllScreens(); G.toast('open-book', 'settings.allScreensOpened', {}, 'success') }
+
+// The game's maker, shown in About. The photo comes from GitHub; offline it falls back to the crown
+const MAKER = { name: 'Crystal', handle: '3Vynia', profile: 'https://github.com/3Vynia', repo: 'https://github.com/3Vynia/Aetheria', photo: 'https://github.com/3Vynia.png?size=144' }
+const photoFailed = ref(false)
 </script>
 
 <template>
@@ -144,10 +148,30 @@ function openAll() { G.openAllScreens(); G.toast('open-book', 'settings.allScree
         <div class="panel pad">
           <h3 class="panel-title"><GameIcon name="open-book" /> {{ $t('settings.about') }}</h3>
           <p class="muted" style="margin-top:0">{{ $t('settings.aboutText') }}</p>
+          <!-- Who makes the game, and where to find it -->
+          <div class="maker">
+            <a :href="MAKER.profile" target="_blank" rel="noopener" class="maker-photo" :aria-label="MAKER.handle">
+              <img v-if="!photoFailed" :src="MAKER.photo" alt="" width="72" height="72" @error="photoFailed = true">
+              <span v-else class="maker-mark"><GameIcon name="crown" :size="34" /></span>
+            </a>
+            <div class="grow">
+              <div class="small faint">{{ $t('settings.madeBy') }}</div>
+              <div class="maker-name">{{ MAKER.name }}</div>
+              <a :href="MAKER.profile" target="_blank" rel="noopener" class="small">@{{ MAKER.handle }}</a>
+              <div class="small muted" style="margin-top:4px">{{ $t('settings.makerRole') }}</div>
+            </div>
+          </div>
+          <div class="maker-links">
+            <a :href="MAKER.repo" target="_blank" rel="noopener" class="maker-link"><i class="pi pi-github" /> {{ $t('settings.links.code') }}</a>
+            <a href="https://3vynia.itch.io/aetheria" target="_blank" rel="noopener" class="maker-link"><GameIcon name="joystick" :size="15" /> {{ $t('settings.links.itch') }}</a>
+            <a :href="MAKER.repo + '/releases'" target="_blank" rel="noopener" class="maker-link"><i class="pi pi-tag" /> {{ $t('settings.links.releases') }}</a>
+            <a :href="MAKER.repo + '/issues/new'" target="_blank" rel="noopener" class="maker-link"><i class="pi pi-flag" /> {{ $t('settings.links.issue') }}</a>
+          </div>
           <div class="kv"><span>{{ $t('settings.version') }}</span><b>{{ CHANGELOG[0].version }}</b></div>
           <div class="kv"><span>{{ $t('settings.interface') }}</span><b>Vue 3 + PrimeVue 4</b></div>
           <div class="kv"><span>{{ $t('settings.icons') }}</span><b><a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> · CC BY 3.0</b></div>
           <div class="kv"><span>{{ $t('settings.offline') }}</span><b>{{ $t('settings.upTo', { n: +G.offlineCapHours().toFixed(1) }) }}</b></div>
+          <div class="kv"><span>{{ $t('settings.license') }}</span><b><a :href="MAKER.repo + '/blob/main/LICENSE'" target="_blank" rel="noopener">MIT</a></b></div>
           <p class="small faint">{{ $t('settings.credits') }}</p>
         </div>
       </div>
@@ -166,6 +190,17 @@ function openAll() { G.openAllScreens(); G.toast('open-book', 'settings.allScree
 .set-tab.on { background: linear-gradient(90deg, rgba(226, 182, 90, 0.14), rgba(226, 182, 90, 0.02)); border-color: rgba(226, 182, 90, 0.22); color: var(--ink); }
 .set-tab.on i { color: var(--gold); }
 .set-body { max-width: 820px; min-width: 0; }
+.maker { display: flex; align-items: center; gap: 16px; padding: 14px; margin: 4px 0 12px; border-radius: 14px; border: 1px solid rgba(226, 182, 90, 0.25);
+  background: radial-gradient(circle at 0% 50%, rgba(226, 182, 90, 0.1), transparent 60%), var(--well); }
+.maker-photo { flex: none; width: 72px; height: 72px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gold); box-shadow: 0 0 18px -6px var(--gold); display: grid; place-items: center; }
+.maker-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.maker-mark { width: 100%; height: 100%; display: grid; place-items: center; background: var(--gold-grad); color: var(--on-gold); }
+.maker-name { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.04em; line-height: 1.1; }
+.maker-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.maker-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--tint-1);
+  color: var(--ink-2); text-decoration: none; font-size: 13.5px; }
+.maker-link:hover { border-color: var(--gold); color: var(--ink); }
+.maker-link .pi { color: var(--gold); }
 .pref { display: flex; align-items: center; gap: 12px; padding: 10px 0; cursor: pointer; border-top: 1px solid var(--line); }
 .panel-title + .pref, .panel-title + p + .pref { border-top: 0; }
 .pref.col { flex-direction: column; align-items: flex-start; gap: 8px; cursor: default; }

@@ -1506,6 +1506,7 @@ export default {
     tutorial: 'Tutorial guiado', tutorialHint: 'Vuelve a mostrar los primeros pasos en la parte de arriba.', tutorialRestart: 'Reiniciar', tutorialRestarted: 'Tutorial reiniciado',
     pastePlaceholder: 'Pega aquí un código de partida para importarla…', export: 'Exportar', import: 'Importar', game: 'Partida', slot: 'Ranura', slotOf: '{n} de {total}',
     role: 'Rol', difficulty: 'Dificultad', saveAndExit: 'Guardar y volver al menú', deleteGame: 'Borrar esta partida', about: 'Acerca de Aetheria',
+    madeBy: 'Un juego de', makerRole: 'Diseño, código y textos del juego', links: { code: 'Código en GitHub', itch: 'Página en itch.io', releases: 'Versiones', issue: 'Informar de un fallo' }, license: 'Licencia',
     aboutText: 'RPG idle de fantasía en el que entrenas habilidades, fabricas, derrotas jefes y llevas una taberna, incluso cuando no estás.',
     interface: 'Interfaz', icons: 'Iconos', offline: 'Progreso sin conexión', upTo: 'Hasta {n} h',
     credits: 'Iconos de Lorc, Delapouite y colaboradores de game-icons.net, bajo licencia Creative Commons BY 3.0.',

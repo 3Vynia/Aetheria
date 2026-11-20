@@ -1506,6 +1506,7 @@ export default {
     tutorial: 'Guided tutorial', tutorialHint: 'Shows the first steps again at the top of the screen.', tutorialRestart: 'Restart', tutorialRestarted: 'Tutorial restarted',
     pastePlaceholder: 'Paste a save code here to import it…', export: 'Export', import: 'Import', game: 'Game', slot: 'Slot', slotOf: '{n} of {total}',
     role: 'Role', difficulty: 'Difficulty', saveAndExit: 'Save and return to menu', deleteGame: 'Delete this game', about: 'About Aetheria',
+    madeBy: 'A game by', makerRole: 'Design, code and writing', links: { code: 'Code on GitHub', itch: 'Page on itch.io', releases: 'Releases', issue: 'Report a bug' }, license: 'Licence',
     aboutText: 'A fantasy idle RPG where you train skills, craft, fight bosses and run a tavern, even while you are away.',
     interface: 'Interface', icons: 'Icons', offline: 'Offline progress', upTo: 'Up to {n} h',
     credits: 'Icons by Lorc, Delapouite and the game-icons.net contributors, under the Creative Commons BY 3.0 licence.',
