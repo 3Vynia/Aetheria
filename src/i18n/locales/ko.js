@@ -2696,4 +2696,127 @@ export default {
       sellJunk: '잡동사니 팔기',
     },
   },
+
+  crown: {
+    title: '에테르 왕관',
+    intro: '이번 삶에서 찾은 왕관의 일곱 파편. 머리띠에 최대 셋을 끼우면 보너스를 줘요. 심장은 깨어나면 언제나 함께해요. 승천하면 파편은 사라지지만, 고른 결말은 모든 삶에 남아요.',
+    count: '파편 {n} / {total}',
+    circlet: '머리띠',
+    circletHint: '파편을 최대 셋 끼우세요. 끼운 파편만 보너스를 주고 힘을 쓸 수 있어요.',
+    socketEmpty: '빈 홈',
+    heart: '심장',
+    heartAsleep: '아직 잠들어 있음',
+    notFound: '아직 찾지 못함',
+    where: '위치: {hint}',
+    passive: '끼우고 있는 동안',
+    power: '힘',
+    setToUse: '머리띠에 끼우면 힘을 쓸 수 있어요',
+    use: '부르기',
+    readyIn: '{time} 후 준비',
+    activeFor: '활성 · {time}',
+    setIn: '끼우기',
+    takeOut: '빼기',
+    found: '왕관의 파편을 찾았어요: {shard}!',
+    foundPlain: '왕관의 파편: {shard}',
+    foundHint: '왕관 화면에서 보세요.',
+    powerUsed: '{power}: 불러냈어요',
+    choiceTitle: '선택',
+    choiceIntro: '왕관이 온전해졌어요. 누군가에게 주거나, 아무에게도 주지 마세요. 이번 삶의 이야기는 여기서 끝나고, 결말의 보너스는 이후 모든 삶에 남아요.',
+    choiceLocked: '한 삶에서 일곱 파편을 모두 모으고 에테르 군주를 쓰러뜨려야 고를 수 있어요.',
+    confirmTitle: '이 결말을 고를까요?',
+    confirmMessage: '{ending}: {desc} 보너스는 이후 모든 삶에 남아요. 이번 삶에서는 선택을 되돌릴 수 없어요.',
+    confirm: '고르기',
+    chosenNow: '이번 삶에서 고름',
+    chosenBefore: '이전 삶에서 고름',
+    endingToast: '결말: {ending}',
+    legacyTitle: '유산',
+    legacyIntro: '고른 결말들의 보너스, 모든 삶에 남아요.',
+    legacyNone: '아직 고른 결말이 없어요. 삶마다 다른 결말을 고를 수 있어요.',
+    shards: {
+      forge: {
+        name: '대장간의 파편',
+        desc: '모루 길드가 몰래 간직해 왔어요. 망치를 기억해요.',
+      },
+      sap: {
+        name: '수액의 파편',
+        desc: '뱀 신전에서 온 생명 그 자체의 심장. 곁에 있는 모든 것이 자라요.',
+      },
+      sea: {
+        name: '바다의 파편',
+        desc: '크라켄과 함께 심해에서 건져 올렸어요. 소금과 폭풍 냄새가 나요.',
+      },
+      winter: {
+        name: '겨울의 파편',
+        desc: '겨울 여왕의 선물. 쇠도 깨뜨릴 만큼 차가워요.',
+      },
+      flame: {
+        name: '불꽃의 파편',
+        desc: '청동 용의 보물 더미에서. 너무 눈부셔서 바라볼 수 없어요.',
+      },
+      deep: {
+        name: '심연의 파편',
+        desc: '떨어지는 빛이 모여든 세상의 밑바닥에서 찾았어요.',
+      },
+      heart: {
+        name: '심장',
+        desc: '왕관이 부서질 때 당신 안으로 떨어진 파편. 왕과 마주할 때 깨어나요.',
+      },
+    },
+    hints: {
+      forge: '대장 기술 레벨 40 달성',
+      sap: '거대 나가 처치',
+      sea: '크라켄 처치',
+      winter: '겨울 여왕 처치',
+      flame: '청동 용 처치',
+      deep: '이번 삶에서 고대 용과 심연의 생물 200마리 처치',
+      heart: '공허의 황제 처치',
+    },
+    powers: {
+      temper: {
+        name: '담금질',
+        desc: '30분: 제작 품질이 크게 오르고 제작이 빨라져요.',
+      },
+      bloom: {
+        name: '개화',
+        desc: '자라고 있는 모든 밭이 즉시 준비돼요.',
+      },
+      tide: {
+        name: '밀물',
+        desc: '30분: 더 빠른 낚시와 더 좋은 물고기.',
+      },
+      ward: {
+        name: '겨울의 보호',
+        desc: '20분: 더 많이 피하고 피해를 덜 받아요.',
+      },
+      wildfire: {
+        name: '들불',
+        desc: '20분: 피해 +25%, 치명타 증가.',
+      },
+      echo: {
+        name: '삶들의 메아리',
+        desc: '30분: 경험치 +50%.',
+      },
+      awaken: {
+        name: '각성',
+        desc: '30분: 모든 것이 빨라지고 경험치 +20%.',
+      },
+    },
+    endings: {
+      queen: {
+        name: '서리 왕관',
+        action: '모르웬에게 주기',
+        desc: '그녀 가문의 왕관이 다시 온전해져요: 하이던의 죽은 이들이 마침내 잠들어요.',
+      },
+      sky: {
+        name: '돌아온 빛',
+        action: '빛을 돌려주기',
+        desc: '왕관을 놓아주세요: 별들이 왕국으로 돌아와요.',
+      },
+      king: {
+        name: '마지막 별',
+        action: '{king}에게 주기',
+        desc: '왕이 시작한 일을 끝내고 별이 되게 하세요.',
+      },
+    },
+  },
 }
