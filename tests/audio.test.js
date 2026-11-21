@@ -1,23 +1,20 @@
 import { describe, it, expect } from 'vitest'
 import { G, state, newHero } from './helpers.js'
-import { moodFor, areaFor, areaAmbienceFor, MOOD_IDS } from '../src/game/music.js'
+import { areaFor, areaAmbienceFor, shuffleBag } from '../src/game/music.js'
 import { gateCue, cueSettings, setCue, SOUND_KINDS } from '../src/game/sound.js'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { applyProfile, saveCustomProfile, matchingProfile, resetAudio } from '../src/game/audioProfiles.js'
-import { CUES, CUE_MAP, CUE_CATS, THEMES, STINGERS, ROOMS, SCREEN_THEMES, SKILL_THEMES, PROFILES, PROFILE_IDS, PACKS, PALETTES, GROUP_WINDOW, AREA_AMBIENCE } from '../src/game/data/audio.js'
+import { CUES, CUE_MAP, CUE_CATS, THEMES, THEME_IDS, SHUFFLE_IDS, STINGERS, ROOMS, PROFILES, PROFILE_IDS, PACKS, PALETTES, GROUP_WINDOW, AREA_AMBIENCE } from '../src/game/data/audio.js'
 import { AREAS } from '../src/game/data/combat.js'
-import { SKILLS } from '../src/game/data/skills.js'
-import { ACTIONS } from '../src/game/data/actions.js'
 import { MODES } from '../src/game/audio/composer.js'
 import { i18n } from '../src/i18n/index.js'
 
 const te = k => i18n.global.te(k, 'en')
 
 describe('music themes', () => {
-  it('cover every screen, skill, fight and region of the game', () => {
-    newHero()
-    expect(MOOD_IDS.length).toBeGreaterThanOrEqual(30)
-    for (const id of MOOD_IDS) {
+  it('are many, each complete and named', () => {
+    expect(THEME_IDS.length).toBeGreaterThanOrEqual(50)
+    for (const id of THEME_IDS) {
       const th = THEMES[id]
       expect(MODES[th.mode], id).toBeTruthy()
       expect(th.prog.every(([d]) => d >= 1 && d <= 7), id).toBe(true)
@@ -25,35 +22,28 @@ describe('music themes', () => {
       expect(ROOMS[th.room], id).toBeTruthy()
       expect(te(`audio.themes.${id}`), id).toBe(true)
     }
-    for (const id of [...Object.values(SCREEN_THEMES), ...Object.values(SKILL_THEMES)]) expect(THEMES[id], id).toBeTruthy()
-    for (const skill of Object.keys(SKILLS)) if (ACTIONS[skill]) expect(SKILL_THEMES[skill], skill).toBeTruthy()
-    // A fight on a fight screen sets the music
-    state.activity = { type: 'combat', kind: 'area', target: 'bear' }
-    expect(moodFor()).toBe('frozen')
-    expect(moodFor(state, 'region')).toBe('frozen')
-    expect(areaFor()).toBe('peaks')
-    state.activity = { type: 'combat', kind: 'area', target: 'red_dragon' }
-    expect(moodFor()).toBe('dragon')
-    state.activity = { type: 'combat', kind: 'dungeon', target: 'crypt' }
-    expect(moodFor()).toBe('dungeon')
-    expect(areaFor()).toBe('dungeon')
-    state.activity = { type: 'combat', kind: 'tower' }
-    expect(moodFor()).toBe('tower')
-    state.activity = { type: 'combat', kind: 'boss', target: 'kraken' }
-    expect(moodFor()).toBe('boss')
-    // Elsewhere each screen has its own theme, even while fighting
-    expect(moodFor(state, 'tavern')).toBe('tavern')
-    state.activity = null
-    expect(moodFor(state, 'home')).toBe('hearth')
-    expect(moodFor(state, 'farming')).toBe('farm')
-    expect(moodFor(state, 'fishing')).toBe('waters')
-    expect(moodFor(state, 'smithing')).toBe('workshop')
-    expect(moodFor(state, 'hero')).toBe('hero')
-    // Settings keep what is playing; unknown places follow the sky
-    expect(moodFor(state, 'settings')).toBe(null)
-    expect(moodFor(state, null, 'blizzard')).toBe('cold')
-    expect(moodFor(state, null, 'clear')).toBe('calm')
     for (const k in STINGERS) expect(STINGERS[k].length).toBeGreaterThan(2)
+  })
+
+  it('shuffle through every theme before one comes back, never twice in a row', () => {
+    expect(SHUFFLE_IDS).not.toContain('boss')
+    let last = null
+    for (let round = 0; round < 20; round++) {
+      const bag = shuffleBag(SHUFFLE_IDS, last)
+      expect(new Set(bag).size).toBe(SHUFFLE_IDS.length)
+      expect(bag[0]).not.toBe(last)
+      last = bag[bag.length - 1]
+    }
+  })
+
+  it('know the region being fought in, for its ambience', () => {
+    newHero()
+    state.activity = { type: 'combat', kind: 'area', target: 'bear' }
+    expect(areaFor()).toBe('peaks')
+    state.activity = { type: 'combat', kind: 'dungeon', target: 'crypt' }
+    expect(areaFor()).toBe('dungeon')
+    state.activity = null
+    expect(areaFor()).toBe(null)
   })
 
   it('give every region of the realm its own ambience', () => {

@@ -8,7 +8,7 @@ import SelectButton from 'primevue/selectbutton'
 import { useConfirm } from 'primevue/useconfirm'
 import { G, state } from '../game/engine.js'
 import { PALETTES, PROFILE_IDS } from '../game/data/audio.js'
-import { nowPlaying, previewTheme, stopPreview } from '../game/music.js'
+import { nowPlaying, previewTheme, stopPreview, skipTheme } from '../game/music.js'
 import { play } from '../game/sound.js'
 import { speak, VOICE_SPEEDS } from '../game/voices.js'
 import { applyProfile, saveCustomProfile, matchingProfile, resetAudio } from '../game/audioProfiles.js'
@@ -61,11 +61,20 @@ const LOOK = {
   farm: ['wheat', '#c9b84a', '#6aa84a'], waters: ['fishing-pole', '#5fa8d3', '#3a6aa8'], stealth: ['hood', '#4a4a6a', '#2a5a5a'],
   hero: ['crossed-swords', '#e2b65a', '#4a6fbf'], chronicle: ['quill-ink', '#c9b27a', '#6a4a8a'], library: ['bookshelf', '#a8865a', '#4a6a8a'],
   playful: ['paw-print', '#f2a65a', '#5ab8a8'], starlight: ['crystal-ball', '#a98bff', '#4ad0e0'], rebirth: ['ankh', '#f1e3b0', '#7a5ad8'],
+  dawn: ['sun', '#ffcf8a', '#8ab8e8'], dusk: ['sun', '#e8845a', '#5a3a8a'], meadowsong: ['wheat', '#b8d86a', '#e2c35a'],
+  rainfall: ['family-house', '#6a8aa8', '#3a4a6a'], lantern: ['candle-light', '#f2b25a', '#8a4a3a'], pilgrim: ['church', '#c9b27a', '#4a5a8a'],
+  riverbend: ['fishing-pole', '#6ac8c8', '#4a8a5a'], highlands: ['pine-tree', '#6a9a6a', '#8a8ab8'], orchard: ['wheat', '#e8a65a', '#7ab85a'],
+  embers: ['candle-light', '#e0602a', '#4a2a2a'], moonlit: ['crystal-ball', '#c8d8ff', '#3a3a7a'], sails: ['compass', '#5fa8d3', '#f1e3b0'],
+  caravan: ['two-coins', '#d9a35b', '#a8462a'], cloister: ['church', '#e8dcb0', '#6a5a8a'], frostfire: ['ice-spell-cast', '#8fd0f2', '#e0602a'],
+  wanderer: ['compass', '#a8865a', '#4a6a8a'], lullaby: ['family-house', '#f2c8d8', '#8a9ad8'], harvestmoon: ['wheat', '#f2b233', '#8a3a2a'],
+  starfall: ['crystal-ball', '#ffe08a', '#4a3a9a'], oldroad: ['beer-horn', '#c9a36b', '#5a6a4a'],
 }
 const THEME_ICONS = Object.fromEntries(Object.entries(LOOK).map(([k, v]) => [k, v[0]]))
 const colorsOf = id => (LOOK[id] || LOOK.calm).slice(1)
 // The library of themes, by where they are heard
 const GROUPS = [
+  { id: 'road', themes: ['dawn', 'meadowsong', 'riverbend', 'orchard', 'sails', 'highlands', 'oldroad', 'wanderer', 'caravan', 'pilgrim', 'lantern', 'harvestmoon', 'frostfire'] },
+  { id: 'night', themes: ['dusk', 'embers', 'rainfall', 'moonlit', 'starfall', 'cloister', 'lullaby'] },
   { id: 'realm', themes: ['calm', 'voyage', 'adventure', 'dark', 'cold', 'frozen', 'ominous', 'celestial', 'dragon', 'dungeon', 'tower', 'boss'] },
   { id: 'town', themes: ['town', 'tavern', 'market', 'guild', 'hearth', 'chapel', 'festival'] },
   { id: 'work', themes: ['labour', 'workshop', 'farm', 'waters', 'stealth'] },
@@ -83,8 +92,7 @@ function lockCurrent() { st.musicTheme = nowPlaying.theme; st.musicMode = 'locke
 const why = computed(() => {
   if (nowPlaying.reason === 'preview') return t('audio.why.preview')
   if (nowPlaying.reason === 'locked') return t('audio.why.locked')
-  const parts = [t(`weather.${nowPlaying.weather}.name`), t(nowPlaying.night ? 'audio.why.night' : 'audio.why.day')]
-  return t('audio.why.auto', { list: parts.join(' · ') })
+  return nowPlaying.next ? t('audio.why.shuffle', { next: t(`audio.themes.${nowPlaying.next}`) }) : t('audio.mode.autoHint')
 })
 function reset() {
   confirm.require({
@@ -114,6 +122,7 @@ function reset() {
           <div class="mode-pill" role="radiogroup">
             <button v-for="m in modes" :key="m.value" role="radio" :aria-checked="st.musicMode === m.value" :class="{ on: st.musicMode === m.value }" @click="st.musicMode = m.value">{{ m.label }}</button>
           </div>
+          <button class="ghost" :aria-label="$t('audio.skip')" v-tooltip.top="$t('audio.skip')" @click="skipTheme"><i class="pi pi-step-forward" /></button>
           <button v-if="st.musicMode === 'auto'" class="ghost" @click="lockCurrent"><i class="pi pi-lock" /> {{ $t('audio.keepThis') }}</button>
         </div>
         <p class="stage-hint">{{ $t(st.musicMode === 'locked' ? 'audio.mode.lockedHint' : 'audio.mode.autoHint') }}</p>

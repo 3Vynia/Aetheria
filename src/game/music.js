@@ -1,15 +1,16 @@
 import { reactive } from 'vue'
 import { state, G } from './engine.js'
 import { AREAS } from './data/combat.js'
-import { THEMES, THEME_IDS, STINGERS, AREA_AMBIENCE, DUNGEON_AMBIENCE, SCREEN_THEMES, SKILL_THEMES } from './data/audio.js'
+import { THEMES, STINGERS, AREA_AMBIENCE, DUNGEON_AMBIENCE, SHUFFLE_IDS, SHUFFLE_PLAY, SHUFFLE_GAP } from './data/audio.js'
 import { buildGraph } from './audio/mixer.js'
-import { createComposer } from './audio/composer.js'
+import { createComposer, hash } from './audio/composer.js'
 import { playNote, warmUp } from './audio/instruments.js'
 
 /*
   Music and ambient sound, synthesised with WebAudio: no audio files.
-  - Every screen and activity has a theme of its own (data/audio.js). The composer (audio/composer.js)
-    writes it as it plays, in phrases built on the theme's motif; the instruments (audio/instruments.js)
+  - The music is a playlist of fifty themes (data/audio.js) played in a shuffled order, a few minutes
+    each, whatever screen is open; one can also be kept on its own. The composer (audio/composer.js)
+    writes each as it plays, in phrases built on the theme's motif; the instruments (audio/instruments.js)
     play it in the theme's room, through the mixer's chain (audio/mixer.js).
   - Fights raise the intensity: drums join, and at low health the music dulls under a heartbeat.
   - Ambience follows the weather (rain, wind, thunder, birds, crickets, snow, fog) and the region being
@@ -19,38 +20,8 @@ import { playNote, warmUp } from './audio/instruments.js'
 */
 
 /* ================= scenes ================= */
-const AREA_MOOD = {
-  meadow: 'adventure', forest: 'adventure', caves: 'dark', swamp: 'dark', ruins: 'dark',
-  peaks: 'frozen', lair: 'dragon', abyss: 'ominous', void: 'ominous', celestial: 'celestial',
-}
 const AREA_OF = {}
 AREAS.forEach(a => a.monsters.forEach(m => (AREA_OF[m.id] = a.id)))
-// Screens where a fight is shown: there the fight sets the music
-const FIGHT_SCREENS = new Set(['combat', 'region', 'weekly', 'tower', 'omens'])
-// Screens that keep whatever is playing
-const KEEP_SCREENS = new Set(['settings'])
-
-function fightMood(a) {
-  if (a.kind === 'area') return AREA_MOOD[AREA_OF[a.target]] || 'adventure'
-  if (a.kind === 'tower') return 'tower'
-  if (a.kind === 'dungeon') return 'dungeon'
-  if (a.kind === 'omen') return 'ominous'
-  if (a.kind === 'festival') return 'frozen'
-  return 'boss' // bosses and the weekly boss
-}
-// What the music should be right now: a fight on screen first, then the screen (or skill) itself, then
-// what the hero is busy with, then the sky. null keeps what is playing
-export function moodFor(s = state, place = null, weather = null) {
-  const a = s.activity
-  const fighting = a?.type === 'combat'
-  if (fighting && (!place || FIGHT_SCREENS.has(place))) return fightMood(a)
-  if (place && KEEP_SCREENS.has(place)) return null
-  if (place && SKILL_THEMES[place]) return SKILL_THEMES[place]
-  if (place && SCREEN_THEMES[place]) return SCREEN_THEMES[place]
-  if (!place && a?.type === 'skill' && SKILL_THEMES[a.skill]) return SKILL_THEMES[a.skill]
-  if (weather === 'snow' || weather === 'blizzard') return 'cold'
-  return 'calm'
-}
 // The region being fought in, for its ambience
 export function areaFor(s = state) {
   const a = s.activity
@@ -59,7 +30,6 @@ export function areaFor(s = state) {
   if (a.kind === 'dungeon') return 'dungeon'
   return null
 }
-export const MOOD_IDS = THEME_IDS
 
 // Which ambient layers each weather uses (levels 0-1)
 const AMBIENCE = {
@@ -71,12 +41,12 @@ export const ambienceFor = (weather, night) => AMBIENCE[weather === 'clear' && n
 export const areaAmbienceFor = area => (area === 'dungeon' ? DUNGEON_AMBIENCE : AREA_AMBIENCE[area] || {})
 
 // What is playing and why, for the settings screen
-export const nowPlaying = reactive({ theme: 'calm', reason: 'auto', area: null, weather: 'clear', night: false, preview: null, intensity: 2 })
+export const nowPlaying = reactive({ theme: 'calm', reason: 'auto', area: null, weather: 'clear', night: false, preview: null, intensity: 2, next: null })
 
 /* ================= the audio graph ================= */
 let ctx = null, graph = null, ambBus, noise
 let unlocked = false, running = false, timer = null
-let scene = { mood: 'calm', weather: 'clear', night: false, area: null }
+let scene = { weather: 'clear', night: false, area: null }
 let nextBar = 0, preview = null, stream = null
 const layers = {}
 let captionFn = null
@@ -134,11 +104,39 @@ export function applyAudioSettings() {
 function release(src, ...nodes) { src.onended = () => { src.disconnect(); nodes.forEach(n => n.disconnect()) } }
 
 /* ================= music ================= */
+// The playlist: every theme once, in a shuffled order, before any comes back; never the same twice in a row
+export function shuffleBag(ids, last = null, rnd = Math.random) {
+  const bag = [...ids]
+  for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]] }
+  if (bag.length > 1 && bag[0] === last) bag.push(bag.shift())
+  return bag
+}
+let bag = [], shuffleId = null, playedBars = 0, targetBars = 0
+function nextShuffle() {
+  if (!bag.length) bag = shuffleBag(SHUFFLE_IDS, shuffleId)
+  shuffleId = bag.shift()
+  if (!bag.length) bag = shuffleBag(SHUFFLE_IDS, shuffleId)
+  nowPlaying.next = bag[0]
+  playedBars = 0
+  targetBars = 0
+  return shuffleId
+}
 export function currentTheme() {
   if (previewing()) return preview.id
   const st = settings()
   if (st.musicMode === 'locked' && THEMES[st.musicTheme]) return st.musicTheme
-  return THEMES[scene.mood] ? scene.mood : 'calm'
+  return shuffleId || nextShuffle()
+}
+// Move on to the next theme of the playlist now; what is ringing fades on its own
+export function skipTheme() {
+  if (!ctx) return
+  if (settings().musicMode === 'locked') settings().musicMode = 'auto'
+  preview = null
+  nowPlaying.preview = null
+  nextShuffle()
+  stream = null
+  nextBar = ctx.currentTime + 0.4
+  nowPlaying.theme = shuffleId
 }
 const fighting = () => state.activity?.type === 'combat'
 // How full the music is: 0 pads only … 3 with drums. Fights on screen bring the drums
@@ -146,9 +144,8 @@ function intensityNow(id) {
   if (previewing()) return 3
   const dense = Math.max(0, Math.min(100, settings().density ?? 60))
   const base = dense < 25 ? 1 : 2
-  return fighting() && THEMES[id].perc && FIGHT_THEMES.has(id) ? 3 : base
+  return fighting() && THEMES[id].perc ? 3 : base
 }
-const FIGHT_THEMES = new Set(['adventure', 'dark', 'frozen', 'ominous', 'celestial', 'dragon', 'dungeon', 'tower', 'boss'])
 // At low health in a fight the music dulls and a heartbeat comes up
 function lowHealth() {
   if (!fighting() || state.hp <= 0) return false
@@ -168,16 +165,28 @@ function notesOf(id) {
 
 function scheduleBar(at) {
   const id = currentTheme(), th = THEMES[id], st = settings()
+  const shuffling = !previewing() && st.musicMode !== 'locked'
+  // In the playlist a theme plays for a few minutes and ends on a phrase; a short pause, then the next
+  if (shuffling && stream && targetBars && playedBars >= targetBars && stream.index % 8 === 0) {
+    nextShuffle()
+    stream = null
+    return SHUFFLE_GAP
+  }
   if (!stream || stream.theme.id !== id) {
-    stream = createComposer(th)
+    // Each playing of a theme varies its accompaniment and phrasing, while its motif stays its own
+    stream = createComposer(th, hash(id) ^ Math.floor(Math.random() * 1e9))
     warmUp(ctx, notesOf(id))
     graph.setRoom(th.room)
+    playedBars = 0
+    targetBars = 0
   }
   graph.bright = th.bright * (scene.night ? 0.7 : 1)
   const intensity = intensityNow(id)
   const tempo = Math.max(0.6, Math.min(1.4, (st.tempo || 100) / 100))
   const density = Math.max(0, Math.min(100, st.density ?? 60)) / 60
   const { events, len } = stream.bar({ intensity, density, night: scene.night, tempo })
+  playedBars++
+  if (!targetBars) { const secs = SHUFFLE_PLAY[0] + Math.random() * (SHUFFLE_PLAY[1] - SHUFFLE_PLAY[0]); targetBars = Math.ceil(secs / len / 8) * 8 }
   const palette = st.palette || 'soft'
   for (const e of events) playNote(graph, { ...e, vel: e.vel * th.level }, at + Math.max(0, e.t), palette)
   // A heartbeat under the music when health runs low in a fight
@@ -185,7 +194,7 @@ function scheduleBar(at) {
   graph.lowHp.frequency.setTargetAtTime(lowHealth() ? 900 : 20000, at, 0.6)
   nowPlaying.theme = id
   nowPlaying.intensity = intensity
-  nowPlaying.reason = previewing() ? 'preview' : st.musicMode === 'locked' ? 'locked' : 'auto'
+  nowPlaying.reason = previewing() ? 'preview' : st.musicMode === 'locked' ? 'locked' : 'shuffle'
   return len
 }
 // Short phrases for big moments, in the key of what is playing: bells over a held chord, drums for a victory
@@ -389,13 +398,10 @@ export function startAmbient() {
   // Wait for the first click or key press, as browsers require
   window.addEventListener('pointerdown', onUnlock); window.addEventListener('keydown', onUnlock)
 }
-// The game tells the music where the hero is; theme changes land on the next bar. A screen that keeps
-// the music (null mood) leaves the theme as it was
+// The game tells the music where the hero is, for the ambience and the night
 export function setScene(next) {
-  const { mood, ...rest } = next
-  scene = { ...scene, ...rest, ...(mood ? { mood } : {}) }
+  scene = { ...scene, ...next }
   Object.assign(nowPlaying, { area: scene.area, weather: scene.weather, night: scene.night })
-  if (!previewing()) nowPlaying.theme = currentTheme()
   if (running && ctx) setLayers()
 }
 export const audioUnlocked = () => unlocked

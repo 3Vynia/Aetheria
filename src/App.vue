@@ -22,7 +22,7 @@ import { SHARDS } from './game/data/crown.js'
 import { AREAS } from './game/data/combat.js'
 import { regionOfActivity, regionPath } from './game/data/world.js'
 import { UNIQUE_MERCS } from './game/data/company.js'
-import { startAmbient, stopAmbient, setScene, applyAudioSettings, moodFor, areaFor, setCaptionHandler } from './game/music.js'
+import { startAmbient, stopAmbient, setScene, applyAudioSettings, areaFor, setCaptionHandler } from './game/music.js'
 import { setCompactNumbers } from './game/format.js'
 import { zoomFor } from './game/data/settings.js'
 import { onError } from './game/feedback.js'
@@ -97,8 +97,7 @@ function wxTip() {
   return tip(t(`weather.${wxLook.value.key}.name`), t(`weather.${wxLook.value.key}.desc`), lines)
 }
 // Music follows what the hero is doing and the weather; settings apply as soon as they change
-const place = computed(() => (route.name === 'skill' ? route.params.id : String(route.name || '')))
-watch(() => ({ mood: moodFor(state, place.value, wx.value.weather.id), weather: wx.value.weather.id, night: wx.value.night, area: areaFor() }), setScene, { immediate: true, deep: true })
+watch(() => ({ weather: wx.value.weather.id, night: wx.value.night, area: areaFor() }), setScene, { immediate: true, deep: true })
 watch(() => ({ ...state.settings }), st => {
   applyAudioSettings()
   setCompactNumbers(st.compactNumbers)

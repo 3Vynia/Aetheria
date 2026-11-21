@@ -95,6 +95,27 @@ export const THEMES = {
   playful: T({ level: 1.36, root: 57, mode: 'ionian', bpm: 112, swing: 0.5, prog: [[1], [6], [2], [5]], progB: [[4], [5], [3], [6]], pad: 'warm', bass: { instr: 'bass', pattern: 'walk' }, accomp: { instr: 'pizz', pattern: 'alberti' }, lead: { instr: 'celesta', center: 79 }, percLow: 'soft', perc: 'soft', room: 'room' }),
   starlight: T({ level: 0.57, root: 54, mode: 'lydian', bpm: 60, prog: [[1], [2], [1], [7]], progB: [[3], [2], [5], [1]], pad: 'choir', bass: { instr: 'deep', pattern: 'drone' }, accomp: { instr: 'celesta', pattern: 'sparse', octave: 12 }, lead: { instr: 'bell', center: 79 }, room: 'cathedral', bright: 3400 }),
   rebirth: T({ level: 0.52, root: 49, mode: 'lydian', bpm: 54, prog: [[1], [5], [6], [4]], progB: [[2], [5], [3], [1]], pad: 'choir', bass: { instr: 'deep', pattern: 'drone' }, accomp: { instr: 'harp', pattern: 'arp', thin: true }, lead: { instr: 'strings', center: 72 }, room: 'abyss', bright: 3000 }),
+  // Songs of the road: pieces with no place of their own, for listening while the hero works
+  dawn: T({ root: 50, mode: 'lydian', bpm: 70, prog: [[1], [2], [5], [1]], progB: [[6], [2], [3], [5]], pad: 'strings', bass: { instr: 'deep', pattern: 'root' }, accomp: { instr: 'harp', pattern: 'arp' }, lead: { instr: 'flute', center: 76 }, room: 'field', bright: 3000 }),
+  dusk: T({ root: 49, mode: 'aeolian', bpm: 64, meter: 3, prog: [[1], [6], [7], [1]], progB: [[4], [3], [7], [5]], pad: 'warm', bass: { instr: 'deep', pattern: 'root' }, accomp: { instr: 'harp', pattern: 'arp', thin: true }, lead: { instr: 'strings', center: 70 }, room: 'hall', bright: 1900 }),
+  meadowsong: T({ root: 55, mode: 'ionian', bpm: 96, meter: 6, prog: [[1], [5], [6], [4]], progB: [[2], [5], [1], [1]], pad: 'warm', bass: { instr: 'bass', pattern: 'root' }, accomp: { instr: 'lute', pattern: 'arp' }, lead: { instr: 'flute', center: 79 }, percLow: 'soft', perc: 'jig', room: 'field' }),
+  rainfall: T({ root: 52, mode: 'dorian', bpm: 60, prog: [[1], [4], [1], [7]], progB: [[3], [4], [5], [1]], pad: 'strings', bass: { instr: 'deep', pattern: 'drone' }, accomp: { instr: 'celesta', pattern: 'sparse' }, lead: { instr: 'harp', center: 74 }, room: 'room', bright: 1700 }),
+  lantern: T({ root: 57, mode: 'mixolydian', bpm: 80, meter: 3, prog: [[1], [7], [4], [1]], progB: [[5], [4], [2], [5]], pad: 'warm', bass: { instr: 'bass', pattern: 'root' }, accomp: { instr: 'lute', pattern: 'arp' }, lead: { instr: 'flute', center: 74 }, percLow: 'waltz', perc: 'waltz', room: 'tavern' }),
+  pilgrim: T({ root: 48, mode: 'dorian', bpm: 74, prog: [[1], [7], [6], [7]], progB: [[4], [5], [1], [7]], pad: 'choir', bass: { instr: 'cello', pattern: 'root' }, accomp: { instr: 'lute', pattern: 'sparse' }, lead: { instr: 'strings', center: 67 }, percLow: 'soft', perc: 'march', room: 'cathedral', bright: 2100 }),
+  riverbend: T({ root: 53, mode: 'ionian', bpm: 72, meter: 6, prog: [[1], [3], [4], [5]], progB: [[6], [3], [4], [1]], pad: 'strings', bass: { instr: 'bass', pattern: 'root' }, accomp: { instr: 'harp', pattern: 'arp' }, lead: { instr: 'flute', center: 77 }, room: 'field', bright: 2600 }),
+  highlands: T({ root: 50, mode: 'mixolydian', bpm: 88, prog: [[1], [7], [1], [4]], progB: [[7], [4], [1], [5]], pad: 'strings', bass: { instr: 'cello', pattern: 'drone' }, accomp: { instr: 'harp', pattern: 'alberti' }, lead: { instr: 'horn', center: 69 }, percLow: 'soft', perc: 'march', room: 'field', bright: 2300 }),
+  orchard: T({ root: 58, mode: 'ionian', bpm: 100, swing: 0.4, prog: [[1], [4], [2], [5]], progB: [[3], [6], [2], [5]], pad: 'warm', bass: { instr: 'bass', pattern: 'walk' }, accomp: { instr: 'pizz', pattern: 'alberti' }, lead: { instr: 'flute', center: 77 }, percLow: 'soft', perc: 'soft', room: 'room' }),
+  embers: T({ root: 47, mode: 'dorian', bpm: 66, meter: 3, prog: [[1], [4], [7], [1]], progB: [[3], [7], [4], [5]], pad: 'warm', bass: { instr: 'cello', pattern: 'root' }, accomp: { instr: 'lute', pattern: 'arp', thin: true }, lead: { instr: 'strings', center: 66 }, room: 'room', bright: 1600 }),
+  moonlit: T({ root: 54, mode: 'aeolian', bpm: 58, prog: [[1], [6], [3], [7]], progB: [[4], [6], [7], [1]], pad: 'choir', bass: { instr: 'deep', pattern: 'drone' }, accomp: { instr: 'celesta', pattern: 'arp', thin: true }, lead: { instr: 'flute', center: 76 }, room: 'cathedral', bright: 2400 }),
+  sails: T({ root: 55, mode: 'mixolydian', bpm: 104, meter: 6, prog: [[1], [7], [4], [1]], progB: [[6], [7], [5], [1]], pad: 'strings', bass: { instr: 'bass', pattern: 'root' }, accomp: { instr: 'lute', pattern: 'strum' }, lead: { instr: 'horn', center: 70 }, percLow: 'jig', perc: 'jig', room: 'field' }),
+  caravan: T({ root: 50, mode: 'phrygian', bpm: 86, prog: [[1], [2], [1], [7]], progB: [[6], [7], [2], [1]], pad: 'warm', bass: { instr: 'bass', pattern: 'pulse' }, accomp: { instr: 'pizz', pattern: 'alberti' }, lead: { instr: 'flute', center: 72 }, percLow: 'work', perc: 'work', room: 'street', bright: 2000 }),
+  cloister: T({ root: 53, mode: 'dorian', bpm: 52, prog: [[1], [4], [1], [5]], progB: [[7], [4], [6], [1]], pad: 'organ', bass: { instr: 'deep', pattern: 'drone' }, lead: { instr: 'choir', center: 65 }, room: 'cathedral', bright: 2300 }),
+  frostfire: T({ root: 45, mode: 'harmonic', bpm: 82, meter: 3, prog: [[1], [4], [5], [1]], progB: [[6], [4], [2], [5]], pad: 'strings', bass: { instr: 'cello', pattern: 'root' }, accomp: { instr: 'celesta', pattern: 'arp' }, lead: { instr: 'strings', center: 70 }, percLow: 'waltz', perc: 'war', room: 'ice', bright: 2600 }),
+  wanderer: T({ root: 52, mode: 'aeolian', bpm: 78, prog: [[1], [7], [6], [5]], progB: [[4], [3], [7], [1]], pad: 'strings', bass: { instr: 'bass', pattern: 'root' }, accomp: { instr: 'lute', pattern: 'arp' }, lead: { instr: 'flute', center: 74 }, percLow: 'soft', perc: 'march', room: 'hall' }),
+  lullaby: T({ root: 57, mode: 'ionian', bpm: 56, meter: 3, prog: [[1], [4], [5], [1]], progB: [[6], [4], [2], [5]], pad: 'warm', bass: { instr: 'deep', pattern: 'drone' }, accomp: { instr: 'celesta', pattern: 'arp' }, lead: { instr: 'harp', center: 76 }, room: 'room', bright: 2000 }),
+  harvestmoon: T({ root: 51, mode: 'mixolydian', bpm: 92, meter: 6, prog: [[1], [4], [7], [1]], progB: [[5], [4], [2], [1]], pad: 'warm', bass: { instr: 'bass', pattern: 'root' }, accomp: { instr: 'lute', pattern: 'strum' }, lead: { instr: 'flute', center: 75 }, percLow: 'jig', perc: 'jig', room: 'tavern' }),
+  starfall: T({ root: 56, mode: 'lydian', bpm: 68, prog: [[1], [2], [3], [2]], progB: [[6], [2], [5], [1]], pad: 'choir', bass: { instr: 'deep', pattern: 'root' }, accomp: { instr: 'harp', pattern: 'arp' }, lead: { instr: 'bell', center: 79 }, room: 'abyss', bright: 3600 }),
+  oldroad: T({ root: 48, mode: 'mixolydian', bpm: 90, swing: 0.3, prog: [[1], [4], [7], [4]], progB: [[1], [5], [4], [1]], pad: 'strings', bass: { instr: 'bass', pattern: 'walk' }, accomp: { instr: 'lute', pattern: 'alberti' }, lead: { instr: 'horn', center: 67 }, percLow: 'soft', perc: 'march', room: 'street' }),
 }
 for (const id in THEMES) {
   THEMES[id].id = id
@@ -102,17 +123,11 @@ for (const id in THEMES) {
   THEMES[id].scale = { ionian: [0, 2, 4, 5, 7, 9, 11], dorian: [0, 2, 3, 5, 7, 9, 10], phrygian: [0, 1, 3, 5, 7, 8, 10], lydian: [0, 2, 4, 6, 7, 9, 11], mixolydian: [0, 2, 4, 5, 7, 9, 10], aeolian: [0, 2, 3, 5, 7, 8, 10], harmonic: [0, 2, 3, 5, 7, 8, 11] }[THEMES[id].mode]
 }
 export const THEME_IDS = Object.keys(THEMES)
-// The theme of each screen, and of each skill's screen. Screens left out keep what is playing
-export const SCREEN_THEMES = {
-  hero: 'hero', inventory: 'market', shop: 'market', forge: 'workshop', combat: 'voyage', region: 'voyage', slayer: 'guild',
-  tower: 'tower', weekly: 'ominous', quests: 'chronicle', journal: 'chronicle', crown: 'chronicle', achievements: 'library',
-  stats: 'library', bestiary: 'library', routines: 'library', ascension: 'rebirth', omens: 'starlight', festival: 'festival',
-  pets: 'playful', guilds: 'guild', tavern: 'tavern', home: 'hearth', church: 'chapel',
-}
-export const SKILL_THEMES = {
-  mining: 'labour', woodcutting: 'labour', agility: 'labour', fishing: 'waters', farming: 'farm', thieving: 'stealth', prayer: 'chapel',
-  smithing: 'workshop', crafting: 'workshop', fletching: 'workshop', cooking: 'workshop', firemaking: 'workshop', herblore: 'workshop', runecrafting: 'workshop',
-}
+// The playlist the music shuffles through: everything but the boss's war drums
+export const SHUFFLE_IDS = THEME_IDS.filter(id => id !== 'boss')
+// How long a theme plays in the playlist before the next (seconds, it ends on a phrase), and the pause between
+export const SHUFFLE_PLAY = [150, 240]
+export const SHUFFLE_GAP = 3
 // The spaces music is heard in (see roomImpulse in audio/dsp.js); wet: how much of it reaches the ear
 export const ROOMS = {
   hall: { decay: 2.6, predelay: 22, damp: 0.55, early: 0.4, wet: 0.32 },

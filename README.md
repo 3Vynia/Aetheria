@@ -177,7 +177,7 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 <details>
 <summary><b>Sound</b></summary>
 
-- **A theme for every screen and activity:** thirty pieces, from the tavern's jig and the workshop's anvils to the chapel's organ and the boss's war drums. Each is written in its own mode and composed as it plays, in phrases built on a motif of its own, with harmony that moves smoothly from chord to chord.
+- **Fifty themes on shuffle:** from the tavern's jig and the workshop's anvils to the chapel's organ, rain on the roof and songs of the road. They play in a random order, a few minutes each, wherever you are, or you can keep one. Each is written in its own mode and composed as it plays, in phrases built on a motif of its own, with harmony that moves smoothly from chord to chord.
 - **Synthesised instruments:** plucked lute and harp, bells and celesta, bowed strings, a choir on real vowels, organ, a breathy flute, horns, frame drums, tambourine and timpani. Plucked and struck notes are rendered once and replayed, so they cost almost nothing.
 - **Fights raise the music:** drums come in when a fight is on screen, and at low health the music dulls under a heartbeat.
 - **A real mix:** every theme plays in its own room (a warm tavern, a long cave, a vast cathedral), through an EQ, a bus compressor, gentle saturation and a limiter, with themes evened out to the same loudness.
