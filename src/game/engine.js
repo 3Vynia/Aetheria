@@ -22,6 +22,8 @@ import { guilds, guildsState } from './guilds.js'
 import { affairs } from './affairs.js'
 import { codex, codexState } from './codex.js'
 import { repairNumbers } from './saveGuard.js'
+import { readSave, writeSave, adoptPlain, admitImported } from './saveFile.js'
+import { isSealed, open as openSealed } from './vault.js'
 import { recordError } from './feedback.js'
 import { crown, crownState } from './crown.js'
 import { routines, routinesState } from './routines.js'
@@ -82,6 +84,10 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, v); return true } catch { return false } },
   del(k) { try { localStorage.removeItem(k) } catch { /* storage unavailable */ } },
 }
+// Slots are sealed (vault.js); a plain one comes from an older version and is adopted as it is
+function readSlotRaw(raw) {
+  return isSealed(raw) ? openSealed(raw) : adoptPlain(JSON.parse(raw))
+}
 
 export function newState(profile = {}) {
   const skills = {}
@@ -90,6 +96,9 @@ export function newState(profile = {}) {
   return {
     version: 3,
     created: Date.now(),
+    // How this save came to be: sealed by the game, reviewed from an old plain file, marked as altered,
+    // or signed by the creator (saveFile.js, creator.js)
+    integrity: { status: 'sealed' },
     lastTick: Date.now(),
     name: profile.name || 'Adventurer',
     role: profile.role || 'warrior',
@@ -227,9 +236,9 @@ export const G = {
     const raw = store.get(LEGACY_KEY)
     if (!raw || store.get(SLOT_KEY(0))) return
     try {
-      const s = JSON.parse(raw)
+      const s = adoptPlain(JSON.parse(raw))
       Object.assign(s, { role: s.role || 'warrior', difficulty: s.difficulty || 'easy', avatar: 'wizard-face', tint: '#6f5cd2' })
-      store.set(SLOT_KEY(0), JSON.stringify(s))
+      store.set(SLOT_KEY(0), writeSave(s))
       store.del(LEGACY_KEY)
     } catch { /* unreadable old save */ }
   },
@@ -243,12 +252,22 @@ export const G = {
       activity: s.activity ? (s.activity.type === 'skill' ? { skill: s.activity.skill } : { combat: true }) : null,
     }
   },
-  listSlots() {
+  // Saves from before sealing (or written by an older version still open in another tab) are sealed
+  // as they are the next time the slots are read
+  sealStoredSlots() {
     this.migrateLegacy()
+    for (let i = 0; i < SLOT_COUNT; i++) {
+      const raw = store.get(SLOT_KEY(i))
+      if (!raw || isSealed(raw)) continue
+      try { store.set(SLOT_KEY(i), writeSave(adoptPlain(JSON.parse(raw)))) } catch { /* unreadable: left as it is, its backups remain */ }
+    }
+  },
+  listSlots() {
+    this.sealStoredSlots()
     return Array.from({ length: SLOT_COUNT }, (_, i) => {
       const raw = store.get(SLOT_KEY(i))
       if (!raw) return null
-      try { return this.summarize(JSON.parse(raw)) } catch { return null }
+      try { return this.summarize(readSlotRaw(raw)) } catch { return null }
     })
   },
   lastSlot() {
@@ -256,10 +275,11 @@ export const G = {
   },
   // False when the slot is empty or its save cannot be read (the backups can still bring it back)
   loadSlot(i) {
+    this.sealStoredSlots()
     const raw = store.get(SLOT_KEY(i))
     if (!raw) return false
     try {
-      replaceState(JSON.parse(raw))
+      replaceState(readSlotRaw(raw))
       this.slot = i
       this.migrateState()
     } catch (err) {
@@ -297,7 +317,7 @@ export const G = {
     if (this.slot === null) return false
     state.lastTick = Date.now()
     guardNumbers(toRaw(state), false)
-    const ok = store.set(SLOT_KEY(this.slot), JSON.stringify(toRaw(state)))
+    const ok = store.set(SLOT_KEY(this.slot), writeSave(toRaw(state)))
     if (ok) store.set(META_KEY, JSON.stringify({ last: this.slot }))
     else if (Date.now() - saveWarnedAt > SAVE_WARN_EVERY) { saveWarnedAt = Date.now(); this.emit('saveFailed') }
     return ok
@@ -306,15 +326,16 @@ export const G = {
   backupNow() {
     if (this.slot === null) return Promise.resolve(null)
     const raw = toRaw(state)
-    return writeBackup(this.slot, JSON.stringify(raw), this.summarize(raw))
+    return writeBackup(this.slot, writeSave(raw), this.summarize(raw))
   },
   // Before an import, a restore or a new hero replaces slot i, its game is kept as the "before" backup so
   // the player can undo it. Reads the slot as stored: in game, save first. Resolves when written
   keepBefore(i) {
     const raw = store.get(SLOT_KEY(i))
     if (!raw) return Promise.resolve(null)
-    let info
-    try { info = this.summarize(JSON.parse(raw)) } catch { return Promise.resolve(null) }
+    // Kept as stored even when it cannot be read here, so nothing is ever lost by replacing it
+    let info = null
+    try { info = this.summarize(readSlotRaw(raw)) } catch { /* kept unread */ }
     return writeBefore(i, raw, info)
   },
   // Downloading or sharing the save counts as a backup the player keeps
@@ -326,9 +347,11 @@ export const G = {
     if (!st.backupReminder || (this.s.stats.playTime || 0) < 2 * 3600) return false
     return now - (st.lastExport || 0) > 7 * 86400e3 && now - (st.remindedAt || 0) > 3 * 86400e3
   },
-  exportSave() { return btoa(unescape(encodeURIComponent(JSON.stringify(toRaw(state))))) },
+  exportSave() { return writeSave(toRaw(state)) },
   importSave(str) {
-    const s = JSON.parse(decodeURIComponent(escape(atob(str.trim()))))
+    str = str.trim()
+    // Sealed, plain JSON, or the base64 codes of the old Export button
+    const s = isSealed(str) || str.startsWith('{') ? readSave(str, { imported: true }) : admitImported(JSON.parse(decodeURIComponent(escape(atob(str)))))
     if (!s || !s.skills) throw new Error('Invalid save')
     this.loadSave(s)
   },
@@ -340,7 +363,8 @@ export const G = {
   },
   // Store a save object straight into a slot, from the title screen
   writeSlot(i, s) {
-    return store.set(SLOT_KEY(i), JSON.stringify(s))
+    this.sealStoredSlots()
+    return store.set(SLOT_KEY(i), writeSave(s))
   },
 
   freshState(profile) { return newState(profile) },

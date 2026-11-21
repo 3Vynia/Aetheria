@@ -4202,4 +4202,6 @@ export default {
       battle_echo: 'Eco de batalla', ironbound: 'Espíritu de hierro', undying: 'Inmortal', forgemaster: 'Maestro forjador', war_banner: 'Estandarte de guerra', warlord: 'Señor de la guerra eterno',
     },
   },
+
+  integrity: { tampered: "Esta partida se modificó fuera del juego o está dañada: no se puede abrir.", altered: "Partida alterada", alteredHint: "Esta partida no superó la revisión de integridad al importarse: puede haberse editado fuera del juego.", creator: "Partida del creador", creatorHint: "Firmada por la creadora del juego." },
 }

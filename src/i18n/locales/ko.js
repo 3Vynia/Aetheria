@@ -4222,4 +4222,6 @@ export default {
       },
     },
   },
+
+  integrity: { tampered: "이 저장은 게임 밖에서 바뀌었거나 손상되어 열 수 없어요.", altered: "변조된 저장", alteredHint: "이 저장은 가져올 때 무결성 검사를 통과하지 못했어요. 게임 밖에서 편집되었을 수 있어요.", creator: "제작자 저장", creatorHint: "게임 제작자가 서명했어요." },
 }

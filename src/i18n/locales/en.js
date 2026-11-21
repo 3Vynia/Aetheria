@@ -4202,4 +4202,6 @@ export default {
       battle_echo: 'Battle Echo', ironbound: 'Ironbound Spirit', undying: 'Undying', forgemaster: 'Forgemaster', war_banner: 'War Banner', warlord: 'Eternal Warlord',
     },
   },
+
+  integrity: { tampered: "This save was changed outside the game, or is damaged: it cannot be opened.", altered: "Altered save", alteredHint: "This save did not pass the integrity review when it was taken in: it may have been edited outside the game.", creator: "Creator save", creatorHint: "Signed by the game's creator." },
 }

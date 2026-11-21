@@ -7,7 +7,9 @@
    A fourth copy keeps the game a slot held just before an import, a restore or a new hero replaced
    it, so that can be undone.
    Without IndexedDB (private windows) every call quietly does nothing.
+   Copies are sealed like the slots (vault.js); older plain ones are reviewed when read.
    ========================================================= */
+import { readSave } from './saveFile.js'
 
 const DB_NAME = 'aetheria-backups'
 const STORE = 'saves'
@@ -76,7 +78,7 @@ export function writeBefore(slot, data, info, now = Date.now()) {
 
 export async function readBackup(slot, tier) {
   const b = await run('readonly', s => s.get(`${slot}:${tier}`))
-  return b ? JSON.parse(b.data) : null
+  return b ? readSave(b.data) : null
 }
 
 export async function deleteBackups(slot) {

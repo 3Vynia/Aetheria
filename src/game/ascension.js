@@ -13,7 +13,7 @@ import { TRIALS, TRIAL_MAP, TRIAL_SHARDS } from './data/trials.js'
 const START_SKILLS = ['mining', 'woodcutting', 'fishing', 'farming', 'thieving', 'smithing', 'cooking', 'firemaking', 'fletching', 'crafting', 'herblore', 'runecrafting', 'agility', 'prayer']
 
 // What survives an ascension; everything else goes back to a fresh character
-const KEPT = ['created', 'name', 'role', 'origin', 'avatar', 'tint', 'difficulty', 'pets', 'achievements', 'stats', 'history', 'settings', 'daily', 'ascension', 'bestiary', 'cosmetics', 'festival', 'omens', 'companions', 'weekly', 'relicForge', 'journal', 'abilities', 'company', 'guilds', 'codex', 'church', 'thief', 'log', 'legacy', 'routines', 'unlocks', 'records', 'mythics', 'mythicStreak', 'trophies']
+const KEPT = ['created', 'integrity', 'name', 'role', 'origin', 'avatar', 'tint', 'difficulty', 'pets', 'achievements', 'stats', 'history', 'settings', 'daily', 'ascension', 'bestiary', 'cosmetics', 'festival', 'omens', 'companions', 'weekly', 'relicForge', 'journal', 'abilities', 'company', 'guilds', 'codex', 'church', 'thief', 'log', 'legacy', 'routines', 'unlocks', 'records', 'mythics', 'mythicStreak', 'trophies']
 
 // How many finished lives the record keeps, newest last
 export const LIVES_KEPT = 100

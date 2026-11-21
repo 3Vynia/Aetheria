@@ -48,7 +48,7 @@ describe('save transfer', () => {
   it('round-trips a save through a compressed code', async () => {
     state.gold = 12345
     const code = await encodeCode(JSON.parse(JSON.stringify(state)))
-    expect(code.startsWith('AE1.')).toBe(true)
+    expect(code.startsWith('AE2.')).toBe(true)
     expect(code).not.toMatch(/[+/=]/)
     const back = await decodeAny(code)
     expect(back.name).toBe('Ñandú')

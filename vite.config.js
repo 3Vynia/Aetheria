@@ -42,6 +42,10 @@ function precacheAll() {
 
 // `npm run build`        -> dist/ (regular deploy with chunks)
 // `npm run build:single` -> dist-single/index.html (one self-contained file)
+// Published builds must seal saves with the real key (a repository secret); without it they would use
+// the development key, which is public, so the build stops instead
+if (process.env.REQUIRE_SAVE_KEY && !process.env.VITE_SAVE_KEY) throw new Error('VITE_SAVE_KEY is missing: set the SAVE_KEY repository secret')
+
 export default defineConfig(({ mode }) => ({
   base: './',
   plugins: [vue(), ...(mode === 'single' ? [viteSingleFile()] : [precacheAll()])],

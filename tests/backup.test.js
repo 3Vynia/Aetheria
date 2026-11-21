@@ -26,7 +26,8 @@ describe('automatic backups', () => {
     expect(JSON.parse(b.day.data).n).toBe(1)
     // Each copy keeps the time it was taken, not the time it moved
     expect(b.day.at).toBe(t0)
-    expect(await readBackup(10, 'hour')).toEqual({ n: 2 })
+    // A plain copy (from before sealing) is the player's own: it opens as it is
+    expect(await readBackup(10, 'hour')).toMatchObject({ n: 2, integrity: { status: 'sealed' } })
   })
 
   it('never keeps the same copy twice and keeps each tier about its age, over days of play', async () => {
@@ -88,11 +89,12 @@ describe('the copy from before a replacement', () => {
     expect((await readBackup(15, BEFORE)).name).toBe('Bea')
   })
 
-  it('does nothing for an empty slot or one whose save cannot be read', async () => {
-    expect(await G.keepBefore(16)).toBe(null)
-    localStorage.setItem('aetheria-slot-16', '{broken')
+  it('does nothing for an empty slot, and keeps even a save it cannot read, so nothing is lost', async () => {
     expect(await G.keepBefore(16)).toBe(null)
     expect(await listBackups(16)).toEqual([])
+    localStorage.setItem('aetheria-slot-16', '{broken')
+    await G.keepBefore(16)
+    expect((await listBackups(16)).map(b => b.tier)).toEqual(['before'])
   })
 })
 

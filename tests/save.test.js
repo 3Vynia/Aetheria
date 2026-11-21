@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { G, state, newHero, setLevel, run } from './helpers.js'
 import { decodeAny } from '../src/game/transfer.js'
+import { seal, open } from '../src/game/vault.js'
 
 describe('save slots', () => {
   beforeEach(() => newHero({ name: 'Saver' }))
@@ -141,7 +142,7 @@ describe('save failures', () => {
 
   it('reads the rescue file of a game that could not start, taking the slot played last', async () => {
     G.save()
-    const older = JSON.stringify({ ...JSON.parse(localStorage.getItem('aetheria-slot-0')), name: 'Older', lastTick: 1 })
+    const older = seal({ ...open(localStorage.getItem('aetheria-slot-0')), name: 'Older', lastTick: 1 })
     const file = JSON.stringify({ 'aetheria-slot-0': localStorage.getItem('aetheria-slot-0'), 'aetheria-slot-2': older, 'aetheria-meta': '{}' })
     const save = await decodeAny(file)
     expect(save.name).toBe('Fragile')

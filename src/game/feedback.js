@@ -74,6 +74,7 @@ export function buildReport({ version, locale, hero, now = Date.now() }) {
     lines.push(
       `Hero: level ${hero.heroLevel}, total skill level ${hero.totalLevel}, ${hero.role}, ${hero.difficulty}`,
       `Play time: ${hours(hero.playTime)}, rebirths: ${hero.rebirths}`,
+      `Save: ${hero.integrity || 'sealed'}`,
       `Doing: ${hero.activity || 'nothing'}`,
     )
   }

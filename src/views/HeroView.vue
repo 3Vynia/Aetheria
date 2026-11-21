@@ -104,6 +104,8 @@ const diary = computed(() => state.log.map(l => ({ icon: l.icon, text: tm(l), ho
                 <span class="tag" :style="{ color: role.color }"><GameIcon :name="role.icon" :size="13" /> {{ role.name }}</span>
                 <span class="tag" :style="{ color: G.race().color }" v-tooltip.top="$t(`races.${G.raceId()}.trait`) + ': ' + $t(`races.${G.raceId()}.traitText`)"><GameIcon :name="G.race().icon" :size="13" /> {{ G.race().name }}</span>
                 <span class="tag hue" :style="{ '--hue': diff.color }">{{ diff.name }}</span>
+                <span v-if="state.integrity?.status === 'creator'" class="tag gold" v-tooltip.top="$t('integrity.creatorHint')"><GameIcon name="quill-ink" :size="13" /> {{ $t('integrity.creator') }}</span>
+                <span v-else-if="state.integrity?.status === 'altered'" class="tag bad" v-tooltip.top="$t('integrity.alteredHint')"><GameIcon name="broken-shield" :size="13" /> {{ $t('integrity.altered') }}</span>
               </div>
               <div class="row small" style="margin-bottom:6px">
                 <span class="grow muted">{{ $t('hero.heroLevel') }} <b class="gold-text">{{ G.heroLevel() }}</b></span>

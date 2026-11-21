@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { G, state, newHero, run } from './helpers.js'
 import { repairNumbers, keepStorage, storage } from '../src/game/saveGuard.js'
 import { sessionErrors, clearErrors, buildReport } from '../src/game/feedback.js'
+import { seal, open } from '../src/game/vault.js'
 
 describe('bad numbers in a save', () => {
   beforeEach(() => { newHero(); clearErrors() })
@@ -22,10 +23,10 @@ describe('bad numbers in a save', () => {
   it('repairs nulls left by older saves where a number belongs, and the game keeps running', () => {
     state.gold = 500
     G.save()
-    const raw = JSON.parse(localStorage.getItem('aetheria-slot-0'))
+    const raw = open(localStorage.getItem('aetheria-slot-0'))
     raw.gold = null
     raw.skills.hitpoints.xp = null
-    localStorage.setItem('aetheria-slot-0', JSON.stringify(raw))
+    localStorage.setItem('aetheria-slot-0', seal(raw))
     expect(G.loadSlot(0)).toBe(true)
     expect(state.gold).toBe(G.freshState().gold)
     expect(state.skills.hitpoints.xp).toBe(G.freshState().skills.hitpoints.xp)

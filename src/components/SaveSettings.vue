@@ -9,7 +9,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { G, state } from '../game/engine.js'
 import { exitToTitle } from '../game/loop.js'
 import { ROLES, DIFFICULTIES } from '../game/data/character.js'
-import { encodeCode, decodeAny, makeLink, downloadFile, pickFile } from '../game/transfer.js'
+import { encodeCode, decodeAny, makeLink, downloadFile, pickFile, importErrorKey } from '../game/transfer.js'
 import { listBackups, readBackup } from '../game/backup.js'
 import { fmtTime, fmtDateTime } from '../game/format.js'
 import GameIcon from './GameIcon.vue'
@@ -66,7 +66,7 @@ async function copy(text, okKey) {
   try { await navigator.clipboard.writeText(text); G.toast('scroll-unfurled', okKey, {}, 'success') }
   catch { G.toast('scroll-unfurled', 'settings.copyManually') }
 }
-function download() { downloadFile(snapshot()); G.markExported(); G.toast('locked-chest', 'settings.downloaded', {}, 'success') }
+async function download() { await downloadFile(snapshot()); G.markExported(); G.toast('locked-chest', 'settings.downloaded', {}, 'success') }
 async function copyLink() {
   const link = await makeLink(snapshot())
   saveText.value = link
@@ -95,11 +95,11 @@ function askReplace(save) {
 }
 async function importCode() {
   try { askReplace(await decodeAny(saveText.value)) }
-  catch { G.toast('cross-mark', 'settings.invalidSave', {}, 'warn') }
+  catch (e) { G.toast('cross-mark', importErrorKey(e), {}, 'warn') }
 }
 async function loadFile() {
   try { const save = await pickFile(); if (save) askReplace(save) }
-  catch { G.toast('cross-mark', 'settings.invalidSave', {}, 'warn') }
+  catch (e) { G.toast('cross-mark', importErrorKey(e), {}, 'warn') }
 }
 
 /* ---------- the slot ---------- */

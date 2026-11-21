@@ -24,7 +24,7 @@ function hero() {
   const act = s.activity
   return {
     ...sum,
-    rebirths: s.ascension?.count || 0,
+    rebirths: s.ascension?.count || 0, integrity: s.integrity?.status || 'sealed',
     activity: !act ? '' : act.type === 'skill' ? `${act.skill} / ${act.action}` : `combat / ${act.kind} / ${act.target}${act.floor ? ` floor ${act.floor}` : ''}`,
   }
 }

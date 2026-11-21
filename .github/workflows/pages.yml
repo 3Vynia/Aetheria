@@ -26,7 +26,11 @@ jobs:
           cache: npm
 
       - run: npm ci
+      # The key that seals saves lives in a repository secret, never in the code
       - run: npm run build
+        env:
+          VITE_SAVE_KEY: ${{ secrets.SAVE_KEY }}
+          REQUIRE_SAVE_KEY: '1'
 
       - uses: actions/configure-pages@v5
 

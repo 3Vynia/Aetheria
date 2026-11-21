@@ -26,10 +26,16 @@ jobs:
 
       # Web build: index.html at the root of the zip, ready for itch.io or any static host
       - run: npm run build
+        env:
+          VITE_SAVE_KEY: ${{ secrets.SAVE_KEY }}
+          REQUIRE_SAVE_KEY: '1'
       - run: cd dist && zip -qr "../aetheria-web-${GITHUB_REF_NAME}.zip" .
 
       # Single self-contained HTML file that can be opened straight from disk
       - run: npm run build:single
+        env:
+          VITE_SAVE_KEY: ${{ secrets.SAVE_KEY }}
+          REQUIRE_SAVE_KEY: '1'
       - run: cp dist-single/index.html "aetheria-${GITHUB_REF_NAME}.html"
 
       - name: Publish the release

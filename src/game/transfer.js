@@ -1,28 +1,29 @@
+import { isSealed } from './vault.js'
+import { isCreatorCode, openCreator } from './creator.js'
+import { sealForTransfer, openTransfer, admitImported, readSave } from './saveFile.js'
+
 /*
   Moving a save between browsers and devices without a server:
-  - a .json file to download and load again,
-  - a transfer code / link: the save deflated and base64url-encoded, so it fits in a URL.
-  Older plain base64 codes from the "Export" button are still accepted.
+  - a .aetheria file to download and load again,
+  - a transfer code / link.
+  Both hold the save deflated and sealed (vault.js), so they cannot be read or edited outside the game.
+  Older plain ones (.json files, AE1 codes, base64 codes) are always taken in, after the review of
+  plausibility.js (saveFile.js).
 */
 const CODE_PREFIX = 'AE1.'
 const LINK_PARAM = 'import'
-const FILE_FORMAT = 1
 
-const toB64Url = bytes => {
-  let bin = ''
-  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000))
-  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-}
 const fromB64Url = str => {
   const bin = atob(str.replace(/-/g, '+').replace(/_/g, '/'))
   return Uint8Array.from(bin, c => c.charCodeAt(0))
 }
 const pipe = async (bytes, stream) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer())
 
-export async function encodeCode(save) {
-  const json = new TextEncoder().encode(JSON.stringify(save))
-  return CODE_PREFIX + toB64Url(await pipe(json, new CompressionStream('deflate-raw')))
-}
+export const encodeCode = save => sealForTransfer(save)
+
+// The message for a save that could not be taken in: a sealed one changed outside the game, or simply
+// not a save
+export const importErrorKey = e => (e?.message === 'tampered' ? 'integrity.tampered' : 'settings.invalidSave')
 
 const isObject = v => !!v && typeof v === 'object' && !Array.isArray(v)
 const isCount = v => Number.isFinite(v) && v >= 0
@@ -50,21 +51,23 @@ export async function decodeAny(text) {
   let str = String(text || '').trim()
   const fromLink = str.match(new RegExp(`[#&?]${LINK_PARAM}=([^&\\s]+)`))
   if (fromLink) str = decodeURIComponent(fromLink[1])
+  if (isCreatorCode(str)) return validate(await openCreator(str))
+  if (isSealed(str)) return validate(await openTransfer(str))
   if (str.startsWith(CODE_PREFIX)) {
     const bytes = await pipe(fromB64Url(str.slice(CODE_PREFIX.length)), new DecompressionStream('deflate-raw'))
-    return validate(JSON.parse(new TextDecoder().decode(bytes)))
+    return validate(admitImported(JSON.parse(new TextDecoder().decode(bytes))))
   }
   if (str.startsWith('{')) {
     const data = JSON.parse(str)
     // The rescue file from a game that could not start holds every slot: take the one played last
     const slots = Object.keys(data).filter(k => /^aetheria-slot-\d+$/.test(k))
     if (slots.length) {
-      const saves = slots.map(k => { try { return JSON.parse(data[k]) } catch { return null } }).filter(Boolean)
+      const saves = slots.map(k => { try { return readSave(data[k], { imported: true }) } catch { return null } }).filter(Boolean)
       return validate(saves.sort((a, b) => (b.lastTick || 0) - (a.lastTick || 0))[0])
     }
-    return validate(data.game === 'aetheria' ? data.save : data)
+    return validate(admitImported(data.game === 'aetheria' ? data.save : data))
   }
-  return validate(JSON.parse(decodeURIComponent(escape(atob(str)))))
+  return validate(admitImported(JSON.parse(decodeURIComponent(escape(atob(str))))))
 }
 
 export async function makeLink(save) {
@@ -82,12 +85,11 @@ export function takeLinkCode() {
 
 const slug = s => String(s || 'hero').normalize('NFKD').replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'hero'
 
-export function downloadFile(save) {
-  const data = { game: 'aetheria', format: FILE_FORMAT, exported: new Date().toISOString(), save }
-  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
+export async function downloadFile(save) {
+  const blob = new Blob([await sealForTransfer(save)], { type: 'text/plain' })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
-  a.download = `aetheria-${slug(save.name)}-${new Date().toISOString().slice(0, 10)}.json`
+  a.download = `aetheria-${slug(save.name)}-${new Date().toISOString().slice(0, 10)}.aetheria`
   document.body.appendChild(a)
   a.click()
   a.remove()
@@ -99,7 +101,7 @@ export function pickFile() {
   return new Promise((resolve, reject) => {
     const input = document.createElement('input')
     input.type = 'file'
-    input.accept = '.json,application/json,.txt,text/plain'
+    input.accept = '.aetheria,.json,application/json,.txt,text/plain'
     input.onchange = async () => {
       const file = input.files?.[0]
       if (!file) return resolve(null)

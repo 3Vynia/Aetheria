@@ -13,7 +13,7 @@ import ItemTile from './ItemTile.vue'
 import CharacterCreation from './CharacterCreation.vue'
 import LanguageSelect from './LanguageSelect.vue'
 import ThemeSelect from './ThemeSelect.vue'
-import { decodeAny, pickFile, takeLinkCode } from '../game/transfer.js'
+import { decodeAny, pickFile, takeLinkCode, importErrorKey } from '../game/transfer.js'
 import { listBackups, readBackup } from '../game/backup.js'
 
 const { t } = useI18n()
@@ -49,7 +49,7 @@ const activityLabel = a => (!a ? '' : a.skill ? SKILLS[a.skill]?.name : t('nav.c
 async function readLink() {
   const code = takeLinkCode()
   if (!code) return
-  try { offerImport(await decodeAny(code)) } catch { G.toast('cross-mark', 'settings.invalidSave', {}, 'warn') }
+  try { offerImport(await decodeAny(code)) } catch (e) { G.toast('cross-mark', importErrorKey(e), {}, 'warn') }
 }
 onMounted(() => { readLink(); window.addEventListener('hashchange', readLink); findBackups() })
 
@@ -72,7 +72,7 @@ onUnmounted(() => window.removeEventListener('hashchange', readLink))
 function offerImport(save) { pending.value = { save, info: G.summarize(save) }; mode.value = 'import' }
 async function importFile() {
   try { const save = await pickFile(); if (save) offerImport(save) }
-  catch { G.toast('cross-mark', 'settings.invalidSave', {}, 'warn') }
+  catch (e) { G.toast('cross-mark', importErrorKey(e), {}, 'warn') }
 }
 function placeImport(i) {
   const write = async () => {

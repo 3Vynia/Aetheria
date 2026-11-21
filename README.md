@@ -207,6 +207,8 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 - **Four save slots**, saved every few seconds, when the tab is hidden and on close.
 - **Backups:** every slot keeps a recent copy, one from about an hour ago and one from about a day ago, and a deleted game can be recovered from the title screen.
 - **Transfer:** download the save as a file or send yourself a link that opens the hero on another device. No account or server involved.
+- **Sealed saves:** saves, files and transfer links are encrypted and authenticated (XChaCha20-Poly1305, 256-bit), so they cannot be read or edited outside the game. Old plain saves still open: the player's own are sealed as they are, and outside files go through a plausibility review first.
+- **Creator saves** are signed with a post-quantum signature (ML-DSA-65, FIPS 204). The game only holds the public key.
 - **One tab per game**, so two copies never overwrite each other.
 - **A save that repairs itself:** a broken number is never written, and the game asks the browser to keep its storage.
 - **Feedback:** a Settings section to report a bug or share an idea with the details that help. Nothing is sent on its own.
@@ -221,7 +223,7 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 | **Build** | [Vite](https://vite.dev/), with a single-file build that runs straight from disk |
 | **Languages** | [vue-i18n](https://vue-i18n.intlify.dev/): English, Spanish and Korean, every key checked in CI |
 | **Sound** | WebAudio only: music, ambience, alerts and voices are all synthesised |
-| **Quality** | [Vitest](https://vitest.dev/) (over 570 tests, including real saves from every earlier version) and [ESLint](https://eslint.org/) |
+| **Quality** | [Vitest](https://vitest.dev/) (over 590 tests, including real saves from every earlier version) and [ESLint](https://eslint.org/) |
 | **Hosting** | GitHub Pages as an installable, offline-ready app, and itch.io |
 
 There is no backend: the whole game runs in the browser and saves to `localStorage` and IndexedDB.
@@ -244,6 +246,12 @@ npm run dev            # dev server at http://localhost:5173
 | `npm run check:i18n` | Make sure every language has every key |
 | `npm run balance` | XP/hour, gold/hour and combat estimates for every level |
 | `npm run icons` | Rebuild `src/game/icons.json` and check every icon name |
+
+### Save key
+
+Published builds seal saves with a key kept in the `SAVE_KEY` repository secret; a published build without it stops instead of using the public development key. For local builds put the same key in `.env.local` as `VITE_SAVE_KEY=…` (ignored by git). Without one, a development key is used and its saves only open in other development builds. **Never change or lose the key once players have saves sealed with it.**
+
+Creator saves are made with `node scripts/creator.mjs keygen` (once) and `node scripts/creator.mjs sign <save>`. The private key stays in `~/.config/aetheria/creator.key`, outside the repository.
 
 Every push runs lint, the translation check, the tests and a build. A tag such as `v1.0.0-beta.14` publishes a release with both builds and its notes from `docs/releases/`.
 
