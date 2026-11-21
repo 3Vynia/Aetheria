@@ -2444,6 +2444,7 @@ export default {
     },
   },
   tracker: { title: "Seguimiento", handIn: "Hecho: entrégala", ready: "Listo", go: "Ir allí", empty: "No tienes nada en marcha. Empieza una misión o acepta una tarea y aparecerá aquí.", sources: { companion: "Acompañante", story: "Historia", slayer: "Encargo del cazador", guild: "Contrato del gremio", order: "Pedido de la taberna", daily: "Tarea diaria", weekly: "Tarea semanal" } , button: "Seguimiento: {n} en marcha", readyCount: "Listos: {n}", needShort: "Antes: {skill} {lvl}", groups: { all: "Todo", story: "Historia", jobs: "Encargos", tavern: "Taberna", tasks: "Tareas" } },
+  noNetwork: { screenMissing: 'Esta pantalla aún no está guardada en este dispositivo. Ábrela una vez con conexión y luego funcionará sin internet.' },
   backup: {
     saveFailed: "No se pudo guardar la partida: el almacenamiento del navegador está lleno o bloqueado. Descarga una copia en Ajustes → Partida para no perder nada.",
     openFailed: "No se pudo abrir esa partida. Si tiene copias automáticas, puedes recuperar una desde su ranura.",

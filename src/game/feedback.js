@@ -21,9 +21,14 @@ export function clearErrors() { errors.length = 0 }
 // Called with each error kept, so the game can mention once that it can be reported
 export function onError(fn) { listeners.add(fn); return () => listeners.delete(fn) }
 
+// A screen's file that could not be fetched (each browser words it its own way)
+export const isChunkError = msg => /dynamically imported module|Importing a module script failed|Unable to preload CSS|error loading dynamically imported/i.test(String(msg))
+
 export function recordError(err, where = '') {
   const msg = String(err?.message || err?.reason?.message || err?.reason || err || 'Unknown error').slice(0, 300)
   if (NOISE.some(re => re.test(msg))) return null
+  // Offline, a screen missing from the device is not a bug: the router tells the player instead
+  if (navigator.onLine === false && isChunkError(msg)) return null
   const line = String(err?.stack || '').split('\n').find(l => /\.(js|vue)/.test(l))?.trim().slice(0, 200) || ''
   const entry = { at: Date.now(), msg, where, line }
   errors.push(entry)

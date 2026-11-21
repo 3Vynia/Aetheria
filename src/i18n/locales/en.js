@@ -2444,6 +2444,7 @@ export default {
     },
   },
   tracker: { title: "Tracking", handIn: "Done: hand it in", ready: "Ready", go: "Go there", empty: "Nothing on the go. Start a quest or take a task and it shows up here.", sources: { companion: "Companion", story: "Story", slayer: "Slayer task", guild: "Guild contract", order: "Tavern order", daily: "Daily task", weekly: "Weekly task" } , button: "Tracking: {n} on the go", readyCount: "{n} ready", needShort: "First: {skill} {lvl}", groups: { all: "All", story: "Story", jobs: "Jobs", tavern: "Tavern", tasks: "Tasks" } },
+  noNetwork: { screenMissing: 'This screen is not stored on this device yet. Open it once while online and it will work offline from then on.' },
   backup: {
     saveFailed: "Could not save your game: this browser's storage is full or blocked. Download a copy in Settings → Save so nothing is lost.",
     openFailed: "That save could not be opened. If it has automatic backups, you can bring one back from its slot.",

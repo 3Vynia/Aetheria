@@ -10,12 +10,17 @@ import router, { initialRoute } from './router.js'
 import { AetheriaPreset, applyTheme } from './theme.js'
 import { i18n, setLocale, detectLocale } from './i18n/index.js'
 import { G } from './game/engine.js'
-import { installErrorLog, recordError } from './game/feedback.js'
+import { installErrorLog, recordError, isChunkError } from './game/feedback.js'
 import { CHANGELOG } from './game/data/changelog.js'
 import { showBootError } from './bootError.js'
 
 // Expose the engine and the router for debugging from the console in development builds
 if (import.meta.env.DEV) Object.assign(window, { __G: G, __router: router })
+
+// Offline, a screen whose file is not on the device yet cannot open: say so plainly
+router.onError(err => {
+  if (navigator.onLine === false && isChunkError(err?.message)) G.toast('cloud-download', 'noNetwork.screenMissing', {}, 'warn')
+})
 
 // After an update the files of the old version are gone: a page still running it reloads once to pick up the new one
 window.addEventListener('vite:preloadError', e => {

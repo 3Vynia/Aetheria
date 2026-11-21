@@ -28,7 +28,9 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k.startsWith('aetheria') && k !== CACHE).map(k => caches.delete(k))))
+      // The release before stays too: a tab still running it can open its screens offline until reloaded
+      .then(keys => keys.filter(k => k.startsWith('aetheria') && k !== CACHE))
+      .then(old => Promise.all(old.slice(0, -1).map(k => caches.delete(k))))
       .then(() => self.clients.claim()),
   )
 })
