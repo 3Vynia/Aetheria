@@ -1,17 +1,20 @@
 import { reactive } from 'vue'
-import { state } from './engine.js'
+import { state, G } from './engine.js'
 import { AREAS } from './data/combat.js'
-import { THEMES, THEME_IDS, STINGERS, AREA_AMBIENCE, DUNGEON_AMBIENCE } from './data/audio.js'
+import { THEMES, THEME_IDS, STINGERS, AREA_AMBIENCE, DUNGEON_AMBIENCE, SCREEN_THEMES, SKILL_THEMES } from './data/audio.js'
+import { buildGraph } from './audio/mixer.js'
+import { createComposer } from './audio/composer.js'
+import { playNote, warmUp } from './audio/instruments.js'
 
 /*
   Music and ambient sound, synthesised with WebAudio: no audio files.
-  - Music is generative: pad chords, a soft bass and a sparse melody. Each theme has its own key, chord
-    progression and pace; night slows it down and darkens it, and bosses and dungeons add drums.
-    It can follow the game (automatic) or stay on one theme (locked), in one of three palettes.
+  - Every screen and activity has a theme of its own (data/audio.js). The composer (audio/composer.js)
+    writes it as it plays, in phrases built on the theme's motif; the instruments (audio/instruments.js)
+    play it in the theme's room, through the mixer's chain (audio/mixer.js).
+  - Fights raise the intensity: drums join, and at low health the music dulls under a heartbeat.
   - Ambience follows the weather (rain, wind, thunder, birds, crickets, snow, fog) and the region being
     fought in (brooks, dripping caves, frogs, wind chimes, a dragon breathing…).
-  Effects and alerts (sound.js) share the same context. Everything goes through a limiter, so nothing
-  peaks, and every node is let go of when its sound ends.
+  Effects and alerts (sound.js) and voices (voices.js) share the same context and master chain.
   Browsers only allow audio after the player has clicked or pressed a key, so nothing starts before.
 */
 
@@ -22,22 +25,29 @@ const AREA_MOOD = {
 }
 const AREA_OF = {}
 AREAS.forEach(a => a.monsters.forEach(m => (AREA_OF[m.id] = a.id)))
-// Screens of the town, where the music turns homely
-const TOWN = new Set(['tavern', 'guilds', 'shop', 'festival', 'church', 'forge', 'home'])
+// Screens where a fight is shown: there the fight sets the music
+const FIGHT_SCREENS = new Set(['combat', 'region', 'weekly', 'tower', 'omens'])
+// Screens that keep whatever is playing
+const KEEP_SCREENS = new Set(['settings'])
 
-// What the music should feel like right now: the fight first, then the place, then the sky
+function fightMood(a) {
+  if (a.kind === 'area') return AREA_MOOD[AREA_OF[a.target]] || 'adventure'
+  if (a.kind === 'tower') return 'tower'
+  if (a.kind === 'dungeon') return 'dungeon'
+  if (a.kind === 'omen') return 'ominous'
+  if (a.kind === 'festival') return 'frozen'
+  return 'boss' // bosses and the weekly boss
+}
+// What the music should be right now: a fight on screen first, then the screen (or skill) itself, then
+// what the hero is busy with, then the sky. null keeps what is playing
 export function moodFor(s = state, place = null, weather = null) {
   const a = s.activity
-  if (a?.type === 'combat') {
-    if (a.kind === 'area') return AREA_MOOD[AREA_OF[a.target]] || 'adventure'
-    if (a.kind === 'tower') return 'tower'
-    if (a.kind === 'dungeon') return 'dungeon'
-    if (a.kind === 'omen') return 'ominous'
-    if (a.kind === 'festival') return 'frozen'
-    return 'boss' // bosses and the weekly boss
-  }
-  if (place === 'farming' || (a?.type === 'skill' && a.skill === 'farming')) return 'farm'
-  if (place && TOWN.has(place)) return 'town'
+  const fighting = a?.type === 'combat'
+  if (fighting && (!place || FIGHT_SCREENS.has(place))) return fightMood(a)
+  if (place && KEEP_SCREENS.has(place)) return null
+  if (place && SKILL_THEMES[place]) return SKILL_THEMES[place]
+  if (place && SCREEN_THEMES[place]) return SCREEN_THEMES[place]
+  if (!place && a?.type === 'skill' && SKILL_THEMES[a.skill]) return SKILL_THEMES[a.skill]
   if (weather === 'snow' || weather === 'blizzard') return 'cold'
   return 'calm'
 }
@@ -50,7 +60,6 @@ export function areaFor(s = state) {
   return null
 }
 export const MOOD_IDS = THEME_IDS
-const CHORD = { maj: [0, 4, 7], min: [0, 3, 7] }
 
 // Which ambient layers each weather uses (levels 0-1)
 const AMBIENCE = {
@@ -62,14 +71,13 @@ export const ambienceFor = (weather, night) => AMBIENCE[weather === 'clear' && n
 export const areaAmbienceFor = area => (area === 'dungeon' ? DUNGEON_AMBIENCE : AREA_AMBIENCE[area] || {})
 
 // What is playing and why, for the settings screen
-export const nowPlaying = reactive({ theme: 'calm', reason: 'auto', area: null, weather: 'clear', night: false, preview: null })
+export const nowPlaying = reactive({ theme: 'calm', reason: 'auto', area: null, weather: 'clear', night: false, preview: null, intensity: 2 })
 
 /* ================= the audio graph ================= */
-// buses -> master -> tone (soft treble) -> mono -> limiter -> speakers; music also goes through a ducker
-let ctx = null, master, tone, mono, limiter, musicBus, duckGain, ambBus, sfxBus, voiceBus, wet, noise
+let ctx = null, graph = null, ambBus, noise
 let unlocked = false, running = false, timer = null
 let scene = { mood: 'calm', weather: 'clear', night: false, area: null }
-let nextBar = 0, barIndex = 0, lastTheme = null, preview = null
+let nextBar = 0, preview = null, stream = null
 const layers = {}
 let captionFn = null
 const captionAt = {}
@@ -86,103 +94,44 @@ export function audioContext() {
   if (ctx) return ctx
   const AC = typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)
   if (!AC) return null
-  ctx = new AC()
-  limiter = ctx.createDynamicsCompressor()
-  limiter.threshold.value = -6; limiter.knee.value = 0; limiter.ratio.value = 12; limiter.attack.value = 0.003; limiter.release.value = 0.25
-  limiter.connect(ctx.destination)
-  mono = ctx.createGain(); mono.connect(limiter)
-  tone = ctx.createBiquadFilter(); tone.type = 'lowpass'; tone.frequency.value = 20000; tone.connect(mono)
-  master = ctx.createGain(); master.connect(tone)
-  musicBus = ctx.createGain(); duckGain = ctx.createGain(); ambBus = ctx.createGain(); sfxBus = ctx.createGain(); voiceBus = ctx.createGain()
-  musicBus.connect(duckGain).connect(master)
-  ambBus.connect(master); sfxBus.connect(master); voiceBus.connect(master)
-  // A soft hall: a generated impulse with a long, dark tail (made once)
-  wet = ctx.createConvolver()
-  const len = ctx.sampleRate * 3.2, ir = ctx.createBuffer(2, len, ctx.sampleRate)
-  for (let c = 0; c < 2; c++) {
-    const d = ir.getChannelData(c)
-    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 2.6
-  }
-  wet.buffer = ir
-  const wetGain = ctx.createGain(); wetGain.gain.value = 0.55
-  wet.connect(wetGain).connect(musicBus)
-  // Two seconds of noise, looped by the ambient layers
-  noise = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate)
-  const nd = noise.getChannelData(0)
-  for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1
+  ctx = new AC({ latencyHint: 'playback' })
+  graph = buildGraph(ctx)
+  ambBus = graph.amb
+  noise = graph.noise
+  graph.setRoom('hall', 0.1)
   applyAudioSettings()
   return ctx
 }
 // Where sound effects go, so they follow the effects and master volume
-export const sfxOut = () => (audioContext() ? sfxBus : null)
+export const sfxOut = () => (audioContext() ? graph.sfx : null)
 // Where the characters' voices go, with their own volume
-export const voiceOut = () => (audioContext() ? voiceBus : null)
+export const voiceOut = () => (audioContext() ? graph.voice : null)
+// The output analyser, for the sound screen's visuals
+export const audioAnalyser = () => (ctx ? graph.analyser : null)
 
 const previewing = () => !!(preview && ctx && ctx.currentTime < preview.until)
 export function applyAudioSettings() {
   if (!ctx) return
   const st = settings(), t = ctx.currentTime
   const quiet = hiddenQuiet()
-  master.gain.setTargetAtTime(st.muted ? 0 : curve(level(st.masterVol ?? 80)), t, 0.3)
+  graph.master.gain.setTargetAtTime(st.muted ? 0 : curve(level(st.masterVol ?? 80)), t, 0.3)
   const musicOn = (st.music !== false || previewing()) && !quiet
-  musicBus.gain.setTargetAtTime(musicOn ? curve(level(st.musicVol ?? 45)) * 0.55 : 0, t, 0.5)
-  ambBus.gain.setTargetAtTime(st.ambience !== false && !quiet ? curve(level(st.ambienceVol ?? 50)) * 0.7 : 0, t, 0.5)
-  sfxBus.gain.setTargetAtTime(st.sound !== false ? curve(level(st.sfxVol ?? 70)) : 0, t, 0.05)
-  voiceBus.gain.setTargetAtTime(st.voices !== false ? curve(level(st.voiceVol ?? 60)) : 0, t, 0.05)
+  graph.musicVol.gain.setTargetAtTime(musicOn ? curve(level(st.musicVol ?? 45)) * 0.75 : 0, t, 0.5)
+  graph.amb.gain.setTargetAtTime(st.ambience !== false && !quiet ? curve(level(st.ambienceVol ?? 50)) * 0.7 : 0, t, 0.5)
+  graph.sfx.gain.setTargetAtTime(st.sound !== false ? curve(level(st.sfxVol ?? 70)) : 0, t, 0.05)
+  graph.voice.gain.setTargetAtTime(st.voices !== false ? curve(level(st.voiceVol ?? 60)) : 0, t, 0.05)
   // Accessibility: softer treble and mono sound
-  tone.frequency.setTargetAtTime(st.softTone ? 4200 : 20000, t, 0.2)
-  mono.channelCount = st.mono ? 1 : 2
-  mono.channelCountMode = st.mono ? 'explicit' : 'max'
+  graph.tone.frequency.setTargetAtTime(st.softTone ? 4200 : 20000, t, 0.2)
+  graph.mono.channelCount = st.mono ? 1 : 2
+  graph.mono.channelCountMode = st.mono ? 'explicit' : 'max'
   // Nothing to play at all: the context rests, and wakes again when something is turned back on
   const silentAll = st.muted || (st.music === false && st.ambience === false && st.sound === false && st.voices === false && !previewing())
   if (silentAll && ctx.state === 'running') ctx.suspend?.()
   else if (!silentAll && ctx.state === 'suspended' && unlocked) ctx.resume?.()
 }
 
-/* ================= voices ================= */
 // Every node is let go of once its sound has ended
 function release(src, ...nodes) { src.onended = () => { src.disconnect(); nodes.forEach(n => n.disconnect()) } }
-function voice({ freq, at, dur, type, gain, attack, release: rel, cutoff, send = 0.5, detune = 0, bus = musicBus }) {
-  const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter()
-  o.type = type; o.frequency.value = freq; o.detune.value = detune
-  f.type = 'lowpass'; f.frequency.value = cutoff; f.Q.value = 0.4
-  g.gain.setValueAtTime(0.0001, at)
-  g.gain.exponentialRampToValueAtTime(gain, at + attack)
-  g.gain.setValueAtTime(gain, at + Math.max(attack, dur - rel))
-  g.gain.exponentialRampToValueAtTime(0.0001, at + dur)
-  o.connect(f).connect(g)
-  g.connect(bus)
-  let s = null
-  if (send) { s = ctx.createGain(); s.gain.value = send; g.connect(s).connect(wet) }
-  release(o, f, g, ...(s ? [s] : []))
-  o.start(at); o.stop(at + dur + 0.05)
-}
-// A plucked string: a bright attack that dulls as it rings
-function pluck(freq, at, gain) {
-  const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter(), s = ctx.createGain()
-  o.type = 'triangle'; o.frequency.value = freq
-  f.type = 'lowpass'; f.frequency.setValueAtTime(freq * 8, at); f.frequency.exponentialRampToValueAtTime(freq * 1.5, at + 0.6)
-  g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(gain, at + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, at + 1.6)
-  s.gain.value = 0.5
-  o.connect(f).connect(g).connect(musicBus); g.connect(s).connect(wet)
-  release(o, f, g, s)
-  o.start(at); o.stop(at + 1.7)
-}
-function pulse(at, freq, gain = 0.14) {
-  // A soft heartbeat: a low thump made of a falling sine
-  const o = ctx.createOscillator(), g = ctx.createGain()
-  o.frequency.setValueAtTime(freq * 2, at); o.frequency.exponentialRampToValueAtTime(freq, at + 0.12)
-  g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(gain, at + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.35)
-  o.connect(g).connect(musicBus); release(o, g); o.start(at); o.stop(at + 0.4)
-}
-// A big low drum with a little skin noise on top
-function drum(at, gain = 0.2) {
-  pulse(at, 46, gain)
-  const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain()
-  src.buffer = noise; f.type = 'bandpass'; f.frequency.value = 700; f.Q.value = 1.2
-  g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(gain * 0.25, at + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.12)
-  src.connect(f).connect(g).connect(musicBus); release(src, f, g); src.start(at, Math.random()); src.stop(at + 0.15)
-}
 
 /* ================= music ================= */
 export function currentTheme() {
@@ -192,67 +141,73 @@ export function currentTheme() {
   return THEMES[scene.mood] ? scene.mood : 'calm'
 }
 const fighting = () => state.activity?.type === 'combat'
-function scheduleBar(at) {
-  const id = currentTheme(), m = THEMES[id], st = settings()
-  const night = scene.night ? 1 : 0
-  const palette = st.palette || 'soft'
-  const bar = m.bar * (night ? 1.25 : 1) * (100 / Math.max(60, Math.min(140, st.tempo || 100)))
-  const busy = Math.max(0, Math.min(100, st.density ?? 60)) / 60
-  const cutoff = m.bright * (night ? 0.65 : 1)
-  const [step, quality] = m.prog[barIndex % m.prog.length]
-  const root = m.root + step
-  // A new theme fades in on a chord boundary, never in the middle of one
-  const fresh = id !== lastTheme
-  lastTheme = id
-  nowPlaying.theme = id
-  nowPlaying.reason = previewing() ? 'preview' : st.musicMode === 'locked' ? 'locked' : 'auto'
-  // Pad: the chord, each note doubled and slightly detuned
-  const padWave = palette === 'retro' ? 'square' : m.wave
-  CHORD[quality].forEach(iv => {
-    const freq = midiHz(root + iv)
-    const detunes = palette === 'retro' ? [0] : [-7, 7]
-    for (const d of detunes) voice({ freq, at, dur: bar + 1.6, type: padWave, gain: palette === 'retro' ? 0.016 : palette === 'harp' ? 0.022 : 0.03, attack: fresh ? 3 : 1.8, release: 2.2, cutoff: palette === 'retro' ? cutoff * 0.6 : cutoff, send: palette === 'retro' ? 0.1 : 0.6, detune: d })
-  })
-  // Bass under it
-  voice({ freq: midiHz(root - 12), at, dur: bar + 0.8, type: palette === 'retro' ? 'triangle' : 'sine', gain: 0.07, attack: 0.6, release: 1.5, cutoff: 400, send: 0.2 })
-  // The melody, placed on a gentle grid
-  const beats = 8, beat = bar / beats
-  if (palette === 'harp') CHORD[quality].concat(12).forEach((iv, i) => pluck(midiHz(root + iv + 12), at + i * beat, 0.03))
-  for (let b = 0; b < beats; b++) {
-    if (Math.random() > Math.min(1, m.notes * busy) * (night ? 0.55 : 1) * (b % 2 ? 0.45 : 1)) continue
-    const deg = m.scale[Math.floor(Math.random() * m.scale.length)]
-    const oct = Math.random() < 0.3 ? 24 : 12
-    const f = midiHz(m.root + deg + oct), t = at + b * beat + Math.random() * 0.04
-    if (palette === 'harp') pluck(f, t, 0.05)
-    else if (palette === 'retro') voice({ freq: f, at: t, dur: 0.28, type: 'square', gain: 0.022, attack: 0.005, release: 0.2, cutoff: 3200, send: 0 })
-    else voice({ freq: f, at: t, dur: 2.6, type: 'sine', gain: 0.045, attack: 0.012, release: 2.4, cutoff: 5000, send: 0.9 })
-  }
-  // A heartbeat while fighting, and drums against bosses and in dungeons
-  const inFight = fighting() || previewing()
-  if (m.pulse && inFight) for (let b = 0; b < 4; b++) pulse(at + b * (bar / 4), midiHz(root - 24))
-  if (m.drums && inFight) for (const b of [0, 3, 4, 6]) drum(at + b * beat, b === 0 ? 0.24 : 0.16)
-  barIndex++
-  return bar
+// How full the music is: 0 pads only … 3 with drums. Fights on screen bring the drums
+function intensityNow(id) {
+  if (previewing()) return 3
+  const dense = Math.max(0, Math.min(100, settings().density ?? 60))
+  const base = dense < 25 ? 1 : 2
+  return fighting() && THEMES[id].perc && FIGHT_THEMES.has(id) ? 3 : base
 }
-// Short phrases for big moments, in the key of what is playing
+const FIGHT_THEMES = new Set(['adventure', 'dark', 'frozen', 'ominous', 'celestial', 'dragon', 'dungeon', 'tower', 'boss'])
+// At low health in a fight the music dulls and a heartbeat comes up
+function lowHealth() {
+  if (!fighting() || state.hp <= 0) return false
+  try { return state.hp / G.maxHp() < 0.3 } catch { return false }
+}
+
+// Notes a theme needs rendered before it starts
+function notesOf(id) {
+  const th = THEMES[id], out = []
+  const range = (instr, lo, hi) => { for (let m = lo; m <= hi; m++) out.push([instr, m]) }
+  if (th.accomp) range(th.accomp.instr, 48 + (th.accomp.octave || 0), 84 + (th.accomp.octave || 0))
+  if (th.lead) range(th.lead.instr, (th.lead.center ?? 72) - 11, (th.lead.center ?? 72) + 11)
+  if (th.bass) range(th.bass.instr, 24, 48)
+  for (const d of ['frame', 'tamb', 'shaker', 'anvil']) out.push([d, 60])
+  return out
+}
+
+function scheduleBar(at) {
+  const id = currentTheme(), th = THEMES[id], st = settings()
+  if (!stream || stream.theme.id !== id) {
+    stream = createComposer(th)
+    warmUp(ctx, notesOf(id))
+    graph.setRoom(th.room)
+  }
+  graph.bright = th.bright * (scene.night ? 0.7 : 1)
+  const intensity = intensityNow(id)
+  const tempo = Math.max(0.6, Math.min(1.4, (st.tempo || 100) / 100))
+  const density = Math.max(0, Math.min(100, st.density ?? 60)) / 60
+  const { events, len } = stream.bar({ intensity, density, night: scene.night, tempo })
+  const palette = st.palette || 'soft'
+  for (const e of events) playNote(graph, { ...e, vel: e.vel * th.level }, at + Math.max(0, e.t), palette)
+  // A heartbeat under the music when health runs low in a fight
+  if (lowHealth()) for (const b of [0, 0.18, len / 2, len / 2 + 0.18]) playNote(graph, { part: 'perc', instr: 'frame', midi: 50, t: b, dur: 0.5, vel: b % (len / 2) ? 0.4 : 0.6 }, at + b, 'soft')
+  graph.lowHp.frequency.setTargetAtTime(lowHealth() ? 900 : 20000, at, 0.6)
+  nowPlaying.theme = id
+  nowPlaying.intensity = intensity
+  nowPlaying.reason = previewing() ? 'preview' : st.musicMode === 'locked' ? 'locked' : 'auto'
+  return len
+}
+// Short phrases for big moments, in the key of what is playing: bells over a held chord, drums for a victory
 export function playStinger(kind, vol = 1) {
   if (!ctx || !running || ctx.state !== 'running' || settings().music === false || hiddenQuiet()) return false
-  const m = THEMES[currentTheme()], notes = STINGERS[kind]
+  const th = THEMES[currentTheme()], notes = STINGERS[kind]
   if (!notes) return false
-  const at = ctx.currentTime + 0.02, beat = 0.22 * (100 / (settings().tempo || 100))
-  for (const [deg, b] of notes) {
-    voice({ freq: midiHz(m.root + 12 + deg), at: at + b * beat, dur: 1.6, type: 'triangle', gain: 0.07 * vol, attack: 0.01, release: 1.4, cutoff: 4200, send: 0.7 })
-    voice({ freq: midiHz(m.root + deg), at: at + b * beat, dur: 1.2, type: 'sine', gain: 0.04 * vol, attack: 0.02, release: 1, cutoff: 2000, send: 0.4 })
-  }
+  const at = ctx.currentTime + 0.03, beat = 0.24 * (100 / (settings().tempo || 100))
+  const root = th.root + 12
+  for (const [deg, b] of notes) playNote(graph, { part: 'lead', instr: 'bell', midi: root + deg + 12, t: 0, dur: 1.4, vel: 0.9 * vol }, at + b * beat)
+  const third = kind === 'fall' ? 3 : 4
+  for (const iv of [0, third, 7]) playNote(graph, { part: 'pad', instr: kind === 'fall' ? 'choir' : 'strings', midi: root + iv - 12, t: 0, dur: notes[notes.length - 1][1] * beat + 1.2, vel: 0.9 * vol }, at)
+  if (kind === 'victory') { playNote(graph, { part: 'perc', instr: 'timpani', midi: th.root - 12, t: 0, dur: 1, vel: vol }, at); playNote(graph, { part: 'perc', instr: 'timpani', midi: th.root - 5, t: 0, dur: 1, vel: 0.8 * vol }, at + notes[notes.length - 1][1] * beat) }
   return true
 }
 // Big alerts lower the music for a moment
 export function duckMusic() {
   if (!ctx) return
   const t = ctx.currentTime
-  duckGain.gain.cancelScheduledValues(t)
-  duckGain.gain.setTargetAtTime(0.7, t, 0.04)
-  duckGain.gain.setTargetAtTime(1, t + 0.4, 0.25)
+  graph.duck.gain.cancelScheduledValues(t)
+  graph.duck.gain.setTargetAtTime(0.7, t, 0.04)
+  graph.duck.gain.setTargetAtTime(1, t + 0.4, 0.25)
 }
 // The music steps back while a character speaks, and comes back when every voice is done
 let holds = 0
@@ -260,19 +215,20 @@ export function holdDuck(on) {
   holds = Math.max(0, holds + (on ? 1 : -1))
   if (!ctx) return
   const t = ctx.currentTime
-  duckGain.gain.cancelScheduledValues(t)
-  duckGain.gain.setTargetAtTime(holds ? 0.55 : 1, t, holds ? 0.15 : 0.6)
+  graph.duck.gain.cancelScheduledValues(t)
+  graph.duck.gain.setTargetAtTime(holds ? 0.55 : 1, t, holds ? 0.15 : 0.6)
 }
 export const musicPlaying = () => !!(running && ctx && ctx.state === 'running' && settings().music !== false && !hiddenQuiet())
 // Hear a theme for a while, whatever the hero is doing; the game itself is not touched
-export function previewTheme(id, seconds = 15) {
+export function previewTheme(id, seconds = 20) {
   if (!THEMES[id]) return
   unlockNow()
   if (!audioContext()) return
   preview = { id, until: ctx.currentTime + seconds }
   nowPlaying.preview = id
-  nextBar = ctx.currentTime + 0.1
+  nextBar = ctx.currentTime + 0.15
   applyAudioSettings()
+  if (!running) start()
   setTimeout(() => { if (preview?.id === id && !previewing()) stopPreview() }, seconds * 1000 + 200)
 }
 export function stopPreview() {
@@ -399,18 +355,18 @@ function tick() {
   const t = ctx.currentTime
   if (preview && !previewing()) stopPreview()
   if ((settings().music !== false || previewing()) && !hiddenQuiet()) {
-    // After a while in the background the clock may have run ahead: pick up on the next chord
+    // After a while in the background the clock may have run ahead: pick up on the next bar
     if (nextBar < t) nextBar = t + 0.2
-    while (nextBar < t + 1.2) nextBar += scheduleBar(nextBar)
+    while (nextBar < t + 1.5) nextBar += scheduleBar(nextBar)
   }
-  if (settings().ambience !== false && !hiddenQuiet()) ambientEvents(t)
+  if (settings().ambience !== false && !hiddenQuiet() && Math.random() < 0.4) ambientEvents(t)
 }
 function start() {
   if (running || !unlocked || !audioContext()) return
   running = true
   ensureLayers(); setLayers()
   if (ctx.state === 'suspended') ctx.resume?.()
-  timer = setInterval(tick, 250)
+  timer = setInterval(tick, 100)
 }
 export function stopAmbient() {
   running = false
@@ -433,12 +389,35 @@ export function startAmbient() {
   // Wait for the first click or key press, as browsers require
   window.addEventListener('pointerdown', onUnlock); window.addEventListener('keydown', onUnlock)
 }
-// The game tells the music where the hero is; theme changes land on the next chord
+// The game tells the music where the hero is; theme changes land on the next bar. A screen that keeps
+// the music (null mood) leaves the theme as it was
 export function setScene(next) {
-  scene = { ...scene, ...next }
+  const { mood, ...rest } = next
+  scene = { ...scene, ...rest, ...(mood ? { mood } : {}) }
   Object.assign(nowPlaying, { area: scene.area, weather: scene.weather, night: scene.night })
   if (!previewing()) nowPlaying.theme = currentTheme()
   if (running && ctx) setLayers()
 }
 export const audioUnlocked = () => unlocked
 if (typeof document !== 'undefined') document.addEventListener('visibilitychange', applyAudioSettings)
+
+/* ================= rendering a theme to a file ================= */
+// Plays a theme into an offline context and returns its channels, to listen to it outside the game
+export async function renderTheme(id, seconds = 30, { palette = 'soft', intensity = 3, sampleRate = 44100, night = false, gain = 0.55 } = {}) {
+  const th = THEMES[id]
+  const off = new OfflineAudioContext(2, Math.round(sampleRate * seconds), sampleRate)
+  const g = buildGraph(off)
+  g.setRoom(th.room, 0.01)
+  g.bright = th.bright
+  g.musicVol.gain.value = gain
+  const comp = createComposer(th)
+  warmUp(off, notesOf(id), true)
+  let at = 0.1
+  while (at < seconds - 1) {
+    const { events, len } = comp.bar({ intensity, density: 1, night })
+    for (const e of events) playNote(g, { ...e, vel: e.vel * th.level }, at + Math.max(0, e.t), palette)
+    at += len
+  }
+  const buf = await off.startRendering()
+  return { channels: [buf.getChannelData(0), buf.getChannelData(1)], sampleRate }
+}

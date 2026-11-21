@@ -3,24 +3,33 @@ import { G, state, newHero } from './helpers.js'
 import { moodFor, areaFor, areaAmbienceFor, MOOD_IDS } from '../src/game/music.js'
 import { gateCue, cueSettings, setCue } from '../src/game/sound.js'
 import { applyProfile, saveCustomProfile, matchingProfile, resetAudio } from '../src/game/audioProfiles.js'
-import { CUES, CUE_MAP, CUE_CATS, THEMES, STINGERS, PROFILES, PROFILE_IDS, PACKS, PALETTES, GROUP_WINDOW, AREA_AMBIENCE } from '../src/game/data/audio.js'
+import { CUES, CUE_MAP, CUE_CATS, THEMES, STINGERS, ROOMS, SCREEN_THEMES, SKILL_THEMES, PROFILES, PROFILE_IDS, PACKS, PALETTES, GROUP_WINDOW, AREA_AMBIENCE } from '../src/game/data/audio.js'
 import { AREAS } from '../src/game/data/combat.js'
+import { SKILLS } from '../src/game/data/skills.js'
+import { ACTIONS } from '../src/game/data/actions.js'
+import { MODES } from '../src/game/audio/composer.js'
 import { i18n } from '../src/i18n/index.js'
 
 const te = k => i18n.global.te(k, 'en')
 
 describe('music themes', () => {
-  it('cover every place, fight and region of the game', () => {
+  it('cover every screen, skill, fight and region of the game', () => {
     newHero()
-    expect(MOOD_IDS).toHaveLength(13)
+    expect(MOOD_IDS.length).toBeGreaterThanOrEqual(30)
     for (const id of MOOD_IDS) {
       const th = THEMES[id]
-      expect(th.prog.length).toBeGreaterThan(0)
+      expect(MODES[th.mode], id).toBeTruthy()
+      expect(th.prog.every(([d]) => d >= 1 && d <= 7), id).toBe(true)
       expect(th.scale.every(n => n >= 0 && n < 12)).toBe(true)
+      expect(ROOMS[th.room], id).toBeTruthy()
       expect(te(`audio.themes.${id}`), id).toBe(true)
     }
+    for (const id of [...Object.values(SCREEN_THEMES), ...Object.values(SKILL_THEMES)]) expect(THEMES[id], id).toBeTruthy()
+    for (const skill of Object.keys(SKILLS)) if (ACTIONS[skill]) expect(SKILL_THEMES[skill], skill).toBeTruthy()
+    // A fight on a fight screen sets the music
     state.activity = { type: 'combat', kind: 'area', target: 'bear' }
     expect(moodFor()).toBe('frozen')
+    expect(moodFor(state, 'region')).toBe('frozen')
     expect(areaFor()).toBe('peaks')
     state.activity = { type: 'combat', kind: 'area', target: 'red_dragon' }
     expect(moodFor()).toBe('dragon')
@@ -31,11 +40,18 @@ describe('music themes', () => {
     expect(moodFor()).toBe('tower')
     state.activity = { type: 'combat', kind: 'boss', target: 'kraken' }
     expect(moodFor()).toBe('boss')
+    // Elsewhere each screen has its own theme, even while fighting
+    expect(moodFor(state, 'tavern')).toBe('tavern')
     state.activity = null
-    expect(moodFor(state, 'tavern')).toBe('town')
+    expect(moodFor(state, 'home')).toBe('hearth')
     expect(moodFor(state, 'farming')).toBe('farm')
-    expect(moodFor(state, 'hero', 'blizzard')).toBe('cold')
-    expect(moodFor(state, 'hero', 'clear')).toBe('calm')
+    expect(moodFor(state, 'fishing')).toBe('waters')
+    expect(moodFor(state, 'smithing')).toBe('workshop')
+    expect(moodFor(state, 'hero')).toBe('hero')
+    // Settings keep what is playing; unknown places follow the sky
+    expect(moodFor(state, 'settings')).toBe(null)
+    expect(moodFor(state, null, 'blizzard')).toBe('cold')
+    expect(moodFor(state, null, 'clear')).toBe('calm')
     for (const k in STINGERS) expect(STINGERS[k].length).toBeGreaterThan(2)
   })
 

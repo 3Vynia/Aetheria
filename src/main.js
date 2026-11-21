@@ -14,8 +14,11 @@ import { installErrorLog, recordError, isChunkError } from './game/feedback.js'
 import { CHANGELOG } from './game/data/changelog.js'
 import { showBootError } from './bootError.js'
 
-// Expose the engine and the router for debugging from the console in development builds
-if (import.meta.env.DEV) Object.assign(window, { __G: G, __router: router })
+// Expose the engine, the router and the music for debugging from the console in development builds
+if (import.meta.env.DEV) {
+  Object.assign(window, { __G: G, __router: router })
+  import('./game/music.js').then(m => { window.__music = m })
+}
 
 // Offline, a screen whose file is not on the device yet cannot open: say so plainly
 router.onError(err => {

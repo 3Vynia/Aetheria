@@ -7,6 +7,7 @@ describe('music and ambience', () => {
   it('pick a mood from what the hero is doing', () => {
     newHero()
     expect(moodFor()).toBe('calm')
+    expect(moodFor(state, 'hero')).toBe('hero')
     state.activity = { type: 'combat', kind: 'area', target: 'wolf' }
     expect(moodFor()).toBe('adventure')
     state.activity = { type: 'combat', kind: 'area', target: 'skeleton' }
