@@ -2,11 +2,11 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Select from 'primevue/select'
-import { LOCALES, setLocale } from '../i18n/index.js'
+import { LOCALES, PLAYABLE, setLocale } from '../i18n/index.js'
 
 defineProps({ inputId: { type: String, default: 'language-select' } })
 const { locale } = useI18n()
-const options = Object.entries(LOCALES).map(([value, l]) => ({ value, label: l.name }))
+const options = Object.entries(PLAYABLE).map(([value, l]) => ({ value, label: l.name }))
 const current = computed({ get: () => locale.value, set: v => setLocale(v) })
 </script>
 

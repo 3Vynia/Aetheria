@@ -64,9 +64,12 @@ for (const file of walk(join(root, 'src')).filter(f => /\.(vue|js)$/.test(f) && 
 report('Missing in en', [...used].filter(([k]) => !(k in en)).map(([k, where]) => `${k}  (${where})`))
 
 // 2 + 3) Compare every locale with English
+const progress = []
 for (const [loc, msgs] of Object.entries(locales)) {
   if (loc === 'en') continue
-  report(`Missing in ${loc}`, Object.keys(en).filter(k => !(k in msgs)))
+  // A language still being translated may miss texts (they read in English); the rest must hold
+  if (LOCALES[loc].draft) progress.push(`${loc}: ${Object.keys(en).filter(k => k in msgs).length} of ${Object.keys(en).length} texts translated`)
+  else report(`Missing in ${loc}`, Object.keys(en).filter(k => !(k in msgs)))
   report(`Not in en, extra in ${loc}`, Object.keys(msgs).filter(k => !(k in en)))
   report(`Placeholder mismatch in ${loc}`, Object.keys(en).filter(k => k in msgs && placeholders(en[k]) !== placeholders(msgs[k]))
     .map(k => `${k}: en {${placeholders(en[k])}} vs {${placeholders(msgs[k])}}`))
@@ -74,5 +77,6 @@ for (const [loc, msgs] of Object.entries(locales)) {
 }
 report('Reserved character in en', Object.entries(en).filter(([, v]) => /[@|]/.test(v)).map(([k]) => k))
 
+progress.forEach(p => console.log('In progress, ' + p))
 if (problems) { console.log(`\n${problems} problem(s) found.`); process.exit(1) }
 console.log(`All good: ${Object.keys(en).length} keys in ${Object.keys(locales).length} languages.`)

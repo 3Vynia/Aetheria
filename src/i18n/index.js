@@ -3,16 +3,20 @@ import { createI18n } from 'vue-i18n'
 export const LOCALES = {
   en: { name: 'English', intl: 'en-US', load: () => import('./locales/en.js') },
   es: { name: 'Español', intl: 'es-ES', load: () => import('./locales/es.js') },
+  // Being translated: only offered while developing until every text is done; what is missing reads in English
+  ko: { name: '한국어', intl: 'ko-KR', load: () => import('./locales/ko.js'), draft: true, font: 'https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Gowun+Dodum&display=swap' },
 }
+// The languages a player can pick (drafts only show while developing)
+export const PLAYABLE = Object.fromEntries(Object.entries(LOCALES).filter(([, l]) => !l.draft || import.meta.env?.DEV))
 const STORAGE_KEY = 'aetheria-locale'
 
 export function detectLocale() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved && LOCALES[saved]) return saved
+    if (saved && PLAYABLE[saved]) return saved
   } catch { /* storage unavailable */ }
   const nav = (typeof navigator !== 'undefined' && navigator.language || 'en').slice(0, 2)
-  return LOCALES[nav] ? nav : 'en'
+  return PLAYABLE[nav] ? nav : 'en'
 }
 
 export const i18n = createI18n({
@@ -37,6 +41,13 @@ export function applyDocumentLocale() {
   if (typeof document === 'undefined') return
   const loc = currentLocale()
   document.documentElement.lang = loc
+  // Scripts the game's fonts do not cover bring their own, loaded only for the players who need them
+  const font = LOCALES[loc]?.font
+  if (font && !document.querySelector(`link[data-font="${loc}"]`)) {
+    const link = Object.assign(document.createElement('link'), { rel: 'stylesheet', href: font })
+    link.dataset.font = loc
+    document.head.appendChild(link)
+  }
 }
 
 /*
@@ -67,9 +78,11 @@ export function applyStoryNames(names) {
 
 export async function setLocale(loc) {
   if (!LOCALES[loc]) return
-  if (!written[loc]) {
-    written[loc] = (await LOCALES[loc].load()).default
-    renameLocale(loc)
+  // A language still being translated falls back to English, so English comes with it
+  for (const l of LOCALES[loc].draft ? ['en', loc] : [loc]) {
+    if (written[l]) continue
+    written[l] = (await LOCALES[l].load()).default
+    renameLocale(l)
   }
   i18n.global.locale.value = loc
   try { localStorage.setItem(STORAGE_KEY, loc) } catch { /* storage unavailable */ }
