@@ -1516,7 +1516,7 @@ export default {
     audio: "Sound and music",
     masterVol: "Master volume",
     music: "Music",
-    musicHint: "Calm melodies that change with where you are, the weather and the time of day.",
+    musicHint: "Fifty calm themes played in a random order, wherever you are.",
     ambience: "Ambient sound",
     ambienceHint: "Rain, wind, thunder, birds and crickets, following the weather.",
     soundHint: "Short sounds for level ups, loot and quests.",

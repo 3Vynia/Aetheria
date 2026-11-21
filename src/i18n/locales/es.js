@@ -1516,7 +1516,7 @@ export default {
     audio: "Sonido y música",
     masterVol: "Volumen general",
     music: "Música",
-    musicHint: "Melodías tranquilas que cambian según dónde estés, el clima y la hora del día.",
+    musicHint: "Cincuenta temas tranquilos en orden aleatorio, estés donde estés.",
     ambience: "Sonido ambiente",
     ambienceHint: "Lluvia, viento, truenos, pájaros y grillos, según el clima.",
     soundHint: "Sonidos cortos al subir de nivel, conseguir botín y completar misiones.",
