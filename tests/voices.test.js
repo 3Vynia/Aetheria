@@ -48,3 +48,14 @@ describe('character voices', () => {
     expect(sylls.length).toBeGreaterThan(3)
   })
 })
+
+describe('syllables', () => {
+  it('sing the vowel of their letters and start with their kind of consonant', () => {
+    const { sylls } = timeline('Sopa de pato', 'keeper')
+    expect(sylls.map(s => s.vowel)).toEqual(['o', 'a', 'e', 'a', 'o'])
+    expect(sylls[0].onset).toBe('fricative')
+    expect(sylls[2].onset).toBe('plosive')
+    expect(timeline('Mira', 'keeper').sylls[0].onset).toBe('nasal')
+    expect(timeline('Árbol', 'keeper').sylls[0]).toMatchObject({ vowel: 'a', onset: null })
+  })
+})

@@ -3,8 +3,9 @@ import { audioContext, voiceOut, hiddenQuiet, holdDuck } from './music.js'
 
 /*
   Character voices: speech made of tiny sung syllables, synthesised with WebAudio (no audio files and
-  no real words, so it sounds the same in every language). Each character has a timbre of its own;
-  the same text always sounds the same, sentences fall at the end and questions rise.
+  no real words, so it sounds the same in every language). Each syllable is sung on the vowel of its letters,
+  through that vowel's formants, and starts with the kind of consonant they begin with. Each character has a
+  timbre and a throat of its own; the same text always sounds the same, sentences fall at the end and questions rise.
   timeline() says when each character of the text shows, so the words appear in step with the voice.
 */
 
@@ -88,7 +89,12 @@ export function timeline(text, voiceId, speed = 1) {
         let semi = (hash(run + chars.slice(i, i + 3).join('')) - 0.5) * v.range
         if (left < 6) semi += question ? (6 - left) * 0.9 : -(6 - left) * 0.5
         else semi += Math.sin(inSentence * 0.7) * 0.8
-        sylls.push({ t, freq: v.base * 2 ** (semi / 12), stress: hash(run) > 0.7 })
+        // The vowel it is sung on, and how it starts: from the letters of the text, so it always sounds the same
+        const ahead = chars.slice(i, i + 4).join('').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        const vowel = (ahead.match(/[aeiou]/) || ['aeiou'[Math.floor(hash(ahead) * 5)]])[0]
+        const first = ahead[0]
+        const onset = 'aeiouy'.includes(first) ? null : 'ptkbdgcq'.includes(first) ? 'plosive' : 'sfzjxvh'.includes(first) ? 'fricative' : 'mnñ'.includes(first) ? 'nasal' : 'liquid'
+        sylls.push({ t, freq: v.base * 2 ** (semi / 12), stress: hash(run) > 0.7, vowel, onset })
         inSentence++
       }
       if (run.length >= LETTERS_PER_SYLLABLE) run = ''
@@ -111,34 +117,69 @@ function noiseBuffer(ctx) {
   return (noiseBuffer.buf = buf)
 }
 
-// One syllable: a short sung note through a vowel-like filter, with a little breath and echo
+// The three formants of each vowel (Hz) and how strong each is, for an adult voice; smaller or larger
+// throats scale them (a voice's `formant` sets its size: 1000 is the middle)
+const VOWELS = {
+  a: [[730, 1], [1090, 0.5], [2440, 0.22]], e: [[530, 1], [1840, 0.45], [2480, 0.25]], i: [[300, 1], [2290, 0.4], [3010, 0.25]],
+  o: [[570, 1], [840, 0.55], [2410, 0.15]], u: [[300, 1], [870, 0.4], [2240, 0.12]],
+}
+// One syllable: a voice sung on its vowel through three formants, started by its consonant, with a
+// little breath and echo
 function syllable(ctx, out, v, s, when) {
   const dur = v.syll * (s.stress ? 1.3 : 1)
-  const vol = v.vol * 0.22 * (s.stress ? 1.15 : 1)
-  const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain()
-  o.type = v.wave
-  o.frequency.setValueAtTime(s.freq * 1.04, when)
-  o.frequency.exponentialRampToValueAtTime(s.freq, when + dur * 0.4)
+  const vol = v.vol * 0.5 * (s.stress ? 1.15 : 1)
+  const size = Math.max(0.45, Math.min(1.9, v.formant / 1000))
+  const nodes = []
+  // The voice: a pulse rich in overtones (a square for the strange ones), gliding into its note
+  const o = ctx.createOscillator()
+  o.type = v.wave === 'square' ? 'square' : 'sawtooth'
+  o.frequency.setValueAtTime(s.freq * 1.05, when)
+  o.frequency.exponentialRampToValueAtTime(s.freq, when + dur * 0.35)
   if (v.vibrato) {
     const lfo = ctx.createOscillator(), depth = ctx.createGain()
-    lfo.frequency.value = 6; depth.gain.value = v.vibrato
+    lfo.frequency.value = 5.5; depth.gain.value = v.vibrato
     lfo.connect(depth).connect(o.detune)
     lfo.start(when); lfo.stop(when + dur + 0.05)
+    nodes.push(lfo, depth)
   }
-  f.type = 'bandpass'; f.frequency.value = v.formant * (0.85 + (s.freq / v.base) * 0.15); f.Q.value = v.q
+  // Softer voices lose some of their top
+  const soft = ctx.createBiquadFilter()
+  soft.type = 'lowpass'; soft.frequency.value = v.wave === 'sine' ? 2600 : v.wave === 'triangle' ? 4200 : 7000; soft.Q.value = 0.5
+  o.connect(soft)
+  const g = ctx.createGain()
   g.gain.setValueAtTime(0.0001, when)
-  g.gain.exponentialRampToValueAtTime(vol, when + 0.012)
+  g.gain.exponentialRampToValueAtTime(vol, when + 0.018)
+  g.gain.setValueAtTime(vol, when + dur * 0.6)
   g.gain.exponentialRampToValueAtTime(0.0001, when + dur)
-  o.connect(f).connect(g).connect(out)
-  const nodes = [f, g]
-  if (v.breath) {
+  for (const [f, a] of VOWELS[s.vowel] || VOWELS.a) {
+    const bp = ctx.createBiquadFilter(), bg = ctx.createGain()
+    bp.type = 'bandpass'; bp.frequency.value = f * size; bp.Q.value = Math.max(4, v.q * 3)
+    bg.gain.value = a * 2.2
+    soft.connect(bp).connect(bg).connect(g)
+    nodes.push(bp, bg)
+  }
+  g.connect(out)
+  nodes.push(soft, g)
+  // The consonant before the vowel
+  const noise = (start, len, type, freq, q, level) => {
     const n = ctx.createBufferSource(), nf = ctx.createBiquadFilter(), ng = ctx.createGain()
-    n.buffer = noiseBuffer(ctx); nf.type = 'bandpass'; nf.frequency.value = v.formant * 2; nf.Q.value = 1
-    ng.gain.setValueAtTime(0.0001, when); ng.gain.exponentialRampToValueAtTime(vol * v.breath, when + 0.01); ng.gain.exponentialRampToValueAtTime(0.0001, when + dur)
+    n.buffer = noiseBuffer(ctx); nf.type = type; nf.frequency.value = freq; nf.Q.value = q
+    ng.gain.setValueAtTime(0.0001, start); ng.gain.exponentialRampToValueAtTime(level, start + Math.min(0.006, len / 3)); ng.gain.exponentialRampToValueAtTime(0.0001, start + len)
     n.connect(nf).connect(ng).connect(out)
     n.onended = () => { n.disconnect(); nf.disconnect(); ng.disconnect() }
-    n.start(when, Math.random() * 0.3); n.stop(when + dur + 0.02)
+    n.start(start, Math.random() * 0.3); n.stop(start + len + 0.02)
   }
+  if (s.onset === 'plosive') noise(when, 0.014, 'highpass', 1400 * size, 0.7, vol * 0.5)
+  else if (s.onset === 'fricative') noise(when, 0.045, 'bandpass', 4800 * size, 1.2, vol * 0.35)
+  else if (s.onset === 'nasal') {
+    const m = ctx.createOscillator(), mg = ctx.createGain()
+    m.type = 'sine'; m.frequency.value = s.freq
+    mg.gain.setValueAtTime(0.0001, when); mg.gain.exponentialRampToValueAtTime(vol * 0.5, when + 0.01); mg.gain.exponentialRampToValueAtTime(0.0001, when + 0.05)
+    m.connect(mg).connect(out); m.onended = () => { m.disconnect(); mg.disconnect() }
+    m.start(when); m.stop(when + 0.06)
+  }
+  // A whisper of breath over the vowel
+  if (v.breath) noise(when, dur, 'bandpass', 2200 * size, 1, vol * v.breath * 0.6)
   o.onended = () => { o.disconnect(); nodes.forEach(x => x.disconnect()) }
   o.start(when); o.stop(when + dur + 0.03)
 }
@@ -193,4 +234,17 @@ export function speak(text, voiceId) {
   timer = setInterval(pump, 80)
   pump()
   return { timeline: tl, stop }
+}
+
+// A line spoken into an offline context, to listen to a voice outside the game
+export async function renderLine(text, voiceId, sampleRate = 44100) {
+  const tl = timeline(text, voiceId)
+  const off = new OfflineAudioContext(2, Math.round(sampleRate * (tl.length + 1.5)), sampleRate)
+  const out = off.createGain()
+  out.gain.value = 0.9
+  out.connect(off.destination)
+  const v = voiceOf(voiceId), echo = echoOut(off, out, v.echo)
+  for (const s of tl.sylls) syllable(off, echo.node, v, s, 0.2 + s.t)
+  const buf = await off.startRendering()
+  return { channels: [buf.getChannelData(0), buf.getChannelData(1)], sampleRate }
 }

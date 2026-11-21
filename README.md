@@ -177,11 +177,14 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 <details>
 <summary><b>Sound</b></summary>
 
-- **Generative music:** thirteen themes that follow where you are and what you do, in three palettes, with their own tempo and melody density. They can follow the game or stay on one theme.
+- **A theme for every screen and activity:** thirty pieces, from the tavern's jig and the workshop's anvils to the chapel's organ and the boss's war drums. Each is written in its own mode and composed as it plays, in phrases built on a motif of its own, with harmony that moves smoothly from chord to chord.
+- **Synthesised instruments:** plucked lute and harp, bells and celesta, bowed strings, a choir on real vowels, organ, a breathy flute, horns, frame drums, tambourine and timpani. Plucked and struck notes are rendered once and replayed, so they cost almost nothing.
+- **Fights raise the music:** drums come in when a fight is on screen, and at low health the music dulls under a heartbeat.
+- **A real mix:** every theme plays in its own room (a warm tavern, a long cave, a vast cathedral), through an EQ, a bus compressor, gentle saturation and a limiter, with themes evened out to the same loudness.
 - **Ambience** that follows the weather and the region you fight in.
-- **Thirty sound alerts** that can each be tuned, heard with the tab hidden or sent as a browser notification, with profiles to switch everything at once.
-- **Voices** on a channel of their own, with a volume and a reading speed. The music steps back while someone speaks.
-
+- **Sound effects** built in layers from the same instruments, with a little variation every time, in three packs.
+- **Voices** sung on the vowels of their words, with consonants and a throat of their own for every character.
+- **A sound screen** with a live picture of the music, the library of themes and the full mixer.
 </details>
 
 <details>
