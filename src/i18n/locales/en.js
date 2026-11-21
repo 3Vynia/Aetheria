@@ -1191,8 +1191,9 @@ export default {
     keepThis: "Keep this theme",
     stopPreview: "Stop preview",
     themesTitle: "Themes",
-    themesIntro: "Tap a theme to hear it for 15 seconds. The game itself is not touched.",
+    themesIntro: "Tap a theme to hear it for 20 seconds. The game itself is not touched.",
     themesLocked: "Tap a theme to lock it and hear it.",
+    listen: 'Listen', intensity: 'Intensity {n} of 3', intensityTip: 'How much plays at once: fights raise it and bring in the drums.', groups: { realm: 'The realm', town: 'The town', work: 'Crafts and work', story: 'Story and hero' },
     themes: {
       calm: "Calm",
       adventure: "Adventure",

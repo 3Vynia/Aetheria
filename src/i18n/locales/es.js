@@ -1191,8 +1191,9 @@ export default {
     keepThis: "Fijar este tema",
     stopPreview: "Parar vista previa",
     themesTitle: "Temas",
-    themesIntro: "Toca un tema para escucharlo 15 segundos. La partida no cambia.",
+    themesIntro: "Toca un tema para escucharlo 20 segundos. La partida no cambia.",
     themesLocked: "Toca un tema para fijarlo y escucharlo.",
+    listen: 'Escuchar', intensity: 'Intensidad {n} de 3', intensityTip: 'Cuánto suena a la vez: los combates suben la intensidad y entran los tambores.', groups: { realm: 'El reino', town: 'La ciudad', work: 'Oficios', story: 'Historia y héroe' },
     themes: {
       calm: "Calma",
       adventure: "Aventura",

@@ -7,12 +7,13 @@ import Slider from 'primevue/slider'
 import SelectButton from 'primevue/selectbutton'
 import { useConfirm } from 'primevue/useconfirm'
 import { G, state } from '../game/engine.js'
-import { THEME_IDS, PALETTES, PROFILE_IDS } from '../game/data/audio.js'
+import { PALETTES, PROFILE_IDS } from '../game/data/audio.js'
 import { nowPlaying, previewTheme, stopPreview } from '../game/music.js'
 import { play } from '../game/sound.js'
 import { speak, VOICE_SPEEDS } from '../game/voices.js'
 import { applyProfile, saveCustomProfile, matchingProfile, resetAudio } from '../game/audioProfiles.js'
 import GameIcon from './GameIcon.vue'
+import SoundStage from './SoundStage.vue'
 
 const { t } = useI18n()
 const confirm = useConfirm()
@@ -48,10 +49,30 @@ const voiceSpeeds = computed(() => Object.keys(VOICE_SPEEDS).map(v => ({ value: 
 function setVoiceSpeed(v) { st.voiceSpeed = v; speak(t('audio.voiceSample'), 'keeper') }
 
 /* ---------- music ---------- */
-const THEME_ICONS = {
-  calm: 'candle-light', adventure: 'pine-tree', dark: 'mushroom', cold: 'ice-spell-cast', ominous: 'crowned-skull', celestial: 'sun',
-  town: 'beer-horn', farm: 'wheat', dungeon: 'locked-chest', tower: 'stone-tower', boss: 'dragon-head', frozen: 'ice-golem', dragon: 'dragon-breath',
+// Each theme's icon and its two colours, which tint its card and the stage while it plays
+const LOOK = {
+  calm: ['candle-light', '#e2b65a', '#6f5cd2'], voyage: ['compass', '#d9a35b', '#3f8f9a'], adventure: ['pine-tree', '#7fb069', '#e2b65a'],
+  dark: ['mushroom', '#5a4a8a', '#2e6b5a'], cold: ['ice-spell-cast', '#8fd0f2', '#6f7fd2'], frozen: ['ice-golem', '#9fe0ff', '#4a6fbf'],
+  ominous: ['crowned-skull', '#8a2a52', '#3a2a6a'], celestial: ['sun', '#ffe08a', '#a98bff'], dragon: ['dragon-breath', '#e0602a', '#8a2a2a'],
+  dungeon: ['locked-chest', '#6a5a4a', '#3a3a5a'], tower: ['stone-tower', '#c9a04a', '#5a6a9a'], boss: ['dragon-head', '#c0392b', '#5a1a3a'],
+  town: ['beer-horn', '#e2b65a', '#c9853a'], tavern: ['beer-horn', '#c9853a', '#8a4a2a'], market: ['two-coins', '#e2c35a', '#5aa87a'],
+  guild: ['swords-emblem', '#b8862e', '#5a3a8a'], hearth: ['family-house', '#e8a65a', '#a8462a'], chapel: ['church', '#f1e3b0', '#8a9ad8'],
+  festival: ['laurel-crown', '#f2b233', '#e8435a'], labour: ['mining', '#c9a36b', '#5a7a4a'], workshop: ['anvil-impact', '#e07a3a', '#6a6a7a'],
+  farm: ['wheat', '#c9b84a', '#6aa84a'], waters: ['fishing-pole', '#5fa8d3', '#3a6aa8'], stealth: ['hood', '#4a4a6a', '#2a5a5a'],
+  hero: ['crossed-swords', '#e2b65a', '#4a6fbf'], chronicle: ['quill-ink', '#c9b27a', '#6a4a8a'], library: ['bookshelf', '#a8865a', '#4a6a8a'],
+  playful: ['paw-print', '#f2a65a', '#5ab8a8'], starlight: ['crystal-ball', '#a98bff', '#4ad0e0'], rebirth: ['ankh', '#f1e3b0', '#7a5ad8'],
 }
+const THEME_ICONS = Object.fromEntries(Object.entries(LOOK).map(([k, v]) => [k, v[0]]))
+const colorsOf = id => (LOOK[id] || LOOK.calm).slice(1)
+// The library of themes, by where they are heard
+const GROUPS = [
+  { id: 'realm', themes: ['calm', 'voyage', 'adventure', 'dark', 'cold', 'frozen', 'ominous', 'celestial', 'dragon', 'dungeon', 'tower', 'boss'] },
+  { id: 'town', themes: ['town', 'tavern', 'market', 'guild', 'hearth', 'chapel', 'festival'] },
+  { id: 'work', themes: ['labour', 'workshop', 'farm', 'waters', 'stealth'] },
+  { id: 'story', themes: ['hero', 'chronicle', 'library', 'playful', 'starlight', 'rebirth'] },
+]
+const listening = computed(() => !!nowPlaying.preview)
+function toggleListen() { if (nowPlaying.preview) stopPreview(); else previewTheme(nowPlaying.theme, 30) }
 const modes = computed(() => [{ value: 'auto', label: t('audio.mode.auto') }, { value: 'locked', label: t('audio.mode.locked') }])
 const palettes = computed(() => PALETTES.map(p => ({ value: p, label: t(`audio.palettes.${p}.name`) })))
 function pickTheme(id) {
@@ -76,6 +97,49 @@ function reset() {
 
 <template>
   <div class="stack">
+    <!-- The stage: what is playing, drawn as it sounds -->
+    <section class="stage" :style="{ '--a': colorsOf(nowPlaying.theme)[0], '--b': colorsOf(nowPlaying.theme)[1] }">
+      <SoundStage :colors="colorsOf(nowPlaying.theme)" :active="st.music !== false || listening" />
+      <div class="stage-body">
+        <div class="stage-kicker">{{ $t('audio.nowPlaying') }}</div>
+        <h2 class="stage-title">{{ $t(`audio.themes.${nowPlaying.theme}`) }}</h2>
+        <div class="stage-why">{{ why }}</div>
+        <div class="stage-intensity" :aria-label="$t('audio.intensity', { n: nowPlaying.intensity })" v-tooltip.top="$t('audio.intensityTip')">
+          <i v-for="n in 4" :key="n" :class="{ on: n - 1 <= nowPlaying.intensity }" />
+        </div>
+        <div class="stage-controls">
+          <button class="listen" :class="{ on: listening }" :aria-label="$t(listening ? 'audio.stopPreview' : 'audio.listen')" @click="toggleListen">
+            <i class="pi" :class="listening ? 'pi-pause' : 'pi-play'" />
+          </button>
+          <div class="mode-pill" role="radiogroup">
+            <button v-for="m in modes" :key="m.value" role="radio" :aria-checked="st.musicMode === m.value" :class="{ on: st.musicMode === m.value }" @click="st.musicMode = m.value">{{ m.label }}</button>
+          </div>
+          <button v-if="st.musicMode === 'auto'" class="ghost" @click="lockCurrent"><i class="pi pi-lock" /> {{ $t('audio.keepThis') }}</button>
+        </div>
+        <p class="stage-hint">{{ $t(st.musicMode === 'locked' ? 'audio.mode.lockedHint' : 'audio.mode.autoHint') }}</p>
+      </div>
+    </section>
+
+    <!-- The library of themes -->
+    <section class="panel pad">
+      <h3 class="panel-title"><GameIcon name="crystal-ball" /> {{ $t('audio.themesTitle') }}</h3>
+      <p class="small muted" style="margin-top:0">{{ $t(st.musicMode === 'locked' ? 'audio.themesLocked' : 'audio.themesIntro') }}</p>
+      <div v-for="g in GROUPS" :key="g.id" class="theme-group">
+        <div class="group-name">{{ $t('audio.groups.' + g.id) }}</div>
+        <div class="cards">
+          <button v-for="id in g.themes" :key="id" class="card-theme"
+            :class="{ playing: nowPlaying.theme === id, chosen: st.musicMode === 'locked' && st.musicTheme === id }"
+            :style="{ '--a': colorsOf(id)[0], '--b': colorsOf(id)[1] }" @click="pickTheme(id)">
+            <span class="card-glow" />
+            <GameIcon :name="THEME_ICONS[id]" :size="22" />
+            <span class="card-name">{{ $t(`audio.themes.${id}`) }}</span>
+            <span v-if="nowPlaying.theme === id" class="eq" aria-hidden="true"><i /><i /><i /><i /></span>
+            <i v-else class="pi pi-play card-play" />
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- Mixer -->
     <div class="panel pad">
       <h3 class="panel-title"><i class="pi pi-sliders-h" style="color:var(--gold)" /> {{ $t('audio.mixer') }}</h3>
@@ -124,32 +188,6 @@ function reset() {
       <i class="pi" :class="more ? 'pi-angle-up' : 'pi-angle-down'" />
     </button>
     <div v-show="more" class="stack">
-    <!-- Now playing -->
-    <div class="panel pad now">
-      <h3 class="panel-title"><GameIcon :name="THEME_ICONS[nowPlaying.theme] || 'candle-light'" /> {{ $t('audio.nowPlaying') }}</h3>
-      <div class="now-theme">{{ $t(`audio.themes.${nowPlaying.theme}`) }}</div>
-      <div class="small muted">{{ why }}</div>
-      <div class="row wrap" style="gap:8px;margin-top:12px">
-        <SelectButton v-model="st.musicMode" :options="modes" optionLabel="label" optionValue="value" :allowEmpty="false" size="small" />
-        <Button v-if="st.musicMode === 'auto'" :label="$t('audio.keepThis')" icon="pi pi-lock" size="small" severity="secondary" outlined @click="lockCurrent" />
-        <Button v-if="nowPlaying.preview" :label="$t('audio.stopPreview')" icon="pi pi-stop" size="small" severity="secondary" @click="stopPreview" />
-      </div>
-      <p class="small faint" style="margin:10px 0 0">{{ $t(st.musicMode === 'locked' ? 'audio.mode.lockedHint' : 'audio.mode.autoHint') }}</p>
-    </div>
-
-    <!-- Themes -->
-    <div class="panel pad">
-      <h3 class="panel-title"><GameIcon name="crystal-ball" /> {{ $t('audio.themesTitle') }}</h3>
-      <p class="small muted" style="margin-top:0">{{ $t(st.musicMode === 'locked' ? 'audio.themesLocked' : 'audio.themesIntro') }}</p>
-      <div class="themes">
-        <button v-for="id in THEME_IDS" :key="id" class="theme" :class="{ playing: nowPlaying.theme === id, chosen: st.musicMode === 'locked' && st.musicTheme === id }" @click="pickTheme(id)">
-          <GameIcon :name="THEME_ICONS[id]" :size="18" />
-          <span class="grow">{{ $t(`audio.themes.${id}`) }}</span>
-          <i class="pi" :class="nowPlaying.preview === id ? 'pi-volume-up' : 'pi-play'" />
-        </button>
-      </div>
-    </div>
-
     <!-- How the music sounds -->
     <div class="panel pad">
       <h3 class="panel-title"><GameIcon name="magic-swirl" /> {{ $t('audio.styleTitle') }}</h3>
@@ -175,6 +213,54 @@ function reset() {
 </template>
 
 <style scoped>
+/* The stage */
+.stage { position: relative; min-height: 340px; border-radius: 22px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--a) 35%, transparent);
+  box-shadow: 0 30px 60px -30px color-mix(in srgb, var(--a) 50%, #000), inset 0 0 0 1px rgba(255, 255, 255, 0.04); display: flex; align-items: flex-end; }
+.stage-body { position: relative; z-index: 1; width: 100%; padding: 28px 28px 22px; background: linear-gradient(180deg, transparent, rgba(5, 4, 10, 0.75) 60%); color: #f4eee2; }
+.stage-kicker { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(244, 238, 226, 0.6); }
+.stage-title { margin: 4px 0 2px; font-family: var(--font-display); font-weight: 400; font-size: clamp(30px, 5vw, 46px); letter-spacing: 0.03em; line-height: 1.05;
+  background: linear-gradient(90deg, #fff, color-mix(in srgb, var(--a) 70%, #fff)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.stage-why { font-size: 13.5px; color: rgba(244, 238, 226, 0.7); }
+.stage-intensity { display: flex; gap: 5px; margin: 12px 0 16px; width: max-content; }
+.stage-intensity i { width: 22px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.15); transition: background 0.4s; }
+.stage-intensity i.on { background: linear-gradient(90deg, var(--a), var(--b)); box-shadow: 0 0 10px color-mix(in srgb, var(--a) 70%, transparent); }
+.stage-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.listen { width: 56px; height: 56px; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center; color: #12101a; font-size: 18px;
+  background: linear-gradient(135deg, #fff, color-mix(in srgb, var(--a) 60%, #fff)); box-shadow: 0 10px 30px -8px color-mix(in srgb, var(--a) 80%, transparent); transition: transform 0.2s; }
+.listen:hover { transform: scale(1.06); }
+.listen.on { animation: breathe 2.4s ease-in-out infinite; }
+@keyframes breathe { 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--a) 18%, transparent), 0 10px 30px -8px color-mix(in srgb, var(--a) 80%, transparent); } }
+.mode-pill { display: flex; padding: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); }
+.mode-pill button { border: 0; background: none; color: rgba(244, 238, 226, 0.7); font: inherit; font-size: 13px; padding: 7px 16px; border-radius: 999px; cursor: pointer; }
+.mode-pill button.on { background: rgba(255, 255, 255, 0.16); color: #fff; }
+.ghost { border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.04); color: rgba(244, 238, 226, 0.85); font: inherit; font-size: 13px; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+.ghost:hover { background: rgba(255, 255, 255, 0.1); }
+.stage-hint { margin: 12px 0 0; font-size: 12.5px; color: rgba(244, 238, 226, 0.5); max-width: 60ch; }
+.listen:focus-visible, .mode-pill button:focus-visible, .ghost:focus-visible, .card-theme:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* The library */
+.theme-group + .theme-group { margin-top: 16px; }
+.group-name { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 8px; }
+.cards { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 2px; padding: 2px 2px 8px; margin: 0 -2px;
+  scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.15) transparent; -webkit-mask-image: linear-gradient(90deg, #000 90%, transparent); mask-image: linear-gradient(90deg, #000 90%, transparent); }
+.card-theme { flex: 0 0 172px; scroll-snap-align: start; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; min-height: 104px; padding: 14px; border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08); color: #f4eee2; font: inherit; text-align: start; cursor: pointer;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--a) 38%, #0d0b16), color-mix(in srgb, var(--b) 45%, #0a0912)); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+.card-glow { position: absolute; inset: -40% -20% auto auto; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--a) 60%, transparent), transparent 70%); opacity: 0.6; pointer-events: none; }
+.card-theme .gi { position: relative; color: rgba(255, 255, 255, 0.9); filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4)); }
+.card-name { position: relative; font-weight: 700; font-size: 14px; line-height: 1.2; }
+.card-play { position: absolute; right: 12px; bottom: 12px; font-size: 11px; color: rgba(255, 255, 255, 0.55); opacity: 0; transition: opacity 0.2s; }
+.card-theme:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--a) 70%, #000); }
+.card-theme:hover .card-play { opacity: 1; }
+.card-theme.playing { border-color: rgba(255, 255, 255, 0.45); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15), 0 14px 34px -14px color-mix(in srgb, var(--a) 90%, #000); }
+.card-theme.chosen::after { content: ''; position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #fff; }
+.eq { position: absolute; right: 12px; bottom: 12px; display: flex; align-items: flex-end; gap: 2px; height: 14px; }
+.eq i { width: 3px; background: #fff; border-radius: 1px; animation: eq 0.9s ease-in-out infinite; }
+.eq i:nth-child(2) { animation-delay: -0.3s; } .eq i:nth-child(3) { animation-delay: -0.6s; } .eq i:nth-child(4) { animation-delay: -0.15s; }
+@keyframes eq { 0%, 100% { height: 3px; } 50% { height: 14px; } }
+@media (prefers-reduced-motion: reduce) { .eq i, .listen.on { animation: none; } .card-theme { transition: none; } }
+:root[data-motion='reduce'] .eq i, :root[data-motion='reduce'] .listen.on { animation: none; }
+@media (max-width: 600px) { .stage { min-height: 300px; } .stage-body { padding: 20px 18px 18px; } .card-theme { flex-basis: 140px; } }
 .fold { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); color: inherit; font: inherit; text-align: start; cursor: pointer; }
 .fold:hover { border-color: var(--line-hi); }
 .fold .gi { color: var(--gold); }
@@ -191,13 +277,5 @@ function reset() {
 .vol-slider { width: 130px; flex-shrink: 0; }
 .vol-n { width: 26px; text-align: end; }
 .block { display: block; }
-.now-theme { font-family: var(--font-display); font-size: 24px; color: var(--gold-hi); line-height: 1.2; }
-.themes { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; }
-.theme { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: inherit; font: inherit; text-align: start; }
-.theme .gi { color: var(--muted); }
-.theme:hover { border-color: var(--line-hi); }
-.theme.playing { border-color: color-mix(in srgb, var(--gold) 60%, transparent); }
-.theme.playing .gi, .theme.chosen .gi { color: var(--gold); }
-.theme.chosen { background: rgba(226, 182, 90, 0.08); }
 @media (max-width: 520px) { .vol { flex-wrap: wrap; } .vol > .grow { flex: 1 1 calc(100% - 64px); } .vol-slider { width: auto; flex: 1 1 calc(100% - 60px); margin: 4px 8px 6px; } }
 </style>
