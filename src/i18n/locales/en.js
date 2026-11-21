@@ -3489,7 +3489,7 @@ export default {
       snake: "The serpents of the swamp grow longer every year. The Shard of Sap feeds everything here, whether it should or not.",
       scorpion: "Their shells are hard as iron. Herbalists say their venom, boiled right, can stop a fever. Boiled wrong, it can stop you.",
       werewolf: "Hunters who drank from the warm waters of the mire. The moon reminds them every month.",
-      specter: "The royal guard died defending Alba Mayor. They are still waiting for the order to stand down.",
+      specter: "The royal guard died defending Highdawn. They are still waiting for the order to stand down.",
       vampire: "Nobles of the old court who refused to grow old without their king. They got what they wished for.",
       gargoyle: "Carved to watch over the capital. When the city fell, they kept watching. Now they watch you.",
       bear: "Bears of the Frozen Peaks sleep through the long winter. Since the Shard of Winter fell, the winter has not ended.",
