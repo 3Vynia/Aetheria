@@ -19,6 +19,8 @@ if (import.meta.env.DEV) Object.assign(window, { __G: G, __router: router })
 
 // After an update the files of the old version are gone: a page still running it reloads once to pick up the new one
 window.addEventListener('vite:preloadError', e => {
+  // Offline a reload cannot help: the screen stays where it was instead of the page starting over
+  if (navigator.onLine === false) return
   try {
     if (sessionStorage.getItem('aetheria-reloaded')) return
     sessionStorage.setItem('aetheria-reloaded', '1')

@@ -1,16 +1,34 @@
-// Offline support. The page itself is fetched network-first so a new release shows up on the next
-// visit; hashed build assets and fonts never change, so they are served from the cache once stored.
-const CACHE = 'aetheria-v1'
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png']
+// Offline support. Every file of the game is stored when the worker installs (the build fills FILES
+// and names the cache after them), so it plays offline from the first visit, on every screen and in
+// either language. The page itself is fetched network-first so a new release shows up on the next
+// visit; fonts are stored the first time they load.
+const CACHE = 'aetheria'
+const FILES = []
+const SHELL = ['./', './index.html']
+// The fonts' stylesheet, as index.html asks for it; the font files it names are stored with it
+const FONTS = 'https://fonts.googleapis.com/css2?family=Marcellus+SC&family=Alegreya+Sans:wght@400;500;700;800&display=swap'
+
+async function storeFonts(cache) {
+  const css = await fetch(FONTS, { mode: 'cors' })
+  if (!css.ok) return
+  await cache.put(FONTS, css.clone())
+  const urls = [...(await css.text()).matchAll(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/g)].map(m => m[1])
+  await Promise.all(urls.map(u => cache.add(new Request(u, { mode: 'cors' })).catch(() => {})))
+}
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()))
+  event.waitUntil(
+    caches.open(CACHE)
+      // One file that fails to download must not leave the rest unstored
+      .then(cache => Promise.all([...[...SHELL, ...FILES].map(f => cache.add(f).catch(() => {})), storeFonts(cache).catch(() => {})]))
+      .then(() => self.skipWaiting()),
+  )
 })
 
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith('aetheria') && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim()),
   )
 })
@@ -34,7 +52,8 @@ self.addEventListener('fetch', event => {
   }
 
   event.respondWith(
-    caches.match(request).then(hit => hit || fetch(request).then(res => {
+    // Module scripts are requested with an Origin header the stored copies were not, so Vary is ignored
+    caches.match(request, { ignoreSearch: true, ignoreVary: true }).then(hit => hit || fetch(request).then(res => {
       if (res.ok || res.type === 'opaque') { const copy = res.clone(); caches.open(CACHE).then(c => c.put(request, copy)) }
       return res
     })),
