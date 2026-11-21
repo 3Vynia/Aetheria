@@ -42,7 +42,7 @@ export const CUES = [
   cue('queueDone', 'system', 'coin', { bg: true }),
   cue('weather', 'system', 'coin', { prio: 'low', gap: 5000 }),
   // Buttons and small actions on screen: buying, claiming, hiring…
-  cue('ui', 'system', 'coin', { prio: 'low', gap: 60 }),
+  cue('ui', 'system', 'tick', { prio: 'low', gap: 60 }),
 ]
 export const CUE_MAP = Object.fromEntries(CUES.map(c => [c.id, c]))
 export const CUE_LIMIT = { desktop: 48, mobile: 24 } // effect voices playing at once

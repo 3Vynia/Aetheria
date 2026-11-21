@@ -1,6 +1,7 @@
 import { state } from './engine.js'
 import { audioContext, sfxOut, duckMusic, playStinger, musicPlaying, hiddenQuiet } from './music.js'
 import { CUE_MAP, CUE_LIMIT, GROUP_WINDOW } from './data/audio.js'
+import { pluckString, fmBell, frameDrum, shaker, noiseGen, biquad } from './audio/dsp.js'
 
 /*
   Sound effects and the alerts that play them, synthesised with WebAudio (no audio files).
@@ -9,51 +10,94 @@ import { CUE_MAP, CUE_LIMIT, GROUP_WINDOW } from './data/audio.js'
   little before it can sound again, bursts become a single sound, and crowded moments drop the least
   important ones. Big alerts lower the music for a moment, and some play a short musical phrase.
 */
-const NOTES = {
-  level: [[523, 0], [659, 0.09], [784, 0.18], [1047, 0.27]],
-  rare: [[1175, 0], [1568, 0.07], [2093, 0.14]],
-  coin: [[988, 0], [1319, 0.06]],
-  quest: [[392, 0], [523, 0.12], [659, 0.24], [784, 0.36]],
-  bad: [[220, 0], [165, 0.14]],
-  dice: [[300, 0], [420, 0.05], [360, 0.1]],
-  burst: [[784, 0], [988, 0.04], [1175, 0.08], [1568, 0.12]],
-}
-
-/* ---------------- voices ---------------- */
+/* ---------------- the sounds ---------------- */
+// Each effect is built from layers rendered once (audio/dsp.js): a transient, a body and a tail. Every
+// time it plays it is nudged in pitch and loudness, so a repeated sound never feels mechanical.
 let voices = 0
 const voiceLimit = () => (typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches ? CUE_LIMIT.mobile : CUE_LIMIT.desktop)
-function tone(ctx, out, freq, at, dur, type, vol) {
-  const osc = ctx.createOscillator(), gain = ctx.createGain()
-  osc.type = type
-  osc.frequency.value = freq
-  gain.gain.setValueAtTime(0.0001, at)
-  gain.gain.exponentialRampToValueAtTime(vol, at + 0.02)
-  gain.gain.exponentialRampToValueAtTime(0.0001, at + dur)
-  osc.connect(gain).connect(out)
-  voices++
-  osc.onended = () => { voices--; osc.disconnect(); gain.disconnect() }
-  osc.start(at)
-  osc.stop(at + dur + 0.03)
+const hz = m => 440 * 2 ** ((m - 69) / 12)
+
+// A short knock of wood: noise through a resonant band, gone in a few milliseconds
+function woodClick(sr, freq, seed) {
+  const n = Math.round(sr * 0.08), out = new Float32Array(n), rnd = noiseGen(seed), bp = biquad('bandpass', freq, 6, sr)
+  for (let i = 0; i < n; i++) out[i] = bp(rnd()) * Math.exp((-i / sr) * 70) * 4
+  return out
 }
-// One effect in one of the packs: classic (the original), crystal (bright bells) or minimal (soft clicks)
+const RENDER = {
+  ping: (sr, m) => fmBell(hz(m), sr, { dur: 0.7, ratio: 2.71, index: 1.3, decay: 7, partial: 0.3 }),
+  bell: (sr, m) => fmBell(hz(m), sr, { dur: 1.6, ratio: 3.5, index: 2, decay: 2.6 }),
+  glass: (sr, m) => fmBell(hz(m), sr, { dur: 1.4, ratio: 1.4, index: 0.9, decay: 3, partial: 0.1 }),
+  harp: (sr, m) => pluckString(hz(m), sr, { dur: 1.6, decay: 0.998, bright: 0.45, pick: 0.4, body: 0.1 }),
+  mute: (sr, m) => pluckString(hz(m), sr, { dur: 0.6, decay: 0.986, bright: 0.25, pick: 0.3, body: 0.4 }),
+  thud: sr => frameDrum(sr, { pitch: 64, dur: 0.5, slap: 0.15 }),
+  grain: sr => shaker(sr, { dur: 0.09 }),
+  wood: (sr, m) => woodClick(sr, hz(m), m),
+}
+const buffers = new Map()
+function buffer(ctx, kind, midi = 60) {
+  const key = kind + ':' + midi
+  let b = buffers.get(key)
+  if (!b) {
+    const d = RENDER[kind](ctx.sampleRate, midi)
+    b = ctx.createBuffer(1, d.length, ctx.sampleRate)
+    b.getChannelData(0).set(d)
+    buffers.set(key, b)
+  }
+  return b
+}
+// One layer: a rendered sound, when, how loud, a little detuned and placed in the stereo field
+function layer(ctx, out, kind, midi, at, vol, pan = 0) {
+  const src = ctx.createBufferSource(), g = ctx.createGain()
+  src.buffer = buffer(ctx, kind, midi)
+  src.playbackRate.value = 1 + (Math.random() - 0.5) * 0.03
+  g.gain.value = vol * (0.88 + Math.random() * 0.12)
+  let tail = g
+  if (ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; g.connect(p); tail = p }
+  src.connect(g)
+  tail.connect(out)
+  voices++
+  src.onended = () => { voices--; src.disconnect(); g.disconnect(); if (tail !== g) tail.disconnect() }
+  src.start(at)
+}
+// The effects, as layers: [sound, MIDI note, delay in seconds, loudness, pan]
+const DESIGNS = {
+  classic: {
+    coin: [['grain', 60, 0, 0.5, 0.2], ['ping', 91, 0, 1, -0.1], ['ping', 95, 0.07, 0.8, 0.15]],
+    level: [['harp', 60, 0, 0.7, -0.2], ['bell', 84, 0.02, 0.6, 0], ['bell', 88, 0.11, 0.6, 0.1], ['bell', 91, 0.2, 0.7, 0.2], ['bell', 96, 0.3, 0.55, 0.25]],
+    quest: [['harp', 55, 0, 0.8, -0.3], ['harp', 62, 0.045, 0.7, -0.1], ['harp', 67, 0.09, 0.7, 0.1], ['harp', 71, 0.135, 0.7, 0.2], ['bell', 86, 0.24, 0.7, 0.15]],
+    rare: [['glass', 84, 0, 0.6, -0.3], ['glass', 88, 0.06, 0.6, -0.1], ['glass', 91, 0.12, 0.65, 0.1], ['glass', 96, 0.18, 0.7, 0.25], ['bell', 100, 0.26, 0.5, 0.3], ['grain', 60, 0.26, 0.6, 0]],
+    bad: [['thud', 60, 0, 0.9, 0], ['mute', 45, 0, 0.9, -0.1], ['mute', 40, 0.14, 0.9, 0.1]],
+    dice: [['wood', 79, 0, 0.9, -0.2], ['wood', 84, 0.06, 0.7, 0.1], ['wood', 81, 0.11, 0.6, 0.25]],
+    burst: [['glass', 88, 0, 0.5, -0.2], ['glass', 91, 0.04, 0.5, 0], ['glass', 96, 0.08, 0.55, 0.2], ['glass', 100, 0.12, 0.5, 0.3]],
+    tick: [['wood', 86, 0, 0.45, 0]],
+  },
+  crystal: {
+    coin: [['glass', 96, 0, 0.9, -0.1], ['glass', 100, 0.06, 0.7, 0.15]],
+    level: [['glass', 84, 0, 0.7, -0.2], ['glass', 88, 0.09, 0.7, 0], ['glass', 91, 0.18, 0.7, 0.15], ['glass', 96, 0.27, 0.7, 0.25]],
+    quest: [['glass', 79, 0, 0.7, -0.2], ['glass', 86, 0.1, 0.7, 0], ['glass', 91, 0.2, 0.75, 0.2]],
+    rare: [['glass', 91, 0, 0.6, -0.3], ['glass', 96, 0.05, 0.6, 0], ['glass', 100, 0.1, 0.65, 0.2], ['glass', 103, 0.15, 0.6, 0.3]],
+    bad: [['glass', 64, 0, 0.7, 0], ['glass', 59, 0.15, 0.7, 0]],
+    dice: [['glass', 88, 0, 0.5, -0.2], ['glass', 91, 0.05, 0.4, 0.2]],
+    burst: [['glass', 96, 0, 0.5, -0.2], ['glass', 100, 0.04, 0.5, 0.2]],
+    tick: [['glass', 100, 0, 0.3, 0]],
+  },
+  minimal: {
+    coin: [['wood', 88, 0, 1.08, 0]], level: [['harp', 72, 0, 1.08, 0]], quest: [['harp', 67, 0, 1.08, 0], ['harp', 74, 0.08, 0.9, 0]],
+    rare: [['glass', 91, 0, 0.9, 0]], bad: [['mute', 48, 0, 1.26, 0]], dice: [['wood', 81, 0, 1.08, 0]], burst: [['wood', 88, 0, 0.9, 0]], tick: [['wood', 86, 0, 0.63, 0]],
+  },
+}
+// One effect in one of the packs: classic (strings, bells and wood), crystal (glass and bells) or minimal (soft single sounds)
 function render(kind, pack, volume) {
   const ctx = audioContext()
   if (!ctx) return
   if (ctx.state === 'suspended') ctx.resume()
-  const out = sfxOut(), now = ctx.currentTime
-  const notes = NOTES[kind] || NOTES.coin
-  if (pack === 'minimal') {
-    const [freq] = notes[0]
-    tone(ctx, out, kind === 'bad' ? freq : freq * 0.75, now, 0.09, 'sine', volume * 0.7)
-    return
-  }
-  notes.forEach(([freq, at]) => {
-    if (pack === 'crystal') {
-      tone(ctx, out, freq * (kind === 'bad' ? 1 : 2), now + at, 0.6, 'sine', volume * 0.7)
-      tone(ctx, out, freq * (kind === 'bad' ? 1.5 : 3), now + at + 0.01, 0.4, 'sine', volume * 0.18)
-    } else tone(ctx, out, freq, now + at, 0.32, kind === 'bad' ? 'sawtooth' : 'triangle', volume)
-  })
+  const out = sfxOut(), now = ctx.currentTime + 0.005
+  const design = (DESIGNS[pack] || DESIGNS.classic)[kind] || DESIGNS.classic[kind] || DESIGNS.classic.coin
+  // The layers were tuned for an alert at 0.12 to sit just under the music; its volume scales them
+  const vol = volume / 0.12 * 0.25
+  for (const [snd, midi, delay, v, pan] of design) layer(ctx, out, snd, midi, now + delay, v * vol, pan)
 }
+export const SOUND_KINDS = Object.keys(DESIGNS.classic)
 
 /* ---------------- the alert manager ---------------- */
 // How a single alert is set up: the catalogue's defaults under the player's own choices
@@ -137,4 +181,16 @@ export function notify(title, body) {
     if (!state.settings?.notify || !document.hidden || !('Notification' in window) || Notification.permission !== 'granted') return
     new Notification(title, { body, tag: title })
   } catch { /* notifications unavailable */ }
+}
+
+// Every effect of a pack one after another, rendered offline, to listen to them outside the game
+export async function renderEffects(pack = 'classic', sampleRate = 44100) {
+  const gap = 1.3, kinds = SOUND_KINDS
+  const off = new OfflineAudioContext(2, Math.round(sampleRate * (kinds.length * gap + 1)), sampleRate)
+  const out = off.createGain()
+  out.gain.value = 0.9
+  out.connect(off.destination)
+  kinds.forEach((k, i) => { for (const [snd, midi, delay, v, pan] of DESIGNS[pack][k]) layer(off, out, snd, midi, 0.2 + i * gap + delay, v * 0.5, pan) })
+  const buf = await off.startRendering()
+  return { channels: [buf.getChannelData(0), buf.getChannelData(1)], sampleRate, kinds }
 }

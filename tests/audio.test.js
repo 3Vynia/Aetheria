@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { G, state, newHero } from './helpers.js'
 import { moodFor, areaFor, areaAmbienceFor, MOOD_IDS } from '../src/game/music.js'
-import { gateCue, cueSettings, setCue } from '../src/game/sound.js'
+import { gateCue, cueSettings, setCue, SOUND_KINDS } from '../src/game/sound.js'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { applyProfile, saveCustomProfile, matchingProfile, resetAudio } from '../src/game/audioProfiles.js'
 import { CUES, CUE_MAP, CUE_CATS, THEMES, STINGERS, ROOMS, SCREEN_THEMES, SKILL_THEMES, PROFILES, PROFILE_IDS, PACKS, PALETTES, GROUP_WINDOW, AREA_AMBIENCE } from '../src/game/data/audio.js'
 import { AREAS } from '../src/game/data/combat.js'
@@ -72,6 +73,11 @@ describe('alerts', () => {
     for (const cat of CUE_CATS) expect(te(`audio.cats.${cat}`)).toBe(true)
     for (const p of PACKS) expect(te(`audio.packs.${p}.name`)).toBe(true)
     for (const p of PALETTES) expect(te(`audio.palettes.${p}.name`)).toBe(true)
+    // Every alert, and every sound a screen asks for, has a design
+    for (const c of CUES) expect(SOUND_KINDS, c.id).toContain(c.sound)
+    const walk = d => readdirSync(d).flatMap(f => (statSync(d + '/' + f).isDirectory() ? walk(d + '/' + f) : [d + '/' + f]))
+    const asked = new Set(walk('src').filter(f => /\.(js|vue)$/.test(f)).flatMap(f => [...readFileSync(f, 'utf8').matchAll(/\bplay\('([a-z]+)'\)/g)].map(m => m[1])))
+    for (const k of asked) expect(SOUND_KINDS, k).toContain(k)
   })
 
   it('wait between repeats and fold a burst into one sound', () => {
