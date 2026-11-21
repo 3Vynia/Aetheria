@@ -219,7 +219,7 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 |---|---|
 | **Framework** | [Vue 3](https://vuejs.org/) with `<script setup>`, [PrimeVue 4](https://primevue.org/) |
 | **Build** | [Vite](https://vite.dev/), with a single-file build that runs straight from disk |
-| **Languages** | [vue-i18n](https://vue-i18n.intlify.dev/): English and Spanish, every key checked in CI |
+| **Languages** | [vue-i18n](https://vue-i18n.intlify.dev/): English, Spanish and Korean, every key checked in CI |
 | **Sound** | WebAudio only: music, ambience, alerts and voices are all synthesised |
 | **Quality** | [Vitest](https://vitest.dev/) (over 570 tests, including real saves from every earlier version) and [ESLint](https://eslint.org/) |
 | **Hosting** | GitHub Pages as an installable, offline-ready app, and itch.io |

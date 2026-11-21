@@ -3,10 +3,9 @@ import { createI18n } from 'vue-i18n'
 export const LOCALES = {
   en: { name: 'English', intl: 'en-US', load: () => import('./locales/en.js') },
   es: { name: 'Español', intl: 'es-ES', load: () => import('./locales/es.js') },
-  // Being translated: only offered while developing until every text is done; what is missing reads in English
-  ko: { name: '한국어', intl: 'ko-KR', load: () => import('./locales/ko.js'), draft: true, font: 'https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Gowun+Dodum&display=swap' },
+  ko: { name: '한국어', intl: 'ko-KR', load: () => import('./locales/ko.js'), font: 'https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Gowun+Dodum&display=swap' },
 }
-// The languages a player can pick (drafts only show while developing)
+// The languages a player can pick (a language still being translated is marked draft and only shows while developing)
 export const PLAYABLE = Object.fromEntries(Object.entries(LOCALES).filter(([, l]) => !l.draft || import.meta.env?.DEV))
 const STORAGE_KEY = 'aetheria-locale'
 
