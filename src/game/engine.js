@@ -208,6 +208,10 @@ const UI_CACHE = new Map()
 let uiCacheLive = false
 // Offline progress is worked out in slices this long, with a breath for the page in between
 const SIM_SLICE_MS = 30
+// What happened while away that the welcome-back summary tells (ui/moments.js says how)
+export const MOMENTS = new Set(['mythic', 'rare', 'achievement', 'shard', 'ending', 'chapter', 'quest', 'pet', 'petEgg', 'petLevel', 'petBond',
+  'mastery', 'masterwork', 'hybrid', 'guardian', 'guildRank', 'favour', 'elite', 'expedition', 'dungeon', 'record', 'echo', 'companionQuest',
+  'overrun', 'cleansed', 'weeklyKill', 'boon', 'wish', 'event', 'unlock', 'jailed', 'death'])
 const MOD_PREFIX = 'mod|'
 
 export const G = {
@@ -220,7 +224,12 @@ export const G = {
   on(evt, fn) { (this.listeners[evt] ||= []).push(fn); return () => this.off(evt, fn) },
   off(evt, fn) { this.listeners[evt] = (this.listeners[evt] || []).filter(f => f !== fn) },
   emit(evt, data) {
-    if (this.tracker) return
+    // While the time away is worked out nothing is shown: what is worth telling waits for the summary
+    if (this.tracker) {
+      const m = this.tracker.moments
+      if (MOMENTS.has(evt) && m && m.length < 400) m.push({ evt, data })
+      return
+    }
     ;(this.listeners[evt] || []).forEach(fn => fn(data))
   },
   // Messages are { key, params } pairs so they can be shown in any language
@@ -752,7 +761,9 @@ export const G = {
     const total = Math.min(seconds, cap)
     const raw = toRaw(state)
     const activity = raw.activity ? JSON.parse(JSON.stringify(raw.activity)) : null
-    this.tracker = { seconds: total, capped: seconds > cap, xp: {}, items: {}, levels: {}, kills: {}, gold: 0, eaten: 0, tokens: 0, heroLevel: 0, stopReason: null, activity }
+    // from: the levels before, so the summary can show how far each one climbed
+    const from = { hero: this.heroLevel(), skills: Object.fromEntries(Object.keys(raw.skills).map(k => [k, this.level(k)])) }
+    this.tracker = { seconds: total, capped: seconds > cap, cap, xp: {}, items: {}, levels: {}, kills: {}, gold: 0, eaten: 0, tokens: 0, heroLevel: 0, stopReason: null, activity, from, moments: [] }
     return { raw, total, time: 0 }
   },
   // Runs the simulation until it ends or the clock passes `deadline`; true once it is over

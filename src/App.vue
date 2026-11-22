@@ -16,38 +16,36 @@ import { session, exitToTitle, continueGame } from './game/loop.js'
 import { SKILLS } from './game/data/skills.js'
 import { ITEMS } from './game/data/items.js'
 import { ROLES, DIFFICULTIES } from './game/data/character.js'
-import { fmt, fmtDec, fmtTime, fmtClock } from './game/format.js'
+import { fmt, fmtTime, fmtClock } from './game/format.js'
 import { cue, notify } from './game/sound.js'
 import { SHARDS } from './game/data/crown.js'
 import { AREAS } from './game/data/combat.js'
 import { regionOfActivity, regionPath } from './game/data/world.js'
-import { UNIQUE_MERCS } from './game/data/company.js'
 import { startAmbient, stopAmbient, setScene, applyAudioSettings, areaFor, setCaptionHandler } from './game/music.js'
 import { setCompactNumbers } from './game/format.js'
 import { zoomFor } from './game/data/settings.js'
 import { onError } from './game/feedback.js'
 import { watchForUpdates } from './game/updates.js'
 import { tm } from './i18n/index.js'
+import { tellMoment } from './ui/moments.js'
 import NavMenu from './components/NavMenu.vue'
 import HelpTip from './components/HelpTip.vue'
 import { weatherAt, nextWeather, skyMods } from './game/data/weather.js'
 import { modText } from './i18n/mods.js'
-import { guildName } from './i18n/names.js'
 import ActivityDock from './components/ActivityDock.vue'
 import WalletChip from './components/WalletChip.vue'
 import GlobalSearch from './components/GlobalSearch.vue'
 import MythicFound from './components/MythicFound.vue'
 import GameIcon from './components/GameIcon.vue'
 import ItemTile from './components/ItemTile.vue'
-import SpokenText from './components/SpokenText.vue'
-import { welcomeKind } from './game/data/questVoices.js'
+import OfflineSummary from './components/OfflineSummary.vue'
 import TitleScreen from './components/TitleScreen.vue'
 import BottomNav from './components/BottomNav.vue'
 import TutorialCoach from './components/TutorialCoach.vue'
 import TrackerBell from './components/TrackerBell.vue'
 import UpdateNotes from './components/UpdateNotes.vue'
 import { newsUnseen, markNewsSeen, unseenUpdates } from './ui/news.js'
-import { titled, cosmeticsForAch } from './game/data/cosmetics.js'
+import { titled } from './game/data/cosmetics.js'
 import { RARITY_TINT } from './game/data/omens.js'
 
 const { t, te } = useI18n()
@@ -184,6 +182,11 @@ const push = (icon, detail, kind = 'info', life = 3500) => {
   toast.add({ severity: SEVERITY[kind] || 'info', summary: '', detail, life, icon })
 }
 const quiet = () => state.settings.toasts !== 'all'
+// A moment told the same way here and in the welcome-back summary (ui/moments.js)
+const tellPush = (evt, d, life) => {
+  const told = tellMoment(evt, d)
+  if (told) push(told[0], told[1], told[2] === 'myth' ? 'rare' : told[2], life)
+}
 
 onMounted(() => {
   // Every subscription is dropped again on unmount, so a reloaded interface never shows a message twice
@@ -191,35 +194,35 @@ onMounted(() => {
   on('toast', e => push(e.icon, tm(e.msg), e.kind))
   on('levelup', d => { if (quiet()) return; cue('levelUp'); push(SKILLS[d.skill].icon, t('toast.levelUp', { level: d.level, skill: SKILLS[d.skill].name }), 'success', 4500) })
   on('herolevel', l => { cue('heroLevel', { notify: [t('toast.heroLevelPlain', { level: l }), t('toast.pointsToSpend')] }); push('laurel-crown', t('toast.heroLevel', { level: l }), 'success', 6000) })
-  on('mastery', d => quiet() || push('laurels-trophy', t('toast.mastery', { level: d.level, name: tm({ key: 'common.raw', params: { v: d.name } }) }), 'success', 4500))
+  on('mastery', d => quiet() || tellPush('mastery', d, 4500))
   // Ultra rare finds get their own window (MythicFound); this only rings and notifies
   on('mythic', d => cue('rareDrop', { notify: [t('mythic.notify', { tier: t('mythic.tiers.' + d.tier) }), ITEMS[d.item].name] }))
-  on('rare', d => { cue('rareDrop'); push(ITEMS[d.item].icon, t('toast.rare', { item: ITEMS[d.item].name }), 'rare', 5500) })
-  on('achievement', a => { cue('achievement'); push(a.icon, t('toast.achievement', { name: a.name }) + (a.gold ? ` · +${fmt(a.gold)} ${t('common.gold')}` : '') + (cosmeticsForAch(a.id) ? ` · ${t('cosmetics.unlockedToast')}` : ''), 'success', 5500) })
-  on('elite', e => { cue('elite'); push(e.monster.icon, t('toast.elite', { name: t('fighting.eliteName', { kind: t(`fighting.elites.${e.kind}`), name: e.monster.name }) }), 'rare', 5000) })
+  on('rare', d => { cue('rareDrop'); tellPush('rare', d, 5500) })
+  on('achievement', d => { cue('achievement'); tellPush('achievement', d, 5500) })
+  on('elite', d => { cue('elite'); tellPush('elite', d, 5000) })
   on('bossPhase', e => push(e.monster.icon, t('toast.bossPhase', { name: e.monster.name, phase: t(`fighting.phases.${e.id}.name`).toLowerCase() }), 'warn', 4500))
-  on('huntStreak', e => { cue('huntStreak'); push('flame', t('toast.huntStreak', { n: e.n, v: fmtDec(e.bonus * 100) }), 'success', 5000) })
-  on('guildRank', e => { cue('guildRank'); push('star-medal', t('guilds.rankUp', { guild: guildName(e.guild), rank: t(`guilds.ranks.${e.rank}`) }), 'success', 5500) })
-  on('masterwork', e => { cue('masterwork'); push('anvil-impact', t('toast.masterwork', { item: ITEMS[e.item].name }), 'rare', 6000) })
-  on('favour', e => { cue('quest'); push('holy-symbol', t('toast.favour', { n: e.level }), 'success', 5000) })
-  on('guardian', e => { cue('guardian'); push('stone-tower', t('toast.guardian', { name: t(`tower.guardians.${e.id}`) }), 'rare', 6000) })
-  on('hybrid', e => { cue('hybrid'); push('sprout', t('toast.hybrid', { name: t(`crops.${e.id}`) }), 'rare', 7000) })
-  on('jailed', () => { cue('jailed'); push('padlock', t('toast.jailed'), 'warn', 6000) })
-  on('shard', s => { cue('shard', { notify: [t('crown.foundPlain', { shard: t(`crown.shards.${s.id}.name`) }), t('crown.foundHint')] }); push(s.icon, t('crown.found', { shard: t(`crown.shards.${s.id}.name`) }), 'rare', 8000) })
+  on('huntStreak', d => { cue('huntStreak'); tellPush('huntStreak', d, 5000) })
+  on('guildRank', d => { cue('guildRank'); tellPush('guildRank', d, 5500) })
+  on('masterwork', d => { cue('masterwork'); tellPush('masterwork', d, 6000) })
+  on('favour', d => { cue('quest'); tellPush('favour', d, 5000) })
+  on('guardian', d => { cue('guardian'); tellPush('guardian', d, 6000) })
+  on('hybrid', d => { cue('hybrid'); tellPush('hybrid', d, 7000) })
+  on('jailed', d => { cue('jailed'); tellPush('jailed', d, 6000) })
+  on('shard', s => { cue('shard', { notify: [t('crown.foundPlain', { shard: t(`crown.shards.${s.id}.name`) }), t('crown.foundHint')] }); tellPush('shard', s, 8000) })
   on('shardPower', e => { cue('quest'); push(SHARD_ICON[e.id] || 'crown', t('crown.powerUsed', { power: t(`crown.powers.${e.power}.name`) }), 'success', 5000) })
-  on('ending', e => { cue('chapter'); push(e.icon, t('crown.endingToast', { ending: t(`crown.endings.${e.id}.name`) }), 'rare', 9000) })
-  on('chapter', c => { cue('chapter'); push(c.icon, t('toast.chapter', { name: t(`journal.chapters.${c.id}.title`) }), 'rare', 6500) })
-  on('quest', q => { cue('quest'); push(q.icon, t('toast.quest', { name: q.name }), 'success', 5500) })
-  on('pet', p => { cue('pet', { notify: [t('toast.petPlain', { name: p.name }), p.desc] }); push(p.icon, t('toast.pet', { name: p.name }), 'rare', 8000) })
-  on('petEgg', () => { cue('petEgg', { notify: [t('toast.petEggPlain'), t('toast.petEggHint')] }); push('cosmic-egg', t('toast.petEgg'), 'rare', 8000) })
-  on('petLevel', d => { cue('petLevel'); push(d.pet.icon, t('toast.petLevel', { name: G.petName(d.pet.id), level: d.level }), 'success', 4500) })
-  on('petBond', d => { cue('petLevel', { sound: 'quest' }); push(d.pet.icon, t('toast.petBond', { name: G.petName(d.pet.id), tier: t(`pets.bond.${d.tier}`) }), 'success', 5500) })
-  on('weeklyKill', d => { cue('weeklyKill', { notify: [d.boss.name, t('weekly.slainHint')] }); push(d.boss.icon, t(d.trophy ? 'toast.weeklyKill' : 'toast.weeklyKillAgain', { name: d.boss.name }), 'rare', 8000) })
+  on('ending', d => { cue('chapter'); tellPush('ending', d, 9000) })
+  on('chapter', d => { cue('chapter'); tellPush('chapter', d, 6500) })
+  on('quest', d => { cue('quest'); tellPush('quest', d, 5500) })
+  on('pet', p => { cue('pet', { notify: [t('toast.petPlain', { name: p.name }), p.desc] }); tellPush('pet', p, 8000) })
+  on('petEgg', () => { cue('petEgg', { notify: [t('toast.petEggPlain'), t('toast.petEggHint')] }); tellPush('petEgg', null, 8000) })
+  on('petLevel', d => { cue('petLevel'); tellPush('petLevel', d, 4500) })
+  on('petBond', d => { cue('petLevel', { sound: 'quest' }); tellPush('petBond', d, 5500) })
+  on('weeklyKill', d => { cue('weeklyKill', { notify: [d.boss.name, t('weekly.slainHint')] }); tellPush('weeklyKill', d, 8000) })
   on('streak', d => { cue('dailyStreak'); push('flame', t('toast.streak', { n: d.n }), 'success', 6000) })
   on('death', () => cue('death'))
   on('retreat', () => cue('retreat'))
-  on('companionQuest', m => push(UNIQUE_MERCS[m.unique].icon, t('company.questToast', { name: t(`company.uniques.${m.unique}.name`) }), 'rare', 6000))
-  on('overrun', e => { cue('omen'); push('death-skull', t('realm.overrunToast', { area: AREAS.find(a => a.id === e.area).name }), 'warn', 8000) })
+  on('companionQuest', d => { tellPush('companionQuest', d, 6000) })
+  on('overrun', d => { cue('omen'); tellPush('overrun', d, 8000) })
   on('ascend', e => { if (e.completed) push('laurels-trophy', t('trials.completedToast', { name: t(`trials.list.${e.completed}.name`) }), 'success', 8000) })
   // The first error of a session says where to report it; later ones are only kept for the report
   let errorShown = false
@@ -228,25 +231,16 @@ onMounted(() => {
   if (import.meta.env.PROD) offs.push(watchForUpdates(() => push('quill-ink', t('updates.ready'), 'warn', 0)))
   on('saveFailed', () => push('cross-mark', t('backup.saveFailed'), 'warn', 15000))
   on('backupReminder', () => push('locked-chest', t('backup.reminderToast'), 'warn', 12000))
-  on('record', e => { cue('achievement'); push(e.icon, t('records.toast', { name: t(`records.names.${e.id}`), n: fmt(e.value), before: fmt(e.before) }), 'success', 7000) })
-  on('echo', e => { cue('achievement'); push('trophy', t('echoes.toast', { name: tm({ key: 'echoes.who', params: { monster: '@monster:' + e.id } }), n: e.beaten, total: e.total }), 'success', 7000) })
-  on('unlock', ({ list }) => {
-    cue('quest')
-    const [u] = list
-    if (list.length === 1) push(u.icon, t('unlocks.toast', { name: t('nav.' + u.key), intro: t('unlocks.intro.' + u.key) }), 'success', 8000)
-    else push(u.icon, t('unlocks.toastMany', { names: list.map(x => t('nav.' + x.key)).join(', ') }), 'success', 8000)
-  })
-  on('cleansed', e => { cue('quest'); push('laurel-crown', t('realm.cleansedToast', { area: AREAS.find(a => a.id === e.area).name, gold: fmt(e.gold) }), 'success', 8000) }) // the fight's stop message already tells who won and the gold lost
-  on('expedition', r => { cue('expedition', { sound: r.ok ? 'quest' : 'bad' }); push(r.icon, tm({ key: r.ok ? 'toast.expeditionOk' : 'toast.expeditionFail', params: { name: r.name, exp: '@exp:' + r.exp, gold: fmt(r.gold) } }), r.ok ? 'success' : 'warn', 6000) })
-  on('dungeon', d => {
-    cue('dungeon')
-    const loot = Object.entries(d.got).map(([k, n]) => `${n}× ${ITEMS[k].name}`).join(', ') || t('common.nothing')
-    push(d.dg.icon, t('toast.dungeon', { name: d.dg.name, loot }), 'success', 5000)
-  })
-  on('event', e => { cue('omen'); push(e.ev.icon, tm(e.msg), 'rare', 7000) })
+  on('record', d => { cue('achievement'); tellPush('record', d, 7000) })
+  on('echo', d => { cue('achievement'); tellPush('echo', d, 7000) })
+  on('unlock', d => { cue('quest'); tellPush('unlock', d, 8000) })
+  on('cleansed', d => { cue('quest'); tellPush('cleansed', d, 8000) }) // the fight's stop message already tells who won and the gold lost
+  on('expedition', r => { cue('expedition', { sound: r.ok ? 'quest' : 'bad' }); tellPush('expedition', r, 6000) })
+  on('dungeon', d => { cue('dungeon'); tellPush('dungeon', d, 5000) })
+  on('event', d => { cue('omen'); tellPush('event', d, 7000) })
   on('omenSign', e => push('crystal-ball', tm(e.msg), 'info', 7000))
-  on('boon', b => { cue('boon'); push('sparkles', t('toast.boon', { name: t(`omens.boons.${b.id}.name`) }), 'success', 6000) })
-  on('wish', w => { cue('wish'); push('burning-meteor', t('toast.wish', { wish: t(`omens.wishes.${w.id}`) }), 'rare', 7000) })
+  on('boon', d => { cue('boon'); tellPush('boon', d, 6000) })
+  on('wish', d => { cue('wish'); tellPush('wish', d, 7000) })
   on('notify', n => {
     const id = NOTIFY_CUE[n.key]
     if (id) cue(id, { notify: [t('notify.title'), tm(n)] })
@@ -257,8 +251,6 @@ onMounted(() => {
 })
 
 const off = computed(() => session.offline)
-// The tavern keeper greets the hero, more warmly the longer they were away
-const welcomeLine = computed(() => (off.value ? `“${t(`offline.welcome.${welcomeKind(off.value.away ?? off.value.seconds)}`, { name: state.name })}”` : ''))
 // After an update, returning players see what changed once; new players start with it seen
 const news = ref(false)
 const newsList = ref([])
@@ -274,15 +266,6 @@ function closeNews(all) {
 }
 const ev = computed(() => G.currentEvent())
 const omenSign = computed(() => G.omenSign())
-const offlineXp = computed(() => Object.entries(off.value?.xp || {}).filter(([k, v]) => SKILLS[k] && v >= 1).sort((a, b) => b[1] - a[1]))
-const offlineItems = computed(() => Object.entries(off.value?.items || {}).filter(([k, v]) => ITEMS[k] && v !== 0).sort((a, b) => b[1] - a[1]))
-const offlineKills = computed(() => Object.values(off.value?.kills || {}).reduce((a, b) => a + b, 0))
-const offlineWhat = computed(() => {
-  const a = off.value?.activity
-  if (!a) return t('offline.idle')
-  if (a.type === 'skill') return t('offline.training', { skill: SKILLS[a.skill].name, action: G.getAction(a.skill, a.action)?.name || '' })
-  return a.kind === 'tower' ? t('offline.tower') : t('offline.fighting', { monster: G.getMonster(a)?.name || '' })
-})
 function startAdventure() {
   session.welcome = false
   // New characters follow the guided tutorial from the hero screen
@@ -406,46 +389,7 @@ function startAdventure() {
     </template>
   </Dialog>
 
-  <Dialog :visible="!!off" modal :header="$t('offline.title')" style="width: min(540px, calc(100vw - 32px))" @update:visible="session.offline = null">
-    <template v-if="off">
-      <div class="welcome-keeper">
-        <ItemTile icon="beer-horn" tint="#e2b65a" size="sm" :tip="false" />
-        <div class="grow">
-          <div class="welcome-name">{{ $t('offline.keeper') }}</div>
-          <SpokenText :text="welcomeLine" voice="keeper" />
-        </div>
-      </div>
-      <p class="muted" style="margin-top:0">
-        <span v-html="$t('offline.away', { time: fmtTime(off.seconds) })" />
-        <span v-if="off.capped"> {{ $t('offline.capped', { h: +G.offlineCapHours().toFixed(1) }) }}</span>
-        {{ $t('offline.kept', { name: state.name, what: offlineWhat }) }}
-      </p>
-      <div class="stack" style="gap:6px">
-        <div v-if="off.heroLevel" class="sum-row"><GameIcon name="laurel-crown" :size="18" />{{ $t('hero.heroLevel') }}<b class="gold-text">→ {{ off.heroLevel }}</b></div>
-        <div v-if="off.gold" class="sum-row"><GameIcon name="two-coins" :size="18" />{{ $t('common.gold') }}<b class="gold-text">+{{ fmt(off.gold) }}</b></div>
-        <div v-if="offlineKills" class="sum-row"><GameIcon name="crossed-swords" :size="18" />{{ $t('offline.kills') }}<b>{{ fmt(offlineKills) }}</b></div>
-        <div v-if="off.tokens" class="sum-row"><GameIcon name="stone-tower" :size="18" />{{ $t('offline.towerTokens') }}<b class="gold-text">+{{ fmt(off.tokens) }}</b></div>
-        <div v-if="off.eaten" class="sum-row"><GameIcon name="meat" :size="18" />{{ $t('offline.eaten') }}<b>{{ fmt(off.eaten) }}</b></div>
-      </div>
-      <div v-if="offlineXp.length" class="section-title" style="margin:18px 0 10px">{{ $t('offline.experience') }}</div>
-      <div class="stack" style="gap:6px">
-        <div v-for="[k, v] in offlineXp" :key="k" class="sum-row">
-          <GameIcon :name="SKILLS[k].icon" :size="18" :style="{ color: SKILLS[k].color }" />{{ SKILLS[k].name }}
-          <span v-if="off.levels[k]" class="tag gold">→ {{ $t('common.lvlShort', { n: off.levels[k] }) }}</span>
-          <b class="ok-text">+{{ fmt(v) }} XP</b>
-        </div>
-      </div>
-      <div v-if="offlineItems.length" class="section-title" style="margin:18px 0 10px">{{ $t('offline.items') }}</div>
-      <div class="stack" style="gap:6px">
-        <div v-for="[k, v] in offlineItems" :key="k" class="sum-row">
-          <ItemTile :item="k" size="xs" />{{ ITEMS[k].name }}
-          <b :class="v > 0 ? 'ok-text' : 'bad-text'">{{ v > 0 ? '+' : '' }}{{ fmt(v) }}</b>
-        </div>
-      </div>
-      <p v-if="off.stopReason" class="small muted" style="margin-bottom:0"><i class="pi pi-pause-circle" /> {{ tm(off.stopReason) }}</p>
-    </template>
-    <template #footer><Button :label="$t('offline.collect')" icon="pi pi-check" @click="session.offline = null" /></template>
-  </Dialog>
+  <OfflineSummary />
 
 
   <Dialog :visible="session.inGame && session.welcome" modal :header="$t('welcome.title', { name: state.name })" style="width: min(540px, calc(100vw - 32px))" @update:visible="session.welcome = false">
@@ -488,8 +432,6 @@ function startAdventure() {
 </template>
 
 <style>
-.welcome-keeper { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 10px 12px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line)); background: color-mix(in srgb, var(--gold) 7%, transparent); font-style: italic; color: var(--ink-2); line-height: 1.45; }
-.welcome-name { font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
 .catching { position: fixed; inset: 0; z-index: 3000; display: grid; place-items: center; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(3px); }
 .catching-box { display: flex; flex-direction: column; align-items: center; gap: 12px; width: min(320px, calc(100vw - 48px)); padding: 24px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line-hi); text-align: center; }
 .catching-box .gi { color: var(--gold); }

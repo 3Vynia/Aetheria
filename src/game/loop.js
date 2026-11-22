@@ -42,6 +42,10 @@ async function catchUp(seconds) {
   catching = true
   try {
     const sum = await G.simulateAsync(seconds, p => { session.catching = p })
+    // What the time away earned (achievements, journal pages, records…) is checked now, so it is told in
+    // the summary instead of a burst of pop-ups over it
+    G.tracker = sum
+    try { G.checkAchievements(); G.checkJournal(); G.tickRealm(); G.checkUnlocks(); G.tickRecords() } finally { G.tracker = null }
     // away: the real time gone, before the offline cap, for the tavern keeper's greeting
     if (hadActivity && seconds >= SUMMARY_MIN && state.settings.offlineSummary !== false) session.offline = { ...sum, away: seconds }
     G.save()
