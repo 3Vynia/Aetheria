@@ -46,6 +46,7 @@ const sizes = computed(() => TEXT_SIZES.map(s => ({ value: s.id, label: t(`setti
 const toastLevels = computed(() => TOAST_LEVELS.map(id => ({ value: id, label: t(`settings.toastLevels.${id}.name`) })))
 // Accessibility switches, each with a line on what it does
 const access = ['reduceMotion', 'subtitles', 'visualCues', 'softTone', 'mono']
+const vision = ['colorBlind', 'highContrast', 'plainFont']
 
 async function toggleNotify(v) {
   if (v && !(await requestNotify())) { st.notify = false; G.toast('cross-mark', 'settings.notifyBlocked', {}, 'warn'); return }
@@ -130,6 +131,27 @@ const photoFailed = ref(false)
             <ToggleSwitch v-model="st[k]" :inputId="'acc-' + k" />
           </label>
         </div>
+        <div class="panel pad">
+          <h3 class="panel-title"><GameIcon name="eye-target" /> {{ $t('vision.title') }}</h3>
+          <p class="small muted" style="margin-top:0">{{ $t('vision.intro') }}</p>
+          <div class="vision">
+            <div class="grow">
+              <label v-for="k in vision" :key="k" class="pref" :for="'vis-' + k">
+                <span class="grow">{{ $t(`vision.${k}.name`) }}<span class="hint">{{ $t(`vision.${k}.desc`) }}</span></span>
+                <ToggleSwitch v-model="st[k]" :inputId="'vis-' + k" />
+              </label>
+            </div>
+            <!-- What the choices look like, live -->
+            <div class="vision-sample" aria-hidden="true">
+              <div class="vision-sample-title">{{ $t('vision.sample') }}</div>
+              <div class="ok-text"><i class="pi pi-arrow-up" /> {{ $t('vision.gain') }}</div>
+              <div class="bad-text"><i class="pi pi-arrow-down" /> {{ $t('vision.loss') }}</div>
+              <div class="bar hp-ok thick"><i style="width:72%" /></div>
+              <div class="bar hp thick"><i style="width:38%" /></div>
+              <div class="small muted">{{ $t('vision.note') }}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Save: name, backups and the slot -->
@@ -180,6 +202,10 @@ const photoFailed = ref(false)
 </template>
 
 <style scoped>
+.vision { display: flex; gap: 18px; align-items: flex-start; }
+.vision-sample { flex: 0 0 210px; display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--tint-1); font-weight: 700; }
+.vision-sample-title { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
+@media (max-width: 720px) { .vision { flex-direction: column; } .vision-sample { flex-basis: auto; width: 100%; } }
 .set-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 20px; align-items: start; }
 .set-nav { position: sticky; top: calc(var(--topbar-h, 76px) + 14px); display: flex; flex-direction: column; gap: 4px; }
 .set-tab { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; border: 1px solid transparent; background: none; color: var(--ink-2); font: inherit; text-align: start; cursor: pointer; }

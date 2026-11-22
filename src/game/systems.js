@@ -55,6 +55,8 @@ export const extraState = () => ({
     backupReminder: true, lastExport: 0, remindedAt: 0,
     // Display and guidance: text size, which pop-ups show, the next-step bar and the welcome-back summary
     textSize: 'normal', toasts: 'all', goalBar: true, offlineSummary: true,
+    // Vision: colours for colour-blind players, high contrast and a plain font
+    colorBlind: false, highContrast: false, plainFont: false,
     // Sound settings added later: alerts, packs, palettes, music mode and accessibility
     ...AUDIO_DEFAULTS, cues: {},
   },

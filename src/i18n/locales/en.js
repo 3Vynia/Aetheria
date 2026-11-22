@@ -122,6 +122,15 @@ export default {
 
   event: { bought: 'Bought from the travelling merchant', offer: 'Offer ends in {time}', gone: 'The merchant has left' },
 
+  vision: {
+    title: 'Vision',
+    intro: 'Colours, contrast and letters that are easier to tell apart. They change at once, and only for this game.',
+    colorBlind: { name: 'Colour-blind friendly', desc: 'Gains, health and good news in blue, losses and danger in orange, instead of green and red.' },
+    highContrast: { name: 'High contrast', desc: 'Brighter secondary text and clearer borders between panels.' },
+    plainFont: { name: 'Plain letters', desc: "Your device's own simple font instead of the decorative one, also for titles." },
+    sample: 'Preview', gain: '+120 gold', loss: '−35 health', note: 'Secondary text',
+  },
+
   offline: {
     welcome: {
       short: "Back already, {name}? The ale has barely settled.",
@@ -2067,7 +2076,7 @@ export default {
     entries: {
       b15: {
         title: "Korean, fifty songs and sealed saves",
-        new: "Aetheria in Korean: every text of the game, with fonts made for Hangul. Pick 한국어 in the language menu.\nFifty songs: the music no longer changes with the screen. Fifty themes play in a shuffle, each for a few minutes and ending on a phrase, and fights lift whatever is playing. The sound settings show what is on and let you skip to the next song.\nSealed saves: your games, backups, files and transfer codes are now sealed. Nobody can read or edit them outside the game, and a save changed by hand will not open, so your progress is always your own.\nCreator saves: special saves made by the game's creator carry a signature and a seal of their own on the hero.\nThe whole game plays offline after the first visit, on every screen and in every language.\nA new welcome back: a clock that fills up to your offline limit, totals that count up, the highlights of your time away (finds, achievements, pets, expeditions, journal pages) in one place instead of a burst of pop-ups, the levels you climbed, the experience of each skill and what you brought home.",
+        new: "Aetheria in Korean: every text of the game, with fonts made for Hangul. Pick 한국어 in the language menu.\nFifty songs: the music no longer changes with the screen. Fifty themes play in a shuffle, each for a few minutes and ending on a phrase, and fights lift whatever is playing. The sound settings show what is on and let you skip to the next song.\nSealed saves: your games, backups, files and transfer codes are now sealed. Nobody can read or edit them outside the game, and a save changed by hand will not open, so your progress is always your own.\nCreator saves: special saves made by the game's creator carry a signature and a seal of their own on the hero.\nThe whole game plays offline after the first visit, on every screen and in every language.\nA new welcome back: a clock that fills up to your offline limit, totals that count up, the highlights of your time away (finds, achievements, pets, expeditions, journal pages) in one place instead of a burst of pop-ups, the levels you climbed, the experience of each skill and what you brought home.\nVision options in Accessibility: colour-blind friendly colours (blue and orange instead of green and red), high contrast and plain letters, with a live preview.",
         changed: "The sound settings are built around a live stage that shows what is playing and how each part of the mix sounds.\nSound effects are played on real instruments (bells, harps, glass, wood), with their own design in each sound pack.\nVoices sing on real vowels and consonants, and each character's throat gives them a timbre of their own.\nYour existing games are sealed the first time they load, without losing anything. Old .json backups can still be imported; one with numbers no game could reach comes in marked as altered, and the mark stays through rebirth.\nSaved files now end in .aetheria.\nAbout credits the maker of the game.",
         fixed: "A tab left open during an update kept working offline instead of failing to load its files.",
       },

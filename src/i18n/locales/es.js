@@ -122,6 +122,15 @@ export default {
 
   event: { bought: 'Comprado al mercader ambulante', offer: 'La oferta termina en {time}', gone: 'El mercader se ha marchado' },
 
+  vision: {
+    title: 'Visión',
+    intro: 'Colores, contraste y letras más fáciles de distinguir. Cambian al momento y solo en esta partida.',
+    colorBlind: { name: 'Apto para daltónicos', desc: 'Ganancias, vida y buenas noticias en azul, pérdidas y peligro en naranja, en lugar de verde y rojo.' },
+    highContrast: { name: 'Alto contraste', desc: 'Texto secundario más claro y bordes más marcados entre paneles.' },
+    plainFont: { name: 'Letra sencilla', desc: 'La letra sencilla de tu dispositivo en vez de la decorativa, también en los títulos.' },
+    sample: 'Vista previa', gain: '+120 de oro', loss: '−35 de vida', note: 'Texto secundario',
+  },
+
   offline: {
     welcome: {
       short: "¿Ya de vuelta, {name}? La cerveza apenas se ha asentado.",
@@ -2067,7 +2076,7 @@ export default {
     entries: {
       b15: {
         title: "Coreano, cincuenta canciones y partidas selladas",
-        new: "Aetheria en coreano: todos los textos del juego, con tipografías hechas para el hangul. Elige 한국어 en el menú de idioma.\nCincuenta canciones: la música ya no cambia con la pantalla. Cincuenta temas suenan en orden aleatorio, cada uno unos minutos y acabando en una frase, y los combates avivan lo que esté sonando. Los ajustes de sonido muestran qué suena y permiten saltar a la siguiente canción.\nPartidas selladas: tus partidas, copias de seguridad, archivos y códigos de transferencia ahora van sellados. Nadie puede leerlos ni editarlos fuera del juego, y una partida cambiada a mano no se abre, así que tu progreso siempre es tuyo.\nPartidas del creador: las partidas especiales hechas por el creador del juego llevan una firma y un sello propio en el héroe.\nTodo el juego funciona sin conexión desde la primera visita, en todas las pantallas y en todos los idiomas.\nUna bienvenida nueva: un reloj que se llena hasta tu límite sin conexión, totales que van subiendo, lo más destacado de tu ausencia (hallazgos, logros, mascotas, expediciones, páginas del diario) en un solo sitio en vez de una lluvia de avisos, los niveles subidos, la experiencia de cada habilidad y lo que trajiste a casa.",
+        new: "Aetheria en coreano: todos los textos del juego, con tipografías hechas para el hangul. Elige 한국어 en el menú de idioma.\nCincuenta canciones: la música ya no cambia con la pantalla. Cincuenta temas suenan en orden aleatorio, cada uno unos minutos y acabando en una frase, y los combates avivan lo que esté sonando. Los ajustes de sonido muestran qué suena y permiten saltar a la siguiente canción.\nPartidas selladas: tus partidas, copias de seguridad, archivos y códigos de transferencia ahora van sellados. Nadie puede leerlos ni editarlos fuera del juego, y una partida cambiada a mano no se abre, así que tu progreso siempre es tuyo.\nPartidas del creador: las partidas especiales hechas por el creador del juego llevan una firma y un sello propio en el héroe.\nTodo el juego funciona sin conexión desde la primera visita, en todas las pantallas y en todos los idiomas.\nUna bienvenida nueva: un reloj que se llena hasta tu límite sin conexión, totales que van subiendo, lo más destacado de tu ausencia (hallazgos, logros, mascotas, expediciones, páginas del diario) en un solo sitio en vez de una lluvia de avisos, los niveles subidos, la experiencia de cada habilidad y lo que trajiste a casa.\nOpciones de visión en Accesibilidad: colores aptos para daltónicos (azul y naranja en vez de verde y rojo), alto contraste y letra sencilla, con vista previa en vivo.",
         changed: "Los ajustes de sonido giran en torno a un escenario en vivo que muestra qué suena y cómo se oye cada parte de la mezcla.\nLos efectos de sonido se tocan con instrumentos reales (campanas, arpas, cristal, madera), con un diseño propio en cada paquete de sonidos.\nLas voces cantan con vocales y consonantes reales, y la garganta de cada personaje le da un timbre propio.\nTus partidas se sellan la primera vez que se cargan, sin perder nada. Las copias .json antiguas se pueden seguir importando; una con números que ninguna partida podría alcanzar entra marcada como alterada, y la marca se queda al renacer.\nLos archivos de partida ahora terminan en .aetheria.\nAcerca de incluye los créditos del juego.",
         fixed: "Una pestaña abierta durante una actualización sigue funcionando sin conexión en vez de fallar al cargar sus archivos.",
       },

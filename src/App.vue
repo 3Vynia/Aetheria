@@ -100,6 +100,10 @@ watch(() => ({ ...state.settings }), st => {
   applyAudioSettings()
   setCompactNumbers(st.compactNumbers)
   document.documentElement.dataset.motion = st.reduceMotion ? 'reduce' : ''
+  // Vision aids: colours, contrast and font (styles/main.css)
+  document.documentElement.dataset.vision = st.colorBlind ? 'cvd' : ''
+  document.documentElement.dataset.contrast = st.highContrast ? 'high' : ''
+  document.documentElement.dataset.font = st.plainFont ? 'plain' : ''
   // Text size scales the whole game, not the title screen (it belongs to the save)
   document.documentElement.style.zoom = session.inGame ? zoomFor(st.textSize) : ''
 }, { immediate: true, deep: true })
