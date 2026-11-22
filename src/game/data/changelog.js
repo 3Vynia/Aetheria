@@ -7,6 +7,7 @@
 export const SECTIONS = ['new', 'changed', 'fixed']
 
 export const CHANGELOG = [
+  { id: 'b15', date: '2026-11-22', icon: 'lyre', sections: ['new', 'changed', 'fixed'] },
   { id: 'b14', version: '1.0.0-beta.14', date: '2026-11-19', icon: 'family-house', sections: ['new', 'changed', 'fixed'] },
   { id: 'b13', version: '1.0.0-beta.13', date: '2026-11-02', icon: 'treasure-map', sections: ['new', 'changed', 'fixed'] },
   { id: 'b12', version: '1.0.0-beta.12', date: '2026-10-28', icon: 'ankh', sections: ['new', 'changed', 'fixed'] },
