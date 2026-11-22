@@ -84,9 +84,21 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, v); return true } catch { return false } },
   del(k) { try { localStorage.removeItem(k) } catch { /* storage unavailable */ } },
 }
-// Slots are sealed (vault.js); a plain one comes from an older version and is adopted as it is
+/* Slots are sealed (vault.js). A plain one comes from a version from before sealing and is adopted as
+   it is. Once this browser has been sealing for a week, though, no older tab can still be writing plain
+   saves: a plain slot then was put there by hand, and gets the review an imported save gets (it is
+   still loaded, at worst marked as altered) */
+const SEALED_SINCE = 'aetheria-sealed-since'
+const OLD_TAB_GRACE = 7 * 86400e3
+function plainSlot(raw) {
+  const s = JSON.parse(raw)
+  const since = +store.get(SEALED_SINCE) || 0
+  return since && Date.now() - since > OLD_TAB_GRACE ? admitImported(s) : adoptPlain(s)
+}
+// The first sealed write of this browser starts the week
+const markSealing = () => store.get(SEALED_SINCE) || store.set(SEALED_SINCE, String(Date.now()))
 function readSlotRaw(raw) {
-  return isSealed(raw) ? openSealed(raw) : adoptPlain(JSON.parse(raw))
+  return isSealed(raw) ? openSealed(raw) : plainSlot(raw)
 }
 
 export function newState(profile = {}) {
@@ -268,7 +280,7 @@ export const G = {
     for (let i = 0; i < SLOT_COUNT; i++) {
       const raw = store.get(SLOT_KEY(i))
       if (!raw || isSealed(raw)) continue
-      try { store.set(SLOT_KEY(i), writeSave(adoptPlain(JSON.parse(raw)))) } catch { /* unreadable: left as it is, its backups remain */ }
+      try { store.set(SLOT_KEY(i), writeSave(plainSlot(raw))) } catch { /* unreadable: left as it is, its backups remain */ }
     }
   },
   listSlots() {
@@ -326,6 +338,7 @@ export const G = {
     if (this.slot === null) return false
     state.lastTick = Date.now()
     guardNumbers(toRaw(state), false)
+    markSealing()
     const ok = store.set(SLOT_KEY(this.slot), writeSave(toRaw(state)))
     if (ok) store.set(META_KEY, JSON.stringify({ last: this.slot }))
     else if (Date.now() - saveWarnedAt > SAVE_WARN_EVERY) { saveWarnedAt = Date.now(); this.emit('saveFailed') }
@@ -373,6 +386,7 @@ export const G = {
   // Store a save object straight into a slot, from the title screen
   writeSlot(i, s) {
     this.sealStoredSlots()
+    markSealing()
     return store.set(SLOT_KEY(i), writeSave(s))
   },
 

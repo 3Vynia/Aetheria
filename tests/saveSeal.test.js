@@ -65,6 +65,25 @@ describe('sealed saves', () => {
     expect(state.gold).toBe(4321)
   })
 
+  it('review a plain slot put in by hand once the browser has been sealing for a week, still loading it', () => {
+    const honest = JSON.parse(JSON.stringify(state))
+    delete honest.integrity
+    G.save()
+    expect(localStorage.getItem('aetheria-sealed-since')).toBeTruthy()
+    // Within the first week an older tab may still write plain saves: they are adopted as they are
+    localStorage.setItem('aetheria-slot-0', JSON.stringify(inflated()))
+    expect(G.loadSlot(0)).toBe(true)
+    expect(state.integrity.status).toBe('sealed')
+    // After it, a plain slot can only have been written by hand
+    localStorage.setItem('aetheria-sealed-since', String(Date.now() - 8 * 24 * HOUR))
+    localStorage.setItem('aetheria-slot-1', JSON.stringify(honest))
+    localStorage.setItem('aetheria-slot-0', JSON.stringify(inflated()))
+    expect(G.loadSlot(0)).toBe(true)
+    expect(state.integrity.status).toBe('altered')
+    expect(G.loadSlot(1)).toBe(true)
+    expect(state.integrity.status).not.toBe('altered')
+  })
+
   it('keep the mark through a rebirth', () => {
     state.integrity = { status: 'altered', reasons: ['gold'] }
     for (const k of Object.keys(state.skills)) state.skills[k].xp = 2e7
