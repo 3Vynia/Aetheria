@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="430" viewBox="0 0 840 430" role="img" aria-label="Translation progress: 4 of 9 languages complete">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d1a2b"/><stop offset="1" stop-color="#12111b"/></linearGradient>
+    <linearGradient id="gDone" x1="0" x2="1"><stop offset="0" stop-color="#2ea043"/><stop offset="1" stop-color="#6fd28a"/></linearGradient>
+    <linearGradient id="gPart" x1="0" x2="1"><stop offset="0" stop-color="#b8862e"/><stop offset="1" stop-color="#f3d58a"/></linearGradient>
+  </defs>
+  <style>
+    text { font-family: -apple-system, 'Segoe UI', 'Noto Sans', 'Noto Sans CJK JP', 'Noto Sans KR', 'Hiragino Sans', 'Malgun Gothic', 'Microsoft YaHei', sans-serif; }
+    .title { font: 600 22px Georgia, 'Times New Roman', serif; fill: #f3d58a; letter-spacing: 0.06em; }
+    .lead { font-size: 13px; fill: #9b93ad; }
+    .name { font-size: 15px; font-weight: 600; fill: #efe9dc; }
+    .sub { font-size: 11px; fill: #9b93ad; letter-spacing: 0.04em; text-transform: uppercase; }
+    .pct { font-size: 13px; font-weight: 700; }
+    .done { fill: #2ea043; } .part { fill: #b8862e; } .soon { fill: #6e6880; font-weight: 500; }
+  </style>
+  <rect x="0.5" y="0.5" width="839" height="429" rx="16" fill="url(#bg)" stroke="#3a3350"/>
+  <text x="30" y="46" class="title">TRANSLATIONS</text>
+  <text x="30" y="68" class="lead">4 of 9 languages complete · more on the way</text>
+  <line x1="30" y1="80" x2="810" y2="80" stroke="#3a3350"/>
+  <g transform="translate(30,96)">
+    <text x="0" y="16" class="name">English</text>
+    <text x="380" y="16" class="pct done" text-anchor="end">Complete</text>
+    
+    <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
+    <rect x="0" y="40" width="380.0" height="9" rx="4.5" fill="url(#gDone)"><animate attributeName="width" from="0" to="380.0" dur="1.2s" begin="0.10s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
+  </g>
+  <g transform="translate(30,158)">
+    <text x="0" y="16" class="name">Español</text>
+    <text x="380" y="16" class="pct done" text-anchor="end">Complete</text>
+    <text x="0" y="33" class="sub">Spanish</text>
+    <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
+    <rect x="0" y="40" width="380.0" height="9" rx="4.5" fill="url(#gDone)"><animate attributeName="width" from="0" to="380.0" dur="1.2s" begin="0.18s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
+  </g>
+  <g transform="translate(30,220)">
+    <text x="0" y="16" class="name">한국어</text>
+    <text x="380" y="16" class="pct done" text-anchor="end">Complete</text>
+    <text x="0" y="33" class="sub">Korean</text>
+    <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
+    <rect x="0" y="40" width="380.0" height="9" rx="4.5" fill="url(#gDone)"><animate attributeName="width" from="0" to="380.0" dur="1.2s" begin="0.26s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
+  </g>
+  <g transform="translate(30,282)">
+    <text x="0" y="16" class="name">日本語</text>
+    <text x="380" y="16" class="pct done" text-anchor="end">Complete</text>
+    <text x="0" y="33" class="sub">Japanese</text>
+    <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
+    <rect x="0" y="40" width="380.0" height="9" rx="4.5" fill="url(#gDone)"><animate attributeName="width" from="0" to="380.0" dur="1.2s" begin="0.34s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
+  </g>
+  <g transform="translate(30,344)">
+    <text x="0" y="16" class="name">简体中文</text>
+    <text x="380" y="16" class="pct soon" text-anchor="end">Coming soon</text>
+    <text x="0" y="33" class="sub">Chinese</text>
+    <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
+    
+  </g>
+  <g transform="translate(430,96)">
+    <text x="0" y="16" class="name">Português (Brasil)</text>
+    <text x="380" y="16" class="pct soon" text-anchor="end">Coming soon</text>
+    <text x="0" y="33" class="sub">Portuguese</text>
+    <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
+    
+  </g>
+  <g transform="translate(430,158)">
+    <text x="0" y="16" class="name">Русский</text>
+    <text x="380" y="16" class="pct soon" text-anchor="end">Coming soon</text>
+    <text x="0" y="33" class="sub">Russian</text>
+    <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
+    
+  </g>
+  <g transform="translate(430,220)">
+    <text x="0" y="16" class="name">Deutsch</text>
+    <text x="380" y="16" class="pct soon" text-anchor="end">Coming soon</text>
+    <text x="0" y="33" class="sub">German</text>
+    <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
+    
+  </g>
+  <g transform="translate(430,282)">
+    <text x="0" y="16" class="name">Français</text>
+    <text x="380" y="16" class="pct soon" text-anchor="end">Coming soon</text>
+    <text x="0" y="33" class="sub">French</text>
+    <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
+    
+  </g>
+</svg>

@@ -119,11 +119,12 @@
 <h2>🌍 Languages</h2>
 
 <!-- translations:start -->
-<table align="center">
-  <tr><td align="center"><b>English</b><br><img alt="100%" src="https://img.shields.io/badge/100%25-complete-2ea043?style=flat-square"></td><td align="center"><b>Español</b><br><img alt="100%" src="https://img.shields.io/badge/100%25-complete-2ea043?style=flat-square"></td><td align="center"><b>한국어</b><br><img alt="100%" src="https://img.shields.io/badge/100%25-complete-2ea043?style=flat-square"></td></tr>
-  <tr><td align="center"><b>日本語</b><br><img alt="100%" src="https://img.shields.io/badge/100%25-complete-2ea043?style=flat-square"></td><td align="center"><b>简体中文</b><br><img alt="0%" src="https://img.shields.io/badge/0%25-coming%20soon-6e7681?style=flat-square"></td><td align="center"><b>Português (Brasil)</b><br><img alt="0%" src="https://img.shields.io/badge/0%25-coming%20soon-6e7681?style=flat-square"></td></tr>
-  <tr><td align="center"><b>Русский</b><br><img alt="0%" src="https://img.shields.io/badge/0%25-coming%20soon-6e7681?style=flat-square"></td><td align="center"><b>Deutsch</b><br><img alt="0%" src="https://img.shields.io/badge/0%25-coming%20soon-6e7681?style=flat-square"></td><td align="center"><b>Français</b><br><img alt="0%" src="https://img.shields.io/badge/0%25-coming%20soon-6e7681?style=flat-square"></td></tr>
-</table>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="docs/translations-light.svg">
+    <img src="docs/translations-dark.svg" alt="Translation progress of every language" width="840">
+  </picture>
+</p>
 <!-- translations:end -->
 
 <h2>📥 Play</h2>
