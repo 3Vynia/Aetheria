@@ -251,7 +251,7 @@ function reset() {
 .theme-group + .theme-group { margin-top: 16px; }
 .group-name { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 8px; }
 .cards { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 2px; padding: 2px 2px 8px; margin: 0 -2px;
-  scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.15) transparent; -webkit-mask-image: linear-gradient(90deg, #000 90%, transparent); mask-image: linear-gradient(90deg, #000 90%, transparent); }
+  }
 .card-theme { flex: 0 0 172px; scroll-snap-align: start; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; min-height: 104px; padding: 14px; border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08); color: #f4eee2; font: inherit; text-align: start; cursor: pointer;
   background: linear-gradient(145deg, color-mix(in srgb, var(--a) 38%, #0d0b16), color-mix(in srgb, var(--b) 45%, #0a0912)); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }

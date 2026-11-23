@@ -13,6 +13,7 @@ import { G } from './game/engine.js'
 import { installErrorLog, recordError, isChunkError } from './game/feedback.js'
 import { CHANGELOG } from './game/data/changelog.js'
 import { showBootError } from './bootError.js'
+import { installSideScroll } from './ui/sideScroll.js'
 
 // Expose the engine, the router and the music for debugging from the console in development builds
 if (import.meta.env.DEV) {
@@ -67,6 +68,7 @@ async function boot() {
   // Restore the last visited screen (memory history always starts at "/")
   router.replace(initialRoute()).catch(() => router.replace('/'))
   app.mount('#app')
+  installSideScroll()
   // An error while setting up the app leaves nothing on screen
   if (!document.getElementById('app')?.children.length) throw new Error('The app rendered nothing')
 }

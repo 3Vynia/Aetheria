@@ -195,7 +195,7 @@ const clear = () => Object.assign(f, { q: '', group: 'all', mat: 'all', status: 
   background: var(--glass); backdrop-filter: blur(18px); }
 .search { min-width: 220px; }
 .sort { min-width: 170px; }
-.chips-row { display: flex; align-items: center; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
+.chips-row { display: flex; align-items: center; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
 .chips-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-inline-end: 4px; flex-shrink: 0; }
 .fchip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px; font: inherit; font-size: 13px; cursor: pointer;
   color: var(--muted); background: var(--tint-1); border: 1px solid var(--line); transition: all 0.15s; }
