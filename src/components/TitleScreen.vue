@@ -13,7 +13,6 @@ import ItemTile from './ItemTile.vue'
 import CharacterCreation from './CharacterCreation.vue'
 import LanguageSelect from './LanguageSelect.vue'
 import ThemeSelect from './ThemeSelect.vue'
-import QrTransfer from './QrTransfer.vue'
 import TypedConfirm from './TypedConfirm.vue'
 import { decodeAny, pickFile, takeLinkCode, importErrorKey } from '../game/transfer.js'
 import { listBackups, readBackup, deleteBackups } from '../game/backup.js'
@@ -79,7 +78,7 @@ async function discard() {
   findBackups()
 }
 onUnmounted(() => window.removeEventListener('hashchange', readLink))
-const qrOpen = ref(false)
+
 function offerImport(save) { pending.value = { save, info: G.summarize(save) }; mode.value = 'import' }
 async function importFile() {
   try { const save = await pickFile(); if (save) offerImport(save) }
@@ -179,10 +178,6 @@ function created(profile) { startNewGame(createSlot.value, profile) }
             <span class="menu-label"><GameIcon name="open-treasure-chest" :size="20" /> {{ $t('title.importSave') }}</span>
             <span class="menu-meta">{{ $t('title.importHint') }}</span>
           </button>
-          <button class="ts-btn" @click="qrOpen = true">
-            <span class="menu-label"><i class="pi pi-qrcode" style="font-size:18px" /> {{ $t('qr.receive') }}</span>
-            <span class="menu-meta">{{ $t('qr.titleHint') }}</span>
-          </button>
           <p class="hint">{{ $t('title.autosaveHint') }}</p>
         </div>
 
@@ -238,7 +233,6 @@ function created(profile) { startNewGame(createSlot.value, profile) }
       </transition>
     </div>
     <div class="ts-foot">{{ $t('title.footer') }}</div>
-    <QrTransfer v-model:visible="qrOpen" @received="offerImport" />
     <TypedConfirm :visible="!!deleting" :header="$t('title.deleteTitle')" :message="deleting ? $t('title.deleteMessage', { name: deleting.name, level: deleting.level }) : ''"
       :confirm-label="$t('common.delete')" @update:visible="v => v || (deleting = null)" @confirm="confirmRemove" />
     <TypedConfirm :visible="!!discarding" :header="$t('backup.discardTitle')" :message="discarding ? $t('backup.discardMessage', { name: discarding.name, n: discarding.i + 1 }) : ''"

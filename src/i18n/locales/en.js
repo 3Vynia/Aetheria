@@ -123,25 +123,6 @@ export default {
   event: { bought: 'Bought from the travelling merchant', offer: 'Offer ends in {time}', gone: 'The merchant has left' },
 
   typed: { prompt: 'To confirm, type this code:', label: 'Type the code {code} to confirm' },
-  qr: {
-    autoRefresh: 'They are made again every two minutes, so they always carry your latest progress.',
-    titleHint: 'From another device, with the camera or a picture',
-    send: 'Send by QR', receive: 'Receive by QR',
-    sendTitle: 'Send this game by QR', receiveTitle: 'Receive a game by QR',
-    sendIntro: 'On the other device open Aetheria, choose Receive by QR and point the camera at this screen. The codes play one after another; the order does not matter and missed ones come round again.',
-    receiveIntro: 'Point the camera at the codes playing on the other device, or load the picture of codes downloaded there.',
-    partOf: 'Code {i} of {n}', prev: 'Previous code', next: 'Next code', pause: 'Pause', play: 'Play', speed: 'Speed',
-    speeds: { slow: 'Slow', normal: 'Normal', fast: 'Fast' },
-    pictureTitle: 'Every code in one picture', pictureHint: 'For computers without a camera: download it here and load it on the other device.',
-    download: 'Download picture', sheetHint: '{n} codes · load this picture in Receive by QR',
-    useCamera: 'Use the camera', switchCamera: 'Switch camera', stopCamera: 'Stop the camera',
-    read: '{have} of {n} codes read', anyOrder: 'Any order works: keep the camera on the codes until every square lights up.',
-    uploadTitle: 'Load a picture', uploadHint: 'The picture of codes, or screenshots of them (several at once is fine).', upload: 'Load pictures',
-    noCamera: 'No camera could be opened here. Load the picture of codes instead.',
-    cameraDenied: 'The browser did not allow the camera. Allow it in the address bar, or load the picture of codes instead.',
-    nothingFound: 'No Aetheria code was found in that picture.',
-    someMissing: '{have} of {n} codes read. Load the rest, or use the camera for the missing ones.',
-  },
   vision: {
     title: 'Vision',
     intro: 'Colours, contrast and letters that are easier to tell apart. They change at once, and only for this game.',
@@ -2095,8 +2076,8 @@ export default {
     },
     entries: {
       b15: {
-        title: "Korean, fifty songs and games by QR",
-        new: "Aetheria in Korean: every text of the game, with fonts made for Hangul. Pick 한국어 in the language menu.\nFifty songs: the music no longer changes with the screen. Fifty themes play in a shuffle, each for a few minutes and ending on a phrase, and fights lift whatever is playing. The sound settings show what is on and let you skip to the next song.\nGames by QR: send your game to another device as a run of QR codes. Point the other device's camera at the screen, or download every code in one picture and load it there, handy between computers with no camera. Find it in Settings › Game and on the title screen.\nThe whole game plays offline after the first visit, on every screen and in every language.\nA new welcome back: a clock that fills up to your offline limit, totals that count up, the highlights of your time away (finds, achievements, pets, expeditions, journal pages) in one place instead of a burst of pop-ups, the levels you climbed, the experience of each skill and what you brought home.\nVision options in Accessibility: colour-blind friendly colours (blue and orange instead of green and red), high contrast and plain letters, with a live preview.",
+        title: "Korean, fifty songs and a new welcome back",
+        new: "Aetheria in Korean: every text of the game, with fonts made for Hangul. Pick 한국어 in the language menu.\nFifty songs: the music no longer changes with the screen. Fifty themes play in a shuffle, each for a few minutes and ending on a phrase, and fights lift whatever is playing. The sound settings show what is on and let you skip to the next song.\nThe whole game plays offline after the first visit, on every screen and in every language.\nA new welcome back: a clock that fills up to your offline limit, totals that count up, the highlights of your time away (finds, achievements, pets, expeditions, journal pages) in one place instead of a burst of pop-ups, the levels you climbed, the experience of each skill and what you brought home.\nVision options in Accessibility: colour-blind friendly colours (blue and orange instead of green and red), high contrast and plain letters, with a live preview.",
         changed: "The sound settings are built around a live stage that shows what is playing and how each part of the mix sounds.\nSound effects are played on real instruments (bells, harps, glass, wood), with their own design in each sound pack.\nVoices sing on real vowels and consonants, and each character's throat gives them a timbre of their own.\nImprovements to the save system: games, backups and files are kept more safely, and your existing games carry over without losing anything. Saved files now end in .aetheria; old .json backups can still be imported.\nDeleting a game asks you to type a code shown on screen, and takes its automatic backups with it.\nNo more scrollbars: screens scroll as before, and rows that scroll sideways fade at the edge where there is more and follow the mouse wheel and a mouse drag.\nAbout credits the maker of the game.",
         fixed: "A tab left open during an update kept working offline instead of failing to load its files.\nThe notice about found copies on the title screen no longer comes back for a game you deleted, and copies you do not want can be discarded.",
       },

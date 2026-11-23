@@ -123,25 +123,6 @@ export default {
   event: { bought: 'Comprado al mercader ambulante', offer: 'La oferta termina en {time}', gone: 'El mercader se ha marchado' },
 
   typed: { prompt: 'Para confirmarlo, escribe este código:', label: 'Escribe el código {code} para confirmar' },
-  qr: {
-    autoRefresh: 'Se vuelven a generar cada dos minutos, así que siempre llevan tu último progreso.',
-    titleHint: 'Desde otro dispositivo, con la cámara o una imagen',
-    send: 'Enviar por QR', receive: 'Recibir por QR',
-    sendTitle: 'Enviar esta partida por QR', receiveTitle: 'Recibir una partida por QR',
-    sendIntro: 'En el otro dispositivo abre Aetheria, elige Recibir por QR y apunta la cámara a esta pantalla. Los códigos van pasando solos; el orden da igual y los que se pierdan vuelven a salir.',
-    receiveIntro: 'Apunta la cámara a los códigos que pasan en el otro dispositivo, o carga la imagen de códigos que descargaste allí.',
-    partOf: 'Código {i} de {n}', prev: 'Código anterior', next: 'Código siguiente', pause: 'Pausa', play: 'Reproducir', speed: 'Velocidad',
-    speeds: { slow: 'Lento', normal: 'Normal', fast: 'Rápido' },
-    pictureTitle: 'Todos los códigos en una imagen', pictureHint: 'Para ordenadores sin cámara: descárgala aquí y cárgala en el otro dispositivo.',
-    download: 'Descargar imagen', sheetHint: '{n} códigos · carga esta imagen en Recibir por QR',
-    useCamera: 'Usar la cámara', switchCamera: 'Cambiar de cámara', stopCamera: 'Apagar la cámara',
-    read: '{have} de {n} códigos leídos', anyOrder: 'Sirve cualquier orden: mantén la cámara sobre los códigos hasta que se encienda cada casilla.',
-    uploadTitle: 'Cargar una imagen', uploadHint: 'La imagen de códigos o capturas de ellos (puedes cargar varias a la vez).', upload: 'Cargar imágenes',
-    noCamera: 'No se pudo abrir ninguna cámara aquí. Carga la imagen de códigos en su lugar.',
-    cameraDenied: 'El navegador no ha permitido la cámara. Permítela en la barra de direcciones o carga la imagen de códigos.',
-    nothingFound: 'No se encontró ningún código de Aetheria en esa imagen.',
-    someMissing: '{have} de {n} códigos leídos. Carga los que faltan o usa la cámara para ellos.',
-  },
   vision: {
     title: 'Visión',
     intro: 'Colores, contraste y letras más fáciles de distinguir. Cambian al momento y solo en esta partida.',
@@ -2095,8 +2076,8 @@ export default {
     },
     entries: {
       b15: {
-        title: "Coreano, cincuenta canciones y partidas por QR",
-        new: "Aetheria en coreano: todos los textos del juego, con tipografías hechas para el hangul. Elige 한국어 en el menú de idioma.\nCincuenta canciones: la música ya no cambia con la pantalla. Cincuenta temas suenan en orden aleatorio, cada uno unos minutos y acabando en una frase, y los combates avivan lo que esté sonando. Los ajustes de sonido muestran qué suena y permiten saltar a la siguiente canción.\nPartidas por QR: envía tu partida a otro dispositivo como una serie de códigos QR. Apunta la cámara del otro dispositivo a la pantalla, o descarga todos los códigos en una imagen y cárgala allí, muy útil entre ordenadores sin cámara. Está en Ajustes › Partida y en la pantalla de título.\nTodo el juego funciona sin conexión desde la primera visita, en todas las pantallas y en todos los idiomas.\nUna bienvenida nueva: un reloj que se llena hasta tu límite sin conexión, totales que van subiendo, lo más destacado de tu ausencia (hallazgos, logros, mascotas, expediciones, páginas del diario) en un solo sitio en vez de una lluvia de avisos, los niveles subidos, la experiencia de cada habilidad y lo que trajiste a casa.\nOpciones de visión en Accesibilidad: colores aptos para daltónicos (azul y naranja en vez de verde y rojo), alto contraste y letra sencilla, con vista previa en vivo.",
+        title: "Coreano, cincuenta canciones y una bienvenida nueva",
+        new: "Aetheria en coreano: todos los textos del juego, con tipografías hechas para el hangul. Elige 한국어 en el menú de idioma.\nCincuenta canciones: la música ya no cambia con la pantalla. Cincuenta temas suenan en orden aleatorio, cada uno unos minutos y acabando en una frase, y los combates avivan lo que esté sonando. Los ajustes de sonido muestran qué suena y permiten saltar a la siguiente canción.\nTodo el juego funciona sin conexión desde la primera visita, en todas las pantallas y en todos los idiomas.\nUna bienvenida nueva: un reloj que se llena hasta tu límite sin conexión, totales que van subiendo, lo más destacado de tu ausencia (hallazgos, logros, mascotas, expediciones, páginas del diario) en un solo sitio en vez de una lluvia de avisos, los niveles subidos, la experiencia de cada habilidad y lo que trajiste a casa.\nOpciones de visión en Accesibilidad: colores aptos para daltónicos (azul y naranja en vez de verde y rojo), alto contraste y letra sencilla, con vista previa en vivo.",
         changed: "Los ajustes de sonido giran en torno a un escenario en vivo que muestra qué suena y cómo se oye cada parte de la mezcla.\nLos efectos de sonido se tocan con instrumentos reales (campanas, arpas, cristal, madera), con un diseño propio en cada paquete de sonidos.\nLas voces cantan con vocales y consonantes reales, y la garganta de cada personaje le da un timbre propio.\nMejoras en el sistema de partidas: las partidas, las copias y los archivos se guardan de forma más segura, y tus partidas de antes pasan sin perder nada. Los archivos de partida ahora terminan en .aetheria; las copias .json antiguas se pueden seguir importando.\nPara borrar una partida hay que escribir un código que aparece en pantalla, y se borran también sus copias automáticas.\nAdiós a las barras de desplazamiento: las pantallas se desplazan igual que antes, y las filas que se desplazan de lado se difuminan en el borde donde hay más y siguen la rueda y el arrastre del ratón.\nAcerca de incluye los créditos del juego.",
         fixed: "Una pestaña abierta durante una actualización sigue funcionando sin conexión en vez de fallar al cargar sus archivos.\nEl aviso de copias encontradas en la pantalla de título ya no vuelve por una partida que borraste, y las copias que no quieras se pueden descartar.",
       },

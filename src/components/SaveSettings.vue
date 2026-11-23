@@ -1,5 +1,5 @@
 <script setup>
-import { ref, toRaw, onMounted, onUnmounted, watch } from 'vue'
+import { ref, toRaw, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
@@ -13,7 +13,6 @@ import { encodeCode, decodeAny, makeLink, downloadFile, pickFile, importErrorKey
 import { listBackups, readBackup } from '../game/backup.js'
 import { fmtTime, fmtDateTime } from '../game/format.js'
 import GameIcon from './GameIcon.vue'
-import QrTransfer from './QrTransfer.vue'
 import TypedConfirm from './TypedConfirm.vue'
 
 // Everything about the save: the hero's name, automatic backups, copies outside the browser and the slot itself
@@ -104,23 +103,6 @@ async function loadFile() {
   catch (e) { G.toast('cross-mark', importErrorKey(e), {}, 'warn') }
 }
 
-/* ---------- QR codes, for a device with a camera or a picture ---------- */
-const qrOpen = ref(false)
-const qrCode = ref('')
-// While the codes are on screen they are made again every couple of minutes, so they carry the game as it is
-const QR_REFRESH = 2 * 60e3
-let qrTimer = null
-async function sendQr() {
-  qrCode.value = await encodeCode(snapshot())
-  G.markExported()
-  qrOpen.value = true
-  clearInterval(qrTimer)
-  qrTimer = setInterval(async () => { if (qrOpen.value && qrCode.value) qrCode.value = await encodeCode(snapshot()) }, QR_REFRESH)
-}
-watch(qrOpen, v => { if (!v) clearInterval(qrTimer) })
-onUnmounted(() => clearInterval(qrTimer))
-function receiveQr() { qrCode.value = ''; qrOpen.value = true }
-
 /* ---------- the slot ---------- */
 const deleting = ref(false)
 function remove() { const i = G.slot; exitToTitle(false); G.deleteSlot(i) }
@@ -162,10 +144,7 @@ function remove() { const i = G.slot; exitToTitle(false); G.deleteSlot(i) }
         <Button :label="$t('settings.downloadFile')" icon="pi pi-download" @click="download" />
         <Button :label="$t('settings.loadFile')" icon="pi pi-folder-open" severity="secondary" outlined @click="loadFile" />
         <Button :label="$t(canShare ? 'settings.shareLink' : 'settings.copyLink')" :icon="canShare ? 'pi pi-share-alt' : 'pi pi-link'" severity="secondary" class="span-2" @click="copyLink" />
-        <Button :label="$t('qr.send')" icon="pi pi-qrcode" severity="secondary" outlined @click="sendQr" />
-        <Button :label="$t('qr.receive')" icon="pi pi-camera" severity="secondary" outlined @click="receiveQr" />
       </div>
-      <QrTransfer v-model:visible="qrOpen" :code="qrCode" :name="state.name" @received="askReplace" />
       <p class="small faint">{{ state.settings.lastExport ? $t('backup.lastExport', { when: when(state.settings.lastExport) }) : $t('backup.neverExported') }}</p>
       <label class="pref" for="pref-remind"><span class="grow">{{ $t('backup.reminder') }}<span class="small faint block">{{ $t('backup.reminderHint') }}</span></span><ToggleSwitch v-model="state.settings.backupReminder" inputId="pref-remind" /></label>
       <button class="link-btn" :aria-expanded="showCode" @click="showCode = !showCode">
