@@ -32,19 +32,18 @@ export async function measure() {
 }
 
 const bar = pct => '█'.repeat(Math.round(pct / 5)) + '░'.repeat(20 - Math.round(pct / 5))
+const colour = pct => (pct === 100 ? '2ea043' : pct >= 50 ? 'b8862e' : '6e7681')
+const badge = pct => `<img alt="${pct}%" src="https://img.shields.io/badge/${pct}%25-${pct === 100 ? 'complete' : pct ? 'in%20progress' : 'coming%20soon'}-${colour(pct)}?style=flat-square">`
 
-export function table(rows, showAt) {
-  const lines = [
-    '| Language | Progress | | Texts |',
-    '|---|---|--:|--:|',
-    ...rows.map(r => `| ${r.name} | \`${bar(r.pct)}\` | ${r.pct}% | ${r.done.toLocaleString('en-US')} / ${r.total.toLocaleString('en-US')} |`),
-  ]
-  return `${lines.join('\n')}\n\nEnglish and Spanish are complete with every update. The other languages are translated a little at a time; whatever is not translated yet reads in English, and a language appears in the game's language menu once it passes ${showAt}%.`
+export function table(rows) {
+  const cells = rows.map(r => `<td align="center"><b>${r.name}</b><br>${badge(r.pct)}</td>`)
+  const lines = []
+  for (let i = 0; i < cells.length; i += 3) lines.push(`  <tr>${cells.slice(i, i + 3).join('')}</tr>`)
+  return `<table align="center">\n${lines.join('\n')}\n</table>`
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const rows = await measure()
-  const { SHOW_AT } = await load('src/i18n/index.js')
   const progress = Object.fromEntries(rows.filter(r => !r.required).map(r => [r.loc, r.pct]))
   writeFileSync(join(root, 'src/i18n/progress.js'),
     `// Written by scripts/i18n-progress.mjs: the share of texts translated in each language\nexport default ${JSON.stringify(progress, null, 2).replace(/"(\w+)":/g, '$1:')}\n`)
@@ -52,7 +51,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const text = readFileSync(readme, 'utf8')
   const START = '<!-- translations:start -->', END = '<!-- translations:end -->'
   if (text.includes(START) && text.includes(END)) {
-    const out = text.slice(0, text.indexOf(START) + START.length) + '\n' + table(rows, SHOW_AT) + '\n' + text.slice(text.indexOf(END))
+    const out = text.slice(0, text.indexOf(START) + START.length) + '\n' + table(rows) + '\n' + text.slice(text.indexOf(END))
     writeFileSync(readme, out)
   } else console.log('README has no translations markers; table not written')
   rows.forEach(r => console.log(`${r.loc.padEnd(3)} ${bar(r.pct)} ${String(r.pct).padStart(3)}%  ${r.done}/${r.total}`))
