@@ -135,6 +135,7 @@ export default {
 
   typed: { prompt: '확인하려면 이 코드를 입력하세요:', label: '확인하려면 코드 {code}을(를) 입력하세요' },
   qr: {
+    autoRefresh: '2분마다 다시 만들어지므로 언제나 최신 진행 상황을 담고 있어요.',
     titleHint: '다른 기기에서, 카메라나 그림으로',
     send: 'QR로 보내기', receive: 'QR로 받기',
     sendTitle: '이 게임을 QR로 보내기', receiveTitle: 'QR로 게임 받기',

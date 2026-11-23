@@ -30,9 +30,11 @@ export function readPart(text) {
   return n > 0 && n <= 999 && i < n ? { id: m[1], i, n, data: m[4] } : null
 }
 
-// Gathers parts as they are read. A part from another run starts over with that run only when the
-// current one has barely begun, so a stray code on the way does not throw away a long scan
-export function collector() {
+// Gathers parts as they are read. A part from another run starts over with that run when the current
+// one has barely begun or has stopped coming in (the sender refreshed its codes), so a stray code on the
+// way does not throw away a scan that is going well
+const STALE = 4000
+export function collector(now = () => Date.now()) {
   let run = null
   return {
     add(text) {
@@ -42,8 +44,8 @@ export function collector() {
         const whole = String(text || '').trim()
         return whole.length > 20 && !whole.startsWith(TAG) ? { done: true, code: whole, have: 1, n: 1 } : this.state()
       }
-      if (!run || (run.id !== p.id && run.parts.size <= 1)) run = { id: p.id, n: p.n, parts: new Map() }
-      if (run.id === p.id) run.parts.set(p.i, p.data)
+      if (!run || (run.id !== p.id && (run.parts.size <= 1 || now() - run.seen > STALE))) run = { id: p.id, n: p.n, parts: new Map(), seen: now() }
+      if (run.id === p.id) { run.parts.set(p.i, p.data); run.seen = now() }
       return this.state()
     },
     state() {

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, toRaw, onMounted } from 'vue'
+import { ref, toRaw, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
@@ -107,7 +107,18 @@ async function loadFile() {
 /* ---------- QR codes, for a device with a camera or a picture ---------- */
 const qrOpen = ref(false)
 const qrCode = ref('')
-async function sendQr() { qrCode.value = await encodeCode(snapshot()); G.markExported(); qrOpen.value = true }
+// While the codes are on screen they are made again every couple of minutes, so they carry the game as it is
+const QR_REFRESH = 2 * 60e3
+let qrTimer = null
+async function sendQr() {
+  qrCode.value = await encodeCode(snapshot())
+  G.markExported()
+  qrOpen.value = true
+  clearInterval(qrTimer)
+  qrTimer = setInterval(async () => { if (qrOpen.value && qrCode.value) qrCode.value = await encodeCode(snapshot()) }, QR_REFRESH)
+}
+watch(qrOpen, v => { if (!v) clearInterval(qrTimer) })
+onUnmounted(() => clearInterval(qrTimer))
 function receiveQr() { qrCode.value = ''; qrOpen.value = true }
 
 /* ---------- the slot ---------- */

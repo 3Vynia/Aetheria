@@ -124,6 +124,7 @@ export default {
 
   typed: { prompt: 'Para confirmarlo, escribe este código:', label: 'Escribe el código {code} para confirmar' },
   qr: {
+    autoRefresh: 'Se vuelven a generar cada dos minutos, así que siempre llevan tu último progreso.',
     titleHint: 'Desde otro dispositivo, con la cámara o una imagen',
     send: 'Enviar por QR', receive: 'Recibir por QR',
     sendTitle: 'Enviar esta partida por QR', receiveTitle: 'Recibir una partida por QR',

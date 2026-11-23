@@ -39,6 +39,17 @@ describe('a game carried in QR codes', () => {
     expect(col.state().code).toBe(big)
   })
 
+  it('moves on to the new codes when the sender makes them again', () => {
+    let t = 0
+    const col = collector(() => t)
+    const old = splitCode(big)
+    old.slice(0, 4).forEach(p => col.add(p))
+    t = 10_000
+    const fresh = splitCode(big + 'later')
+    fresh.forEach(p => col.add(p))
+    expect(col.state().code).toBe(big + 'later')
+  })
+
   it('takes a whole code read from a single QR', () => {
     expect(collector().add('AE2.' + 'q'.repeat(40))).toMatchObject({ done: true })
     expect(readPart('hello')).toBe(null)

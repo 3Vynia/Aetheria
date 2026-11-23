@@ -112,6 +112,14 @@ async function pictures(ev) {
 }
 const pct = computed(() => (progress.value.n ? Math.round((progress.value.have / progress.value.n) * 100) : 0))
 
+// The game goes on while the window is open: new codes replace the old ones as they come
+watch(() => props.code, async c => {
+  if (!props.visible || !c) return
+  const m = await load()
+  svgs.value = parts.value.map(m.qrSvg)
+  if (shown.value >= svgs.value.length) shown.value = 0
+})
+
 /* ---------- opening and closing ---------- */
 watch(() => props.visible, async v => {
   if (v) {
@@ -135,7 +143,7 @@ onUnmounted(() => { clearInterval(timer); stopCamera() })
     :header="$t(code ? 'qr.sendTitle' : 'qr.receiveTitle')" @update:visible="v => v || close()">
     <!-- Sending: the codes play one after the other -->
     <div v-if="code" class="qr">
-      <p class="small muted qr-intro">{{ $t('qr.sendIntro') }}</p>
+      <p class="small muted qr-intro">{{ $t('qr.sendIntro') }} {{ $t('qr.autoRefresh') }}</p>
       <div class="qr-stage">
         <div v-if="svgs.length" class="qr-code" v-html="svgs[shown]" />
         <div v-else class="qr-code qr-wait"><i class="pi pi-spin pi-spinner" /></div>

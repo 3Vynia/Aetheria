@@ -124,6 +124,7 @@ export default {
 
   typed: { prompt: 'To confirm, type this code:', label: 'Type the code {code} to confirm' },
   qr: {
+    autoRefresh: 'They are made again every two minutes, so they always carry your latest progress.',
     titleHint: 'From another device, with the camera or a picture',
     send: 'Send by QR', receive: 'Receive by QR',
     sendTitle: 'Send this game by QR', receiveTitle: 'Receive a game by QR',
