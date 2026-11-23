@@ -31,7 +31,7 @@ export default {
     continue: 'Continuar', newGame: 'Nueva partida', newGameHint: 'Crea un héroe en una ranura libre', load: 'Cargar partida',
     slotsUsed: '{n} de {total} ranuras ocupadas', autosaveHint: 'Tu progreso se guarda solo cada pocos segundos.',
     chooseSlot: 'Elige una ranura', overwriteTitle: 'Sobrescribir ranura', overwriteMessage: 'En la ranura {n} está {name}. La partida nueva ocupa su lugar; {name} se queda entre las copias automáticas de la ranura y puedes recuperarlo desde Ajustes.',
-    overwrite: 'Sobrescribir', deleteTitle: 'Borrar partida', deleteMessage: 'Se borrará a {name} (héroe nivel {level}). No se puede deshacer.',
+    overwrite: 'Sobrescribir', deleteTitle: 'Borrar partida', deleteMessage: 'Se borrará a {name} (héroe nivel {level}) junto con todas sus copias automáticas, para siempre. Si quizá la quieres recuperar, descarga antes una copia en Ajustes › Partida.',
     heroLevel: 'Héroe nivel {n}', played: 'Jugado {time}', saved: 'guardado {when}', justNow: 'ahora mismo', ago: 'hace {time}',
     loadOne: 'Cargar', emptySlot: 'Ranura vacía', createCharacter: 'Crear un héroe',
     footer: 'Iconos de game-icons.net (CC BY 3.0)',
@@ -122,6 +122,25 @@ export default {
 
   event: { bought: 'Comprado al mercader ambulante', offer: 'La oferta termina en {time}', gone: 'El mercader se ha marchado' },
 
+  typed: { prompt: 'Para confirmarlo, escribe este código:', label: 'Escribe el código {code} para confirmar' },
+  qr: {
+    titleHint: 'Desde otro dispositivo, con la cámara o una imagen',
+    send: 'Enviar por QR', receive: 'Recibir por QR',
+    sendTitle: 'Enviar esta partida por QR', receiveTitle: 'Recibir una partida por QR',
+    sendIntro: 'En el otro dispositivo abre Aetheria, elige Recibir por QR y apunta la cámara a esta pantalla. Los códigos van pasando solos; el orden da igual y los que se pierdan vuelven a salir.',
+    receiveIntro: 'Apunta la cámara a los códigos que pasan en el otro dispositivo, o carga la imagen de códigos que descargaste allí.',
+    partOf: 'Código {i} de {n}', prev: 'Código anterior', next: 'Código siguiente', pause: 'Pausa', play: 'Reproducir', speed: 'Velocidad',
+    speeds: { slow: 'Lento', normal: 'Normal', fast: 'Rápido' },
+    pictureTitle: 'Todos los códigos en una imagen', pictureHint: 'Para ordenadores sin cámara: descárgala aquí y cárgala en el otro dispositivo.',
+    download: 'Descargar imagen', sheetHint: '{n} códigos · carga esta imagen en Recibir por QR',
+    useCamera: 'Usar la cámara', switchCamera: 'Cambiar de cámara', stopCamera: 'Apagar la cámara',
+    read: '{have} de {n} códigos leídos', anyOrder: 'Sirve cualquier orden: mantén la cámara sobre los códigos hasta que se encienda cada casilla.',
+    uploadTitle: 'Cargar una imagen', uploadHint: 'La imagen de códigos o capturas de ellos (puedes cargar varias a la vez).', upload: 'Cargar imágenes',
+    noCamera: 'No se pudo abrir ninguna cámara aquí. Carga la imagen de códigos en su lugar.',
+    cameraDenied: 'El navegador no ha permitido la cámara. Permítela en la barra de direcciones o carga la imagen de códigos.',
+    nothingFound: 'No se encontró ningún código de Aetheria en esa imagen.',
+    someMissing: '{have} de {n} códigos leídos. Carga los que faltan o usa la cámara para ellos.',
+  },
   vision: {
     title: 'Visión',
     intro: 'Colores, contraste y letras más fáciles de distinguir. Cambian al momento y solo en esta partida.',
@@ -1559,7 +1578,7 @@ export default {
     interface: 'Interfaz', icons: 'Iconos', offline: 'Progreso sin conexión', upTo: 'Hasta {n} h',
     credits: 'Iconos de Lorc, Delapouite y colaboradores de game-icons.net, bajo licencia Creative Commons BY 3.0.',
     renamed: 'Nombre actualizado', copied: 'Partida copiada al portapapeles', copyManually: 'Copia el código del cuadro de texto', imported: 'Partida importada',
-    invalidSave: 'El código de partida no es válido', deleteTitle: 'Borrar partida', deleteMessage: 'Se borrará la partida de {name} de la ranura {n}. Esta acción no se puede deshacer.',
+    invalidSave: 'El código de partida no es válido', deleteTitle: 'Borrar partida', deleteMessage: 'Se borrará para siempre la partida de {name} de la ranura {n} junto con sus copias automáticas. Si quizá la quieres recuperar, descarga antes una copia.',
     deleteConfirm: 'Borrar todo',
     autoChain: 'Fabricar automáticamente los materiales que falten', autoChainHint: 'Si a una receta se le acaban los materiales, primero fabrica sus ingredientes (minar, fundir…) y después vuelve a ella.',
   },
@@ -2075,10 +2094,10 @@ export default {
     },
     entries: {
       b15: {
-        title: "Coreano, cincuenta canciones y partidas selladas",
-        new: "Aetheria en coreano: todos los textos del juego, con tipografías hechas para el hangul. Elige 한국어 en el menú de idioma.\nCincuenta canciones: la música ya no cambia con la pantalla. Cincuenta temas suenan en orden aleatorio, cada uno unos minutos y acabando en una frase, y los combates avivan lo que esté sonando. Los ajustes de sonido muestran qué suena y permiten saltar a la siguiente canción.\nPartidas selladas: tus partidas, copias de seguridad, archivos y códigos de transferencia ahora van sellados. Nadie puede leerlos ni editarlos fuera del juego, y una partida cambiada a mano no se abre, así que tu progreso siempre es tuyo.\nPartidas del creador: las partidas especiales hechas por el creador del juego llevan una firma y un sello propio en el héroe.\nTodo el juego funciona sin conexión desde la primera visita, en todas las pantallas y en todos los idiomas.\nUna bienvenida nueva: un reloj que se llena hasta tu límite sin conexión, totales que van subiendo, lo más destacado de tu ausencia (hallazgos, logros, mascotas, expediciones, páginas del diario) en un solo sitio en vez de una lluvia de avisos, los niveles subidos, la experiencia de cada habilidad y lo que trajiste a casa.\nOpciones de visión en Accesibilidad: colores aptos para daltónicos (azul y naranja en vez de verde y rojo), alto contraste y letra sencilla, con vista previa en vivo.",
-        changed: "Los ajustes de sonido giran en torno a un escenario en vivo que muestra qué suena y cómo se oye cada parte de la mezcla.\nLos efectos de sonido se tocan con instrumentos reales (campanas, arpas, cristal, madera), con un diseño propio en cada paquete de sonidos.\nLas voces cantan con vocales y consonantes reales, y la garganta de cada personaje le da un timbre propio.\nTus partidas se sellan la primera vez que se cargan, sin perder nada. Las copias .json antiguas se pueden seguir importando; una con números que ninguna partida podría alcanzar entra marcada como alterada, y la marca se queda al renacer.\nLos archivos de partida ahora terminan en .aetheria.\nAcerca de incluye los créditos del juego.",
-        fixed: "Una pestaña abierta durante una actualización sigue funcionando sin conexión en vez de fallar al cargar sus archivos.",
+        title: "Coreano, cincuenta canciones y partidas por QR",
+        new: "Aetheria en coreano: todos los textos del juego, con tipografías hechas para el hangul. Elige 한국어 en el menú de idioma.\nCincuenta canciones: la música ya no cambia con la pantalla. Cincuenta temas suenan en orden aleatorio, cada uno unos minutos y acabando en una frase, y los combates avivan lo que esté sonando. Los ajustes de sonido muestran qué suena y permiten saltar a la siguiente canción.\nPartidas por QR: envía tu partida a otro dispositivo como una serie de códigos QR. Apunta la cámara del otro dispositivo a la pantalla, o descarga todos los códigos en una imagen y cárgala allí, muy útil entre ordenadores sin cámara. Está en Ajustes › Partida y en la pantalla de título.\nTodo el juego funciona sin conexión desde la primera visita, en todas las pantallas y en todos los idiomas.\nUna bienvenida nueva: un reloj que se llena hasta tu límite sin conexión, totales que van subiendo, lo más destacado de tu ausencia (hallazgos, logros, mascotas, expediciones, páginas del diario) en un solo sitio en vez de una lluvia de avisos, los niveles subidos, la experiencia de cada habilidad y lo que trajiste a casa.\nOpciones de visión en Accesibilidad: colores aptos para daltónicos (azul y naranja en vez de verde y rojo), alto contraste y letra sencilla, con vista previa en vivo.",
+        changed: "Los ajustes de sonido giran en torno a un escenario en vivo que muestra qué suena y cómo se oye cada parte de la mezcla.\nLos efectos de sonido se tocan con instrumentos reales (campanas, arpas, cristal, madera), con un diseño propio en cada paquete de sonidos.\nLas voces cantan con vocales y consonantes reales, y la garganta de cada personaje le da un timbre propio.\nMejoras en el sistema de partidas: las partidas, las copias y los archivos se guardan de forma más segura, y tus partidas de antes pasan sin perder nada. Los archivos de partida ahora terminan en .aetheria; las copias .json antiguas se pueden seguir importando.\nPara borrar una partida hay que escribir un código que aparece en pantalla, y se borran también sus copias automáticas.\nAdiós a las barras de desplazamiento: las pantallas se desplazan igual que antes, y las filas que se desplazan de lado se difuminan en el borde donde hay más y siguen la rueda y el arrastre del ratón.\nAcerca de incluye los créditos del juego.",
+        fixed: "Una pestaña abierta durante una actualización sigue funcionando sin conexión en vez de fallar al cargar sus archivos.\nEl aviso de copias encontradas en la pantalla de título ya no vuelve por una partida que borraste, y las copias que no quieras se pueden descartar.",
       },
       b14: {
         title: "Razas, una casa viva y dos juegos nuevos en la taberna",
@@ -2528,7 +2547,8 @@ export default {
     reminder: "Recordarme guardar una copia",
     reminderHint: "De vez en cuando, si ha pasado más de una semana.",
     codeTitle: "Código de partida (avanzado)",
-    deleteNote: "Al borrar, las copias automáticas se conservan un tiempo, así que una partida borrada aún se puede recuperar desde la pantalla de título.",
+    deleteNote: "Al borrar una partida se borran también sus copias automáticas, así que descarga antes una copia si quizá la quieres recuperar.",
+    discard: "Descartar esta copia", discardTitle: "Descartar las copias", discardMessage: "Las copias de {name} de la ranura {n} se borrarán para siempre y este aviso no volverá a salir.", discardConfirm: "Descartar para siempre",
     reminderToast: "Hace tiempo que no guardas una copia de tu partida fuera del navegador. Descarga una en Ajustes → Partida.",
   },
   records: {

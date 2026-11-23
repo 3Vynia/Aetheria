@@ -57,6 +57,17 @@ describe('automatic backups', () => {
     expect(await listBackups(12)).toEqual([])
     expect(await listBackups(13)).toHaveLength(1)
   })
+
+  it('go with a game the player deletes, since deleting is asked for with a typed code', async () => {
+    newHero({ name: 'Gone' })
+    G.slot = 14
+    G.save()
+    await G.backupNow()
+    expect(await listBackups(14)).toHaveLength(1)
+    G.deleteSlot(14)
+    await new Promise(r => setTimeout(r, 50))
+    expect(await listBackups(14)).toEqual([])
+  })
 })
 
 describe('the copy from before a replacement', () => {

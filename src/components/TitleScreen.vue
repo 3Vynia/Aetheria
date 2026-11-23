@@ -13,8 +13,10 @@ import ItemTile from './ItemTile.vue'
 import CharacterCreation from './CharacterCreation.vue'
 import LanguageSelect from './LanguageSelect.vue'
 import ThemeSelect from './ThemeSelect.vue'
+import QrTransfer from './QrTransfer.vue'
+import TypedConfirm from './TypedConfirm.vue'
 import { decodeAny, pickFile, takeLinkCode, importErrorKey } from '../game/transfer.js'
-import { listBackups, readBackup } from '../game/backup.js'
+import { listBackups, readBackup, deleteBackups } from '../game/backup.js'
 
 const { t } = useI18n()
 const confirm = useConfirm()
@@ -68,7 +70,16 @@ async function recover(i) {
   refresh()
   findBackups()
 }
+// Copies the player does not want back are thrown away, and the notice with them
+const discarding = ref(null)
+async function discard() {
+  const i = discarding.value?.i
+  if (i == null) return
+  await deleteBackups(i)
+  findBackups()
+}
 onUnmounted(() => window.removeEventListener('hashchange', readLink))
+const qrOpen = ref(false)
 function offerImport(save) { pending.value = { save, info: G.summarize(save) }; mode.value = 'import' }
 async function importFile() {
   try { const save = await pickFile(); if (save) offerImport(save) }
@@ -109,17 +120,10 @@ function pickSlot(i) {
     accept: () => { createSlot.value = i; mode.value = 'create' },
   })
 }
-function removeSlot(i) {
-  const s = slots.value[i]
-  confirm.require({
-    header: t('title.deleteTitle'),
-    message: t('title.deleteMessage', { name: s.name, level: s.heroLevel }),
-    icon: 'pi pi-trash',
-    acceptLabel: t('common.delete'), rejectLabel: t('common.cancel'),
-    acceptProps: { severity: 'danger' }, rejectProps: { severity: 'secondary', outlined: true },
-    accept: () => { G.deleteSlot(i); refresh() },
-  })
-}
+// Deleting asks for a code typed by hand, and takes the slot's backups with it
+const deleting = ref(null)
+function removeSlot(i) { const s = slots.value[i]; deleting.value = { i, name: s.name, level: s.heroLevel } }
+function confirmRemove() { G.deleteSlot(deleting.value.i); refresh() }
 function newGame() {
   const empty = slots.value.findIndex(s => !s)
   // With no game at all, straight to a new hero, unless a backup could bring one back first
@@ -152,9 +156,12 @@ function created(profile) { startNewGame(createSlot.value, profile) }
           <div v-if="Object.keys(backups).length" class="recover-box">
             <b><i class="pi pi-history" /> {{ $t('backup.foundTitle') }}</b>
             <span class="small muted">{{ $t('backup.foundText') }}</span>
-            <button v-for="(b, i) in backups" :key="i" class="slot-recover" @click="recover(+i)">
-              <i class="pi pi-replay" /><span class="grow">{{ $t('backup.recoverSlot', { name: b.info?.name || '?', when: ago(b.at) }) }} · {{ $t('creation.slot', { n: +i + 1 }) }}</span>
-            </button>
+            <div v-for="(b, i) in backups" :key="i" class="recover-row">
+              <button class="slot-recover" @click="recover(+i)">
+                <i class="pi pi-replay" /><span class="grow">{{ $t('backup.recoverSlot', { name: b.info?.name || '?', when: ago(b.at) }) }} · {{ $t('creation.slot', { n: +i + 1 }) }}</span>
+              </button>
+              <button class="slot-discard" :aria-label="$t('backup.discard')" v-tooltip.top="$t('backup.discard')" @click="discarding = { i: +i, name: b.info?.name || '?' }"><i class="pi pi-times" /></button>
+            </div>
           </div>
           <button v-if="lastInfo" class="ts-btn primary" @click="open(last)">
             <span class="menu-label"><GameIcon name="play-button" :size="20" /> {{ $t('title.continue') }}</span>
@@ -171,6 +178,10 @@ function created(profile) { startNewGame(createSlot.value, profile) }
           <button class="ts-btn" @click="importFile">
             <span class="menu-label"><GameIcon name="open-treasure-chest" :size="20" /> {{ $t('title.importSave') }}</span>
             <span class="menu-meta">{{ $t('title.importHint') }}</span>
+          </button>
+          <button class="ts-btn" @click="qrOpen = true">
+            <span class="menu-label"><i class="pi pi-qrcode" style="font-size:18px" /> {{ $t('qr.receive') }}</span>
+            <span class="menu-meta">{{ $t('qr.titleHint') }}</span>
           </button>
           <p class="hint">{{ $t('title.autosaveHint') }}</p>
         </div>
@@ -227,6 +238,11 @@ function created(profile) { startNewGame(createSlot.value, profile) }
       </transition>
     </div>
     <div class="ts-foot">{{ $t('title.footer') }}</div>
+    <QrTransfer v-model:visible="qrOpen" @received="offerImport" />
+    <TypedConfirm :visible="!!deleting" :header="$t('title.deleteTitle')" :message="deleting ? $t('title.deleteMessage', { name: deleting.name, level: deleting.level }) : ''"
+      :confirm-label="$t('common.delete')" @update:visible="v => v || (deleting = null)" @confirm="confirmRemove" />
+    <TypedConfirm :visible="!!discarding" :header="$t('backup.discardTitle')" :message="discarding ? $t('backup.discardMessage', { name: discarding.name, n: discarding.i + 1 }) : ''"
+      :confirm-label="$t('backup.discardConfirm')" @update:visible="v => v || (discarding = null)" @confirm="discard" />
   </div>
 </template>
 
@@ -235,6 +251,10 @@ function created(profile) { startNewGame(createSlot.value, profile) }
 .recover-box b { color: var(--gold-hi); }
 .slot-recover { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 8px; padding: 8px 12px; border-radius: 10px; border: 1px dashed var(--line-hi); background: none; color: var(--gold); font: inherit; font-size: 13px; cursor: pointer; text-align: start; }
 .slot-recover:hover { background: var(--tint-2); }
+.recover-row { display: flex; align-items: stretch; gap: 6px; }
+.recover-row .slot-recover { flex: 1; min-width: 0; }
+.slot-discard { flex: none; width: 38px; margin-top: 8px; border-radius: 10px; border: 1px dashed var(--line-hi); background: none; color: var(--muted); cursor: pointer; }
+.slot-discard:hover { color: var(--danger); border-color: var(--danger); }
 .title-screen { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 16px 60px; overflow: hidden; }
 /* Centred while it fits, scrollable from the top when it does not */
 .title-screen > .ts-content, .title-screen > .creator { margin-block: auto; }

@@ -109,8 +109,9 @@ export function startNewGame(slot, profile) {
   startLoop()
 }
 
-export function exitToTitle() {
-  if (!session.elsewhere) { G.save(); G.backupNow() }
+// `keep` false leaves without saving, for a game about to be deleted
+export function exitToTitle(keep = true) {
+  if (keep && !session.elsewhere) { G.save(); G.backupNow() }
   stopLoop()
   session.inGame = false
   session.elsewhere = false

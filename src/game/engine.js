@@ -39,7 +39,7 @@ import { combat } from './combat.js'
 import { progress } from './progress.js'
 import { races } from './races.js'
 import { RACES, DEFAULT_RACE, UNMARKED_TALENTS, SAP_REGEN } from './data/races.js'
-import { writeBackup, writeBefore } from './backup.js'
+import { writeBackup, writeBefore, deleteBackups } from './backup.js'
 import { slayer } from './slayer.js'
 import { company, companyState } from './company.js'
 import { tavernGames } from './tavernGames.js'
@@ -328,8 +328,10 @@ export const G = {
     this.log(ROLES[this.s.role].icon, 'log.start', { name: this.s.name, role: '@role:' + this.s.role })
     this.save()
   },
+  // Deleting is asked for with a code typed by hand, so the game goes for good, its backups with it
   deleteSlot(i) {
     store.del(SLOT_KEY(i))
+    deleteBackups(i)
     if (this.lastSlot() === i) store.del(META_KEY)
     if (this.slot === i) this.slot = null
   },

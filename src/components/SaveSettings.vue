@@ -13,6 +13,8 @@ import { encodeCode, decodeAny, makeLink, downloadFile, pickFile, importErrorKey
 import { listBackups, readBackup } from '../game/backup.js'
 import { fmtTime, fmtDateTime } from '../game/format.js'
 import GameIcon from './GameIcon.vue'
+import QrTransfer from './QrTransfer.vue'
+import TypedConfirm from './TypedConfirm.vue'
 
 // Everything about the save: the hero's name, automatic backups, copies outside the browser and the slot itself
 const { t } = useI18n()
@@ -102,17 +104,15 @@ async function loadFile() {
   catch (e) { G.toast('cross-mark', importErrorKey(e), {}, 'warn') }
 }
 
+/* ---------- QR codes, for a device with a camera or a picture ---------- */
+const qrOpen = ref(false)
+const qrCode = ref('')
+async function sendQr() { qrCode.value = await encodeCode(snapshot()); G.markExported(); qrOpen.value = true }
+function receiveQr() { qrCode.value = ''; qrOpen.value = true }
+
 /* ---------- the slot ---------- */
-function remove() {
-  confirm.require({
-    header: t('settings.deleteTitle'),
-    message: t('settings.deleteMessage', { name: state.name, n: G.slot + 1 }),
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: t('settings.deleteConfirm'), rejectLabel: t('common.cancel'),
-    acceptProps: { severity: 'danger' }, rejectProps: { severity: 'secondary', outlined: true },
-    accept: () => { const i = G.slot; exitToTitle(); G.deleteSlot(i) },
-  })
-}
+const deleting = ref(false)
+function remove() { const i = G.slot; exitToTitle(false); G.deleteSlot(i) }
 </script>
 
 <template>
@@ -151,7 +151,10 @@ function remove() {
         <Button :label="$t('settings.downloadFile')" icon="pi pi-download" @click="download" />
         <Button :label="$t('settings.loadFile')" icon="pi pi-folder-open" severity="secondary" outlined @click="loadFile" />
         <Button :label="$t(canShare ? 'settings.shareLink' : 'settings.copyLink')" :icon="canShare ? 'pi pi-share-alt' : 'pi pi-link'" severity="secondary" class="span-2" @click="copyLink" />
+        <Button :label="$t('qr.send')" icon="pi pi-qrcode" severity="secondary" outlined @click="sendQr" />
+        <Button :label="$t('qr.receive')" icon="pi pi-camera" severity="secondary" outlined @click="receiveQr" />
       </div>
+      <QrTransfer v-model:visible="qrOpen" :code="qrCode" :name="state.name" @received="askReplace" />
       <p class="small faint">{{ state.settings.lastExport ? $t('backup.lastExport', { when: when(state.settings.lastExport) }) : $t('backup.neverExported') }}</p>
       <label class="pref" for="pref-remind"><span class="grow">{{ $t('backup.reminder') }}<span class="small faint block">{{ $t('backup.reminderHint') }}</span></span><ToggleSwitch v-model="state.settings.backupReminder" inputId="pref-remind" /></label>
       <button class="link-btn" :aria-expanded="showCode" @click="showCode = !showCode">
@@ -174,9 +177,11 @@ function remove() {
       <div class="kv"><span>{{ $t('settings.difficulty') }}</span><b class="hue" :style="{ '--hue': DIFFICULTIES[state.difficulty].color }">{{ DIFFICULTIES[state.difficulty].name }}</b></div>
       <div class="row wrap" style="margin-top:14px">
         <Button :label="$t('settings.saveAndExit')" icon="pi pi-sign-out" severity="secondary" @click="exitToTitle" />
-        <Button :label="$t('settings.deleteGame')" icon="pi pi-trash" severity="danger" outlined @click="remove" />
+        <Button :label="$t('settings.deleteGame')" icon="pi pi-trash" severity="danger" outlined @click="deleting = true" />
       </div>
       <p class="small faint" style="margin-bottom:0">{{ $t('backup.deleteNote') }}</p>
+      <TypedConfirm v-model:visible="deleting" :header="$t('settings.deleteTitle')" :message="$t('settings.deleteMessage', { name: state.name, n: G.slot + 1 })"
+        :confirm-label="$t('settings.deleteConfirm')" @confirm="remove" />
     </div>
   </div>
 </template>
