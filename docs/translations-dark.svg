@@ -47,37 +47,37 @@
   </g>
   <g transform="translate(30,344)">
     <text x="0" y="16" class="name">简体中文</text>
-    <text x="380" y="16" class="pct part" text-anchor="end">2%</text>
+    <text x="380" y="16" class="pct part" text-anchor="end">10%</text>
     <text x="0" y="33" class="sub">Chinese</text>
     <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
-    <rect x="0" y="40" width="7.6" height="9" rx="4.5" fill="url(#gPart)"><animate attributeName="width" from="0" to="7.6" dur="1.2s" begin="0.42s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
+    <rect x="0" y="40" width="38.0" height="9" rx="4.5" fill="url(#gPart)"><animate attributeName="width" from="0" to="38.0" dur="1.2s" begin="0.42s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
   </g>
   <g transform="translate(430,96)">
     <text x="0" y="16" class="name">Português (Brasil)</text>
-    <text x="380" y="16" class="pct part" text-anchor="end">2%</text>
+    <text x="380" y="16" class="pct part" text-anchor="end">12%</text>
     <text x="0" y="33" class="sub">Portuguese</text>
     <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
-    <rect x="0" y="40" width="7.6" height="9" rx="4.5" fill="url(#gPart)"><animate attributeName="width" from="0" to="7.6" dur="1.2s" begin="0.50s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
+    <rect x="0" y="40" width="45.6" height="9" rx="4.5" fill="url(#gPart)"><animate attributeName="width" from="0" to="45.6" dur="1.2s" begin="0.50s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
   </g>
   <g transform="translate(430,158)">
     <text x="0" y="16" class="name">Русский</text>
-    <text x="380" y="16" class="pct part" text-anchor="end">2%</text>
+    <text x="380" y="16" class="pct part" text-anchor="end">5%</text>
     <text x="0" y="33" class="sub">Russian</text>
     <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
-    <rect x="0" y="40" width="7.6" height="9" rx="4.5" fill="url(#gPart)"><animate attributeName="width" from="0" to="7.6" dur="1.2s" begin="0.58s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
+    <rect x="0" y="40" width="19.0" height="9" rx="4.5" fill="url(#gPart)"><animate attributeName="width" from="0" to="19.0" dur="1.2s" begin="0.58s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
   </g>
   <g transform="translate(430,220)">
     <text x="0" y="16" class="name">Deutsch</text>
-    <text x="380" y="16" class="pct part" text-anchor="end">2%</text>
+    <text x="380" y="16" class="pct part" text-anchor="end">8%</text>
     <text x="0" y="33" class="sub">German</text>
     <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
-    <rect x="0" y="40" width="7.6" height="9" rx="4.5" fill="url(#gPart)"><animate attributeName="width" from="0" to="7.6" dur="1.2s" begin="0.66s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
+    <rect x="0" y="40" width="30.4" height="9" rx="4.5" fill="url(#gPart)"><animate attributeName="width" from="0" to="30.4" dur="1.2s" begin="0.66s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
   </g>
   <g transform="translate(430,282)">
     <text x="0" y="16" class="name">Français</text>
-    <text x="380" y="16" class="pct part" text-anchor="end">2%</text>
+    <text x="380" y="16" class="pct part" text-anchor="end">11%</text>
     <text x="0" y="33" class="sub">French</text>
     <rect x="0" y="40" width="380" height="9" rx="4.5" fill="#2a2539"/>
-    <rect x="0" y="40" width="7.6" height="9" rx="4.5" fill="url(#gPart)"><animate attributeName="width" from="0" to="7.6" dur="1.2s" begin="0.74s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
+    <rect x="0" y="40" width="41.8" height="9" rx="4.5" fill="url(#gPart)"><animate attributeName="width" from="0" to="41.8" dur="1.2s" begin="0.74s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/></rect>
   </g>
 </svg>
