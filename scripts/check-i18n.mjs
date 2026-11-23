@@ -1,6 +1,7 @@
 // Checks the translation files:
 //  1) every key the code uses exists in English (static keys in the source plus every data name/description)
-//  2) every locale has exactly the same keys as English
+//  2) English and Spanish have every key; the languages translated a little at a time may miss some,
+//     but none may have a key English does not
 //  3) every translation uses the same {placeholders} as the English text
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
@@ -67,8 +68,8 @@ report('Missing in en', [...used].filter(([k]) => !(k in en)).map(([k, where]) =
 const progress = []
 for (const [loc, msgs] of Object.entries(locales)) {
   if (loc === 'en') continue
-  // A language still being translated may miss texts (they read in English); the rest must hold
-  if (LOCALES[loc].draft) progress.push(`${loc}: ${Object.keys(en).filter(k => k in msgs).length} of ${Object.keys(en).length} texts translated`)
+  // A language translated a little at a time may miss texts (they read in English); the rest must hold
+  if (!LOCALES[loc].required) progress.push(`${loc}: ${Object.keys(en).filter(k => k in msgs).length} of ${Object.keys(en).length} texts translated`)
   else report(`Missing in ${loc}`, Object.keys(en).filter(k => !(k in msgs)))
   report(`Not in en, extra in ${loc}`, Object.keys(msgs).filter(k => !(k in en)))
   report(`Placeholder mismatch in ${loc}`, Object.keys(en).filter(k => k in msgs && placeholders(en[k]) !== placeholders(msgs[k]))
@@ -78,5 +79,10 @@ for (const [loc, msgs] of Object.entries(locales)) {
 report('Reserved character in en', Object.entries(en).filter(([, v]) => /[@|]/.test(v)).map(([k]) => k))
 
 progress.forEach(p => console.log('In progress, ' + p))
+// The progress shown in the menu and the README is only a reminder: a stale one does not fail the check
+const { measure } = await load('scripts/i18n-progress.mjs')
+const { default: saved } = await load('src/i18n/progress.js')
+const stale = (await measure()).filter(r => !r.required && saved[r.loc] !== r.pct).map(r => r.loc)
+if (stale.length) console.log(`Translation progress changed for ${stale.join(', ')}: run npm run i18n:progress`)
 if (problems) { console.log(`\n${problems} problem(s) found.`); process.exit(1) }
 console.log(`All good: ${Object.keys(en).length} keys in ${Object.keys(locales).length} languages.`)

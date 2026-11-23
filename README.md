@@ -11,7 +11,7 @@
   <a href="https://github.com/3Vynia/Aetheria/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/3Vynia/Aetheria/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/3Vynia/Aetheria/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/3Vynia/Aetheria?include_prereleases&label=release&color=b8862e"></a>
   <img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883">
-  <img alt="Languages" src="https://img.shields.io/badge/languages-English%20%C2%B7%20Espa%C3%B1ol-6f5cd2">
+  <a href="#languages"><img alt="Languages" src="https://img.shields.io/badge/languages-9-6f5cd2"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
@@ -38,6 +38,24 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 - **A living world:** weather that follows the real seasons, rare omens, regions that grow restless, festivals and fairs.
 - **Generative music and voices** made with WebAudio. There is not a single audio file.
 - **Built to last:** automatic backups, transfer links, offline progress and a save that repairs itself.
+
+## Languages
+
+<!-- translations:start -->
+| Language | Progress | | Texts |
+|---|---|--:|--:|
+| English | `████████████████████` | 100% | 5,997 / 5,997 |
+| Español | `████████████████████` | 100% | 5,997 / 5,997 |
+| 한국어 | `████████████████████` | 100% | 5,997 / 5,997 |
+| 日本語 | `░░░░░░░░░░░░░░░░░░░░` | 0% | 0 / 5,997 |
+| 简体中文 | `░░░░░░░░░░░░░░░░░░░░` | 0% | 0 / 5,997 |
+| Português (Brasil) | `░░░░░░░░░░░░░░░░░░░░` | 0% | 0 / 5,997 |
+| Русский | `░░░░░░░░░░░░░░░░░░░░` | 0% | 0 / 5,997 |
+| Deutsch | `░░░░░░░░░░░░░░░░░░░░` | 0% | 0 / 5,997 |
+| Français | `░░░░░░░░░░░░░░░░░░░░` | 0% | 0 / 5,997 |
+
+English and Spanish are complete with every update. The other languages are translated a little at a time; whatever is not translated yet reads in English, and a language appears in the game's language menu once it passes 50%.
+<!-- translations:end -->
 
 ## Screenshots
 
@@ -117,7 +135,7 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 <summary><b>Story and voices</b></summary>
 
 - **Journal:** the story of Aetheria in chapters that unlock as you explore, beat bosses and witness omens. Six acts take it from the Dawn Road to the top of the sky, with three endings. Every game rolls a new cast of names, and the story knows which people the hero was born to.
-- **Voices:** characters speak in short sung syllables made with WebAudio, with no audio files and no real words, so they sound the same in both languages. Each person has a timbre of their own, questions rise and statements fall, and the words appear in step with the voice.
+- **Voices:** characters speak in short sung syllables made with WebAudio, with no audio files and no real words, so they sound the same in every language. Each person has a timbre of their own, questions rise and statements fall, and the words appear in step with the voice.
   - A new journal page is told by a narrator, and any page can be read again or stopped.
   - **Talk** to everyone you have met: what they say grows with the story, including the old prophecy of the one who remembers.
   - Quest givers tell their quests and thank you when they are done, the tavern keeper greets you back, the astrologer reads her notes on omens and studied creatures have their lore read.
@@ -221,7 +239,7 @@ No download, no account, no ads. It installs as an app on desktop and phones, ke
 |---|---|
 | **Framework** | [Vue 3](https://vuejs.org/) with `<script setup>`, [PrimeVue 4](https://primevue.org/) |
 | **Build** | [Vite](https://vite.dev/), with a single-file build that runs straight from disk |
-| **Languages** | [vue-i18n](https://vue-i18n.intlify.dev/): English, Spanish and Korean, every key checked in CI |
+| **Languages** | [vue-i18n](https://vue-i18n.intlify.dev/): English and Spanish complete with every update and seven more languages translated a little at a time (see [Languages](#languages)), every key checked in CI |
 | **Sound** | WebAudio only: music, ambience, alerts and voices are all synthesised |
 | **Quality** | [Vitest](https://vitest.dev/) (over 590 tests, including real saves from every earlier version) and [ESLint](https://eslint.org/) |
 | **Hosting** | GitHub Pages as an installable, offline-ready app, and itch.io |

@@ -473,6 +473,13 @@ body.cue-flash::after { content: ''; position: fixed; inset: 0; pointer-events: 
 /* Korean: hangul reads badly spread out, and lines break between words, not inside them */
 :root:lang(ko) body, :root:lang(ko) body * { letter-spacing: normal !important; }
 :root:lang(ko) body { word-break: keep-all; overflow-wrap: anywhere; }
+/* Japanese and Chinese: their own fonts, no letter spacing, and lines may break between any two characters */
+:root:lang(ja) { --font-display: 'Shippori Mincho', 'Marcellus SC', serif; --font: 'Zen Kaku Gothic New', 'Alegreya Sans', 'Hiragino Sans', 'Yu Gothic', 'Noto Sans JP', system-ui, sans-serif; }
+:root:lang(zh) { --font-display: 'Noto Serif SC', 'Marcellus SC', serif; --font: 'Noto Sans SC', 'Alegreya Sans', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif; }
+:root:lang(ja) body, :root:lang(ja) body *, :root:lang(zh) body, :root:lang(zh) body * { letter-spacing: normal !important; }
+:root:lang(ja) body, :root:lang(zh) body { line-break: strict; overflow-wrap: anywhere; }
+/* Russian: the display face has no Cyrillic, so titles use one that does */
+:root:lang(ru) { --font-display: 'Philosopher', 'Marcellus SC', Georgia, serif; }
 
 /* Vision aids (Settings > Accessibility). Colour-blind friendly: the Okabe-Ito blue and orange take the
    place of green and red, which most colour-blind players cannot tell apart */

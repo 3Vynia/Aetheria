@@ -14,6 +14,7 @@
     "test:watch": "vitest",
     "icons": "node scripts/build-icons.mjs",
     "check:i18n": "node scripts/check-i18n.mjs",
+    "i18n:progress": "node scripts/i18n-progress.mjs",
     "balance": "node scripts/balance-report.mjs",
     "lint": "eslint ."
   },

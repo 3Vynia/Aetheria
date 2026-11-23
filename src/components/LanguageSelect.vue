@@ -2,11 +2,12 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Select from 'primevue/select'
-import { LOCALES, PLAYABLE, setLocale } from '../i18n/index.js'
+import { LOCALES, PLAYABLE, setLocale, progressOf } from '../i18n/index.js'
 
 defineProps({ inputId: { type: String, default: 'language-select' } })
 const { locale } = useI18n()
-const options = Object.entries(PLAYABLE).map(([value, l]) => ({ value, label: l.name }))
+// A language not fully translated yet says how far along it is
+const options = Object.entries(PLAYABLE).map(([value, l]) => ({ value, label: progressOf(value) < 100 ? `${l.name} · ${progressOf(value)}%` : l.name }))
 const current = computed({ get: () => locale.value, set: v => setLocale(v) })
 </script>
 
