@@ -2,7 +2,7 @@
 export default {
   ko: 100,
   ja: 100,
-  zh: 10,
+  zh: 100,
   pt: 12,
   ru: 5,
   de: 8,
